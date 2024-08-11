@@ -1,3 +1,4 @@
+import 'package:auto_novel_reader_flutter/bloc/epub_viewer/epub_viewer_bloc.dart';
 import 'package:auto_novel_reader_flutter/bloc/global/global_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,3 +18,5 @@ void initScreenSize(BuildContext context) {
 }
 
 GlobalBloc readGlobalBloc(BuildContext context) => context.read<GlobalBloc>();
+EpubViewerBloc readEpubViewerBloc(BuildContext context) =>
+    context.read<EpubViewerBloc>();

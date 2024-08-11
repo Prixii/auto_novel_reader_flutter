@@ -11,6 +11,8 @@ dependencies:
     sdk: flutter
   # epub
   epubx: ^4.0.0
+  # html
+  flutter_widget_from_html: ^0.15.1
   # 文件选择
   path_provider: ^2.1.4
   file_picker: ^8.0.7

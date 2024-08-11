@@ -1,14 +1,13 @@
-import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/file_util.dart';
 import 'package:path_provider/path_provider.dart';
 
-final localFileManager = LocalFileManager();
+final localFileManager = _LocalFileManager();
 
-class LocalFileManager {
+class _LocalFileManager {
   late String externalStorageDirectory;
   final epubDownloadPath = '/downloads/epub';
 
-  LocalFileManager();
+  _LocalFileManager();
 
   Future<void> init() async {
     await getDirectory();

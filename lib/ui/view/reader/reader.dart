@@ -13,16 +13,7 @@ class ReaderView extends StatelessWidget {
           automaticallyImplyLeading: false,
           shadowColor: Theme.of(context).colorScheme.shadow,
           backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-          title: const TabBar(
-            indicatorSize: TabBarIndicatorSize.label,
-            tabAlignment: TabAlignment.start,
-            isScrollable: true,
-            tabs: [
-              Tab(text: '本地'),
-              Tab(text: '历史'),
-              Tab(text: '收藏'),
-            ],
-          ),
+          title: _buildTabBar(),
         ),
         body: const TabBarView(
           children: [
@@ -32,6 +23,19 @@ class ReaderView extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  TabBar _buildTabBar() {
+    return const TabBar(
+      indicatorSize: TabBarIndicatorSize.label,
+      tabAlignment: TabAlignment.start,
+      isScrollable: true,
+      tabs: [
+        Tab(text: '本地'),
+        Tab(text: '历史'),
+        Tab(text: '收藏'),
+      ],
     );
   }
 }

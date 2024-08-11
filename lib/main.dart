@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'package:auto_novel_reader_flutter/bloc/epub_viewer/epub_viewer_bloc.dart';
 import 'package:auto_novel_reader_flutter/ui/view/reader/epub_reader.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/ui/view/splash.dart';
@@ -17,8 +16,11 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => globalBloc,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => globalBloc),
+        BlocProvider(create: (context) => EpubViewerBloc()),
+      ],
       child: const MaterialApp(
         home: SplashView(),
         // home: Tester(),
@@ -49,7 +51,7 @@ class _TesterState extends State<Tester> {
                 final path = result.files.single.path;
                 if (path == null) return;
                 Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => EpubReaderView(epubFile: File(path)),
+                  builder: (context) => const EpubReaderView(),
                 ));
               },
               child: const Text('open epub'))),
