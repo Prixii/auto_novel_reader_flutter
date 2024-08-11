@@ -1,10 +1,8 @@
 import 'dart:io';
 
 import 'package:auto_novel_reader_flutter/bloc/epub_viewer/epub_viewer_bloc.dart';
-import 'package:auto_novel_reader_flutter/ui/view/reader/epub_reader.dart';
 import 'package:auto_novel_reader_flutter/manager/local_file_manager.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
-import 'package:auto_novel_reader_flutter/util/epub_util.dart';
 import 'package:flutter/material.dart';
 
 class BookListTile extends StatelessWidget {

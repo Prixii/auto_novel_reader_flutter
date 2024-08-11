@@ -2,7 +2,10 @@ const htmlUtil = _HtmlUtil();
 
 class _HtmlUtil {
   String redirectSource(String html, String url) {
-    return html.replaceAll('src="', 'src="file://$url/');
+    return html
+        .replaceAll('src="', 'src="file://$url/')
+        .replaceAll('href="', 'href="file://$url/')
+        .replaceAll('../', '');
   }
 
   String removeHeadSection(String html) {

@@ -38,13 +38,14 @@ dependencies:
     # 动画
   animations: ^2.0.11
   flutter_staggered_animations: ^1.0.0
+  # 持久化
+  isar: ^4.0.0-dev.3
+  isar_flutter_libs: ^4.0.0-dev.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
-  # 序列化
-  json_serializable: ^6.8.0
   # 代码生成
   build_runner: ^2.4.9
 

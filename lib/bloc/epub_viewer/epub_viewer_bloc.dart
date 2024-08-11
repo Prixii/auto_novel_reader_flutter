@@ -20,6 +20,13 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
         previousChapter: (event) async => await _onPreviousChapter(event, emit),
         goToChapter: (event) async => await _onGoToChapter(event, emit),
         clickUrl: (event) async => await _onClickUrl(event, emit),
+        close: (event) async => await _onClose(event, emit),
+        openSettings: (event) async => await _onOpenSettings(event, emit),
+        setScrollController: (event) async =>
+            await _onSetScrollController(event, emit),
+        updateReadingProgress: (event) async =>
+            await _onUpdateReadingProgress(event, emit),
+        switchChapter: (event) async => await _onSwitchChapter(event, emit),
       );
     });
   }
@@ -34,34 +41,57 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
       Navigator.of(event.context).push(
           MaterialPageRoute(builder: (context) => const EpubReaderView()));
     }
-
-    final htmlData = await _loadHTMLFile(state.currentChapterIndex);
-    emit(state.copyWith(htmlData: htmlData));
+    add(const EpubViewerEvent.switchChapter(0));
   }
 
   _onNextChapter(_NextChapter event, Emitter<EpubViewerState> emit) async {
     final newIndex = state.currentChapterIndex + 1;
     if (newIndex >= epubUtil.pointList.length) return;
-    final htmlData = await _loadHTMLFile(newIndex);
-    emit(state.copyWith(htmlData: htmlData, currentChapterIndex: newIndex));
+    add(EpubViewerEvent.switchChapter(newIndex));
   }
 
   _onPreviousChapter(
       _PreviousChapter event, Emitter<EpubViewerState> emit) async {
     final newIndex = state.currentChapterIndex - 1;
     if (newIndex < 0) return;
-    final htmlData = await _loadHTMLFile(newIndex);
-    emit(state.copyWith(htmlData: htmlData, currentChapterIndex: newIndex));
+    add(EpubViewerEvent.switchChapter(newIndex));
   }
 
   _onGoToChapter(_GoToChapter event, Emitter<EpubViewerState> emit) async {}
 
-  Future<String> _loadHTMLFile(int chapterIndex) async {
+  _onClickUrl(_ClickUrl event, Emitter<EpubViewerState> emit) {
+    /// TODO 点击事件
+    /// 检查 point 目录
+    /// 检查 html 文件， 打开 html 文件
+    /// 修改 page
+  }
+
+  _onClose(_Close event, Emitter<EpubViewerState> emit) {
+    emit(const EpubViewerState.initial());
+  }
+
+  _onOpenSettings(_OpenSettings event, Emitter<EpubViewerState> emit) {}
+
+  _onSetScrollController(
+      _SetScrollController event, Emitter<EpubViewerState> emit) {
+    emit(state.copyWith(scrollController: event.controller));
+  }
+
+  _onUpdateReadingProgress(
+      _UpdateReadingProgress event, Emitter<EpubViewerState> emit) {}
+
+  _onSwitchChapter(_SwitchChapter event, Emitter<EpubViewerState> emit) async {
+    emit(state.copyWith(currentChapterIndex: event.index));
+    await for (final newHtmlData in _loadHTMLFile(event.index)) {
+      emit(state.copyWith(htmlData: [...state.htmlData, newHtmlData]));
+    }
+  }
+
+  Stream<String> _loadHTMLFile(int chapterIndex) async* {
     final currentPath = epubUtil.currentPath;
     final pointList = epubUtil.pointList;
-    if (currentPath == null || pointList.length < chapterIndex) return '';
+    if (currentPath == null || pointList.length < chapterIndex) return;
 
-    var htmlData = '';
     final resourceList = epubUtil.getChapterContentNameByIndex(chapterIndex);
 
     for (var htmlFileName in resourceList) {
@@ -69,15 +99,7 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
       final redirectedHtml =
           htmlUtil.redirectSource(rawHtml, epubUtil.currentPath ?? '');
       final processedData = htmlUtil.removeHeadSection(redirectedHtml);
-      htmlData += processedData;
+      yield processedData;
     }
-    return htmlData;
-  }
-
-  _onClickUrl(_ClickUrl event, Emitter<EpubViewerState> emit) {
-    /// TODO 点击事件
-    /// 检查 point 目录
-    /// 检查 html 文件， 打开 html 文件
-    /// 修改 page
   }
 }
