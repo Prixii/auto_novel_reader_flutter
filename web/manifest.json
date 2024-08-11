@@ -1,6 +1,6 @@
 {
-    "name": "auto_nover_reader_flutter",
-    "short_name": "auto_nover_reader_flutter",
+    "name": "auto_novel_reader_flutter",
+    "short_name": "auto_novel_reader_flutter",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

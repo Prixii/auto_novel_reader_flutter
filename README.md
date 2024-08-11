@@ -1,3 +1,3 @@
-# auto_nover_reader_flutter
+# auto_novel_reader_flutter
 
 A new Flutter project.

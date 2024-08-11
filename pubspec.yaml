@@ -1,4 +1,4 @@
-name: auto_nover_reader_flutter
+name: auto_novel_reader_flutter
 description: "A new Flutter project."
 publish_to: 'none'
 version: 0.1.0
@@ -7,16 +7,44 @@ environment:
   sdk: '>=3.4.3 <4.0.0'
 
 dependencies:
-  epub_view: ^3.2.0
-  file_picker: ^8.0.7
   flutter:
     sdk: flutter
+  # epub
+  epubx: ^4.0.0
+  # 文件选择
   path_provider: ^2.1.4
+  file_picker: ^8.0.7
+  file: ^7.0.0
+  # 权限申请
+  permission_handler: ^11.3.1
+  # 持久化
+  shared_preferences: ^2.2.3
+  # log 打印
+  talker_dio_logger: ^4.2.0
+  talker_flutter: ^4.2.0
+  # 图标
+  unicons: ^2.1.1
+  # 吐司
+  fluttertoast: ^8.2.6
+  # 代码生成
+  freezed: ^2.5.2
+  freezed_annotation: ^2.4.1
+  json_annotation: ^4.9.0
+  # 状态管理
+  bloc: ^8.1.4
+  flutter_bloc: ^8.1.6
+    # 动画
+  animations: ^2.0.11
+  flutter_staggered_animations: ^1.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  # 序列化
+  json_serializable: ^6.8.0
+  # 代码生成
+  build_runner: ^2.4.9
 
 flutter:
   uses-material-design: true

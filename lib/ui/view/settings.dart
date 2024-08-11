@@ -1,0 +1,96 @@
+import 'package:auto_novel_reader_flutter/ui/components/universal/icon_option.dart';
+import 'package:auto_novel_reader_flutter/ui/components/universal/tab_option.dart';
+import 'package:auto_novel_reader_flutter/util/client_util.dart';
+import 'package:flutter/material.dart';
+import 'package:unicons/unicons.dart';
+
+class SettingsView extends StatelessWidget {
+  const SettingsView({super.key});
+  final dividerIndent = 16.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildHelloPageSetter(prefs.getInt('helloPage') ?? 1),
+            _buildDivider(theme),
+            _buildInfoIcons(),
+            _buildDivider(theme),
+            IconOption(
+              icon: UniconsLine.signout,
+              text: '登出',
+              color: theme.colorScheme.error,
+              onTap: () => tryLogout(context),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Divider _buildDivider(ThemeData theme) {
+    return Divider(
+      indent: dividerIndent,
+      endIndent: dividerIndent,
+      color: theme.dividerColor,
+    );
+  }
+
+  void tryLogout(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('确定登出'),
+        content: const Text('确定要登出吗?'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('取消')),
+          TextButton(
+              onPressed: () {
+                // TODO 登出
+                Navigator.of(context).pop(true);
+              },
+              child: const Text('确定')),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoIcons() {
+    return const Column(
+      children: [
+        IconOption(
+          padding: EdgeInsets.fromLTRB(32, 10, 0, 10),
+          icon: UniconsLine.info_circle,
+          text: '版本信息',
+        ),
+        IconOption(
+          padding: EdgeInsets.fromLTRB(32, 10, 0, 10),
+          icon: UniconsLine.building,
+          text: '关于',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHelloPageSetter(int helloPageIndex) {
+    return TabOption(
+        initValue: helloPageIndex,
+        label: '欢迎页',
+        onTap: (value, index) => {
+              prefs.setInt('helloPage', index),
+            },
+        icon: UniconsLine.estate,
+        tabs: const [
+          '首页',
+          '阅读',
+          '设置',
+        ]);
+  }
+}
