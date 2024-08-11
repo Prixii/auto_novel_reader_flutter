@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:auto_novel_reader_flutter/ui/view/reader/epub_reader.dart';
-import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/epub_util.dart';
 import 'package:auto_novel_reader_flutter/util/html_util.dart';
 import 'package:bloc/bloc.dart';
@@ -36,30 +35,42 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
           MaterialPageRoute(builder: (context) => const EpubReaderView()));
     }
 
-    final htmlData = await _loadHTMLFile();
+    final htmlData = await _loadHTMLFile(state.currentChapterIndex);
     emit(state.copyWith(htmlData: htmlData));
   }
 
-  _onNextChapter(_NextChapter event, Emitter<EpubViewerState> emit) async {}
+  _onNextChapter(_NextChapter event, Emitter<EpubViewerState> emit) async {
+    final newIndex = state.currentChapterIndex + 1;
+    if (newIndex >= epubUtil.pointList.length) return;
+    final htmlData = await _loadHTMLFile(newIndex);
+    emit(state.copyWith(htmlData: htmlData, currentChapterIndex: newIndex));
+  }
 
   _onPreviousChapter(
-      _PreviousChapter event, Emitter<EpubViewerState> emit) async {}
+      _PreviousChapter event, Emitter<EpubViewerState> emit) async {
+    final newIndex = state.currentChapterIndex - 1;
+    if (newIndex < 0) return;
+    final htmlData = await _loadHTMLFile(newIndex);
+    emit(state.copyWith(htmlData: htmlData, currentChapterIndex: newIndex));
+  }
 
   _onGoToChapter(_GoToChapter event, Emitter<EpubViewerState> emit) async {}
 
-  Future<String> _loadHTMLFile() async {
+  Future<String> _loadHTMLFile(int chapterIndex) async {
     final currentPath = epubUtil.currentPath;
     final pointList = epubUtil.pointList;
-    if (currentPath == null || pointList.length < state.currentPage) return '';
+    if (currentPath == null || pointList.length < chapterIndex) return '';
 
-    final htmlFileName = epubUtil.pointList[state.currentPage].sourceName;
-    if (htmlFileName == null) return '';
+    var htmlData = '';
+    final resourceList = epubUtil.getChapterContentNameByIndex(chapterIndex);
 
-    final rawHtml = await File('$currentPath/$htmlFileName').readAsString();
-    final redirectedHtml =
-        htmlUtil.redirectSource(rawHtml, epubUtil.currentPath ?? '');
-    final htmlData = htmlUtil.removeHeadSection(redirectedHtml);
-    talker.debug('htmlContent: $htmlData');
+    for (var htmlFileName in resourceList) {
+      final rawHtml = await File('$currentPath/$htmlFileName').readAsString();
+      final redirectedHtml =
+          htmlUtil.redirectSource(rawHtml, epubUtil.currentPath ?? '');
+      final processedData = htmlUtil.removeHeadSection(redirectedHtml);
+      htmlData += processedData;
+    }
     return htmlData;
   }
 

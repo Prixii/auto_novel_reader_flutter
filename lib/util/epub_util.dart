@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:auto_novel_reader_flutter/manager/local_file_manager.dart';
+import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/file_util.dart';
 import 'package:epubx/epubx.dart' as epubx;
 
@@ -13,9 +14,11 @@ class _EpubUtil {
   String title = '';
   List<String?> authorList = [];
   epubx.Image? coverImage;
+  List<epubx.EpubTextContentFile> htmlContent = [];
   List<epubx.EpubNavigationPoint> pointList = [];
   String? currentPath;
   Map<String, List<String>> chapterResourceMap = {};
+  List<String> chapterTitleList = [];
 
   _EpubUtil();
 
@@ -26,6 +29,7 @@ class _EpubUtil {
     parseBaseInfo();
     parseNcx();
     await extractContent();
+    await sortChapters();
   }
 
   void parseBaseInfo() {
@@ -33,6 +37,11 @@ class _EpubUtil {
     title = epubBook!.Title ?? '';
     authorList = epubBook!.AuthorList ?? [];
     coverImage = epubBook!.CoverImage;
+    final chaptersObject = epubBook!.Chapters ?? [];
+    chapterTitleList = [];
+    for (var chapter in chaptersObject) {
+      chapterTitleList.add(chapter.Title ?? '');
+    }
   }
 
   void parseNcx() {
@@ -42,19 +51,38 @@ class _EpubUtil {
     pointList = ncx.NavMap?.Points ?? [];
   }
 
+  Future<void> sortChapters() async {
+    var index = 0;
+    var htmlNameList = <String>[];
+    var currentChapterName = '';
+    for (final navPoint in pointList) {
+      while (true) {
+        final htmlName = htmlContent[index].FileName;
+        if (navPoint.sourceName == htmlName) {
+          currentChapterName = navPoint.hashCode.toString();
+          chapterResourceMap[currentChapterName] = htmlNameList;
+          htmlNameList = [];
+          break;
+        } else {
+          htmlNameList.add(htmlName ?? '');
+          index++;
+        }
+      }
+    }
+    talker.info(chapterResourceMap);
+  }
+
   void parseChapterList() {
     final chapters = epubBook?.Chapters;
     if (chapters == null) return;
   }
 
-  void sortChapters() {
-    /// TODO 整理章节目录
-    /// [完成章节 -> 资源]的映射
-  }
-
   Future<void> extractContent() async {
     final content = epubBook?.Content;
     if (content == null) return;
+
+    htmlContent = content.Html?.values.toList() ?? [];
+
     final path = '$basePath/$title';
     currentPath = path;
     final parseDir = Directory(path);
@@ -76,9 +104,7 @@ class _EpubUtil {
   }
 
   Future<void> extractHtml(epubx.EpubContent content, String folder) async {
-    List<epubx.EpubTextContentFile> htmlFiles =
-        content.Html?.values.toList() ?? [];
-    for (final htmlFile in htmlFiles) {
+    for (final htmlFile in htmlContent) {
       String htmlContent = htmlFile.Content ?? '';
       await writeStringToFile(htmlFile.FileName ?? '', htmlContent, folder);
     }
@@ -91,6 +117,16 @@ class _EpubUtil {
       String cssContent = cssFile.Content ?? '';
       await writeStringToFile(cssFile.FileName ?? '', cssContent, folder);
     }
+  }
+
+  String getChapterNameByIndex(int index) {
+    if (chapterTitleList.length <= index) throw 'chapter index out of range';
+    return chapterTitleList[index];
+  }
+
+  List<String> getChapterContentNameByIndex(int index) {
+    if (chapterResourceMap.length <= index) throw 'chapter index out of range';
+    return chapterResourceMap[pointList[index].hashCode.toString()] ?? [];
   }
 }
 
