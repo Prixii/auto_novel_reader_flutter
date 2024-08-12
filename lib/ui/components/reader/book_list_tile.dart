@@ -44,8 +44,8 @@ class _BookListTileState extends State<BookListTile> {
           final epubFile = File(path);
           if (!epubFile.existsSync()) throw Exception('epub file not found');
 
-          readEpubViewerBloc(context)
-              .add(EpubViewerEvent.open(epubFile, context));
+          readEpubViewerBloc(context).add(
+              EpubViewerEvent.open(epubFile, widget.epubManageData, context));
         },
         child: Container(
           padding: const EdgeInsets.all(8.0),
@@ -89,8 +89,11 @@ class _BookListTileState extends State<BookListTile> {
   }
 
   Widget _buildReadProgressInfo() {
+    final progress =
+        '${(widget.epubManageData.progress * 100).toStringAsFixed(2)} %';
+    final chapterTitle = '第${widget.epubManageData.chapter + 1}章';
     return Text(
-      '${widget.epubManageData.chapter} 章 ${widget.epubManageData.progress} %',
+      '$chapterTitle ($progress)',
       textAlign: TextAlign.left,
       style: const TextStyle(
         fontSize: 12.0,

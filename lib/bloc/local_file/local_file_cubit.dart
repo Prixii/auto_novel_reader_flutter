@@ -15,7 +15,7 @@ part 'local_file_cubit.freezed.dart';
 class LocalFileCubit extends Cubit<LocalFileState> {
   LocalFileCubit() : super(const LocalFileState.initial());
 
-  Future<void> init() async {
+  init() async {
     emit(
       state.copyWith(
         epubManageDataList: localFileManager.epubManageDataList,
@@ -23,7 +23,7 @@ class LocalFileCubit extends Cubit<LocalFileState> {
     );
   }
 
-  Future<void> selectFile({
+  selectFile({
     required File file,
     required BuildContext context,
   }) async {
@@ -34,7 +34,16 @@ class LocalFileCubit extends Cubit<LocalFileState> {
     emit(state.copyWith(
         epubManageDataList: [epubManageData, ...state.epubManageDataList]));
     if (context.mounted) {
-      readEpubViewerBloc(context).add(EpubViewerEvent.open(file, context));
+      readEpubViewerBloc(context)
+          .add(EpubViewerEvent.open(file, epubManageData, context));
     }
+  }
+
+  updateEpubManageData(EpubManageData newData) {
+    var dataListSnapshot = [...state.epubManageDataList];
+    dataListSnapshot.removeWhere((element) => element.uid == newData.uid);
+    dataListSnapshot = [newData, ...dataListSnapshot];
+    emit(state.copyWith(epubManageDataList: dataListSnapshot));
+    localFileManager.updateEpubManageData(dataListSnapshot);
   }
 }

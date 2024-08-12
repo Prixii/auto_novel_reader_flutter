@@ -5,7 +5,7 @@ const htmlUtil = _HtmlUtil();
 class _HtmlUtil {
   const _HtmlUtil();
 
-  final maxLength = 2000;
+  final maxLength = 500;
 
   List<String> pretreatHtml(String html, String url) {
     var htmlPartList = <String>[];

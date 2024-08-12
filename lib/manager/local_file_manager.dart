@@ -29,7 +29,7 @@ class _LocalFileManager {
       initEpubDownloadDir(),
       Hive.initFlutter().then((_) async {
         Hive.registerAdapter<EpubManageData>(EpubManageDataImplAdapter());
-        epubManagerBox = await Hive.openBox('test1');
+        epubManagerBox = await Hive.openBox('epubBox');
         readLocalFileData();
       }),
     ]);
@@ -37,7 +37,7 @@ class _LocalFileManager {
 
   void readLocalFileData() {
     epubManageDataList = [];
-    final dataList = epubManagerBox.get('epubManageDataList');
+    final dataList = epubManagerBox.get('epubManageDataList') ?? [];
     for (final data in dataList) {
       if (data is EpubManageData) {
         epubManageDataList.add(data);
@@ -71,5 +71,9 @@ class _LocalFileManager {
 
   String? getEpubFilePath(String fileName) {
     return '$externalStorageDirectory$backupPath/$fileName';
+  }
+
+  Future<void> updateEpubManageData(List<EpubManageData> newDataList) async {
+    epubManagerBox.put('epubManageDataList', newDataList);
   }
 }

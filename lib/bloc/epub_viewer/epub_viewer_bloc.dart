@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/ui/view/reader/epub_reader.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/epub_util.dart';
@@ -25,37 +26,36 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
         openSettings: (event) async => await _onOpenSettings(event, emit),
         setScrollController: (event) async =>
             await _onSetScrollController(event, emit),
-        updateReadingProgress: (event) async =>
-            await _onUpdateReadingProgress(event, emit),
         switchChapter: (event) async => await _onSwitchChapter(event, emit),
       );
     });
   }
 
   _onOpen(_Open event, Emitter<EpubViewerState> emit) async {
+    final data = event.epubManageData;
     await epubUtil.parseEpub(event.epub);
-    emit(state.copyWith(
-      title: epubUtil.title,
-      author: epubUtil.authorList.firstOrNull ?? '',
-    ));
+    emit(state.copyWith(epubManageData: data));
     if (event.context.mounted) {
       Navigator.of(event.context).push(
           MaterialPageRoute(builder: (context) => const EpubReaderView()));
     }
-    add(const EpubViewerEvent.switchChapter(0));
+    add(EpubViewerEvent.switchChapter(
+      data.chapter,
+      data.progress,
+    ));
   }
 
   _onNextChapter(_NextChapter event, Emitter<EpubViewerState> emit) async {
     final newIndex = state.currentChapterIndex + 1;
     if (newIndex >= epubUtil.pointList.length) return;
-    add(EpubViewerEvent.switchChapter(newIndex));
+    add(EpubViewerEvent.switchChapter(newIndex, 0));
   }
 
   _onPreviousChapter(
       _PreviousChapter event, Emitter<EpubViewerState> emit) async {
     final newIndex = state.currentChapterIndex - 1;
     if (newIndex < 0) return;
-    add(EpubViewerEvent.switchChapter(newIndex));
+    add(EpubViewerEvent.switchChapter(newIndex, 1));
   }
 
   _onGoToChapter(_GoToChapter event, Emitter<EpubViewerState> emit) async {}
@@ -68,7 +68,13 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
   }
 
   _onClose(_Close event, Emitter<EpubViewerState> emit) {
+    if (state.epubManageData == null) return;
+    final newEpubManageData = state.epubManageData!.copyWith(
+      progress: event.progress,
+      chapter: state.currentChapterIndex,
+    );
     emit(const EpubViewerState.initial());
+    localFileCubit.updateEpubManageData(newEpubManageData);
   }
 
   _onOpenSettings(_OpenSettings event, Emitter<EpubViewerState> emit) {}
@@ -76,10 +82,10 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
   _onSetScrollController(
       _SetScrollController event, Emitter<EpubViewerState> emit) {
     emit(state.copyWith(scrollController: event.controller));
+    state.scrollController!.jumpTo(
+        state.scrollController!.position.maxScrollExtent *
+            state.epubManageData!.progress);
   }
-
-  _onUpdateReadingProgress(
-      _UpdateReadingProgress event, Emitter<EpubViewerState> emit) {}
 
   _onSwitchChapter(_SwitchChapter event, Emitter<EpubViewerState> emit) async {
     emit(state.copyWith(currentChapterIndex: event.index, htmlData: []));
@@ -87,6 +93,9 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
       emit(state.copyWith(htmlData: [...state.htmlData, ...htmlPartList]));
       talker.info('new paras count: ${state.htmlData.length}');
     }
+    if (state.scrollController == null) return;
+    state.scrollController?.jumpTo(
+        state.scrollController!.position.maxScrollExtent * event.readProgress);
   }
 
   Stream<List<String>> _loadHTMLFile(int chapterIndex) async* {

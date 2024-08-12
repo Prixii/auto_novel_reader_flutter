@@ -1,4 +1,6 @@
 import 'package:auto_novel_reader_flutter/bloc/epub_viewer/epub_viewer_bloc.dart';
+import 'package:auto_novel_reader_flutter/ui/components/universal/info_badge.dart';
+import 'package:auto_novel_reader_flutter/ui/components/universal/scroll_index_widget.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/epub_util.dart';
 import 'package:flutter/material.dart';
@@ -44,7 +46,8 @@ class _EpubWebviewState extends State<EpubWebview> {
       builder: (context, htmlDataList) {
         return PopScope(
           onPopInvoked: (value) {
-            readEpubViewerBloc(context).add(const EpubViewerEvent.close());
+            readEpubViewerBloc(context)
+                .add(EpubViewerEvent.close(readProgress));
           },
           child: Stack(
             clipBehavior: Clip.hardEdge,
@@ -78,13 +81,14 @@ class _EpubWebviewState extends State<EpubWebview> {
           previousPage();
         }
       },
-      child: SingleChildScrollView(
-        controller: _scrollController,
-        scrollDirection: Axis.vertical,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 32),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 32),
+        child: ScrollIndexWidget(
+          callback: (firstIndex, lastIndex) {
+            talker.debug('firstIndex: $firstIndex, lastIndex: $lastIndex');
+          },
           child: ListView.builder(
-              physics: const NeverScrollableScrollPhysics(),
+              controller: _scrollController,
               shrinkWrap: true,
               itemCount: htmlDataList.length + 1,
               itemBuilder: (context, index) {
@@ -128,10 +132,12 @@ class _EpubWebviewState extends State<EpubWebview> {
   }
 
   void nextPage() {
+    readProgress = 0.0;
     readEpubViewerBloc(context).add(const EpubViewerEvent.nextChapter());
   }
 
   void previousPage() {
+    readProgress = 0.0;
     readEpubViewerBloc(context).add(const EpubViewerEvent.previousChapter());
   }
 
@@ -156,47 +162,42 @@ class _EpubWebviewState extends State<EpubWebview> {
     );
   }
 
-  Container _buildInfoBadge(String info) {
-    return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(4),
-          color: Colors.grey.withOpacity(0.5),
-        ),
-        child: Text(
-          info,
-          style: const TextStyle(color: Colors.white),
-        ));
+  Widget _buildInfoBadge(String info) {
+    return InfoBadge(info);
   }
 
   Widget _buildProgressBar() {
+    const horizontalPadding = 10.0;
+    const radius = 4.0;
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTapDown: (detail) {
         slideTo(detail.localPosition.dy / maxHeight);
       },
       onLongPressMoveUpdate: (details) {
         slideTo(details.localPosition.dy / maxHeight);
       },
-      child: Container(
-        height: maxHeight,
-        width: 20,
-        padding: const EdgeInsets.only(left: 4, right: 10),
-        child: Stack(
-          children: [
-            Container(
-                height: maxHeight,
+      child: SizedBox(
+        width: 2 * (radius + horizontalPadding),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: horizontalPadding),
+          child: Stack(
+            children: [
+              Container(
+                  height: maxHeight,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(radius),
+                    color: Colors.grey.withOpacity(0.5),
+                  )),
+              Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(3),
-                  color: Colors.grey.withOpacity(0.5),
-                )),
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius: BorderRadius.circular(3),
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.circular(radius),
+                ),
+                height: maxHeight * readProgress,
               ),
-              height: maxHeight * readProgress,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
