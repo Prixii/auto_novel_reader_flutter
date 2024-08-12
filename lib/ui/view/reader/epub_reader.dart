@@ -29,7 +29,6 @@ class _EpubReaderViewState extends State<EpubReaderView> {
         // Show epub document
         body: (epubUtil.currentPath == null)
             ? const Text('no data!')
-            : EpubWebview(
-                htmlFilePath: '${epubUtil.currentPath}/text00011.html'));
+            : const EpubWebview());
   }
 }

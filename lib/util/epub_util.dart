@@ -1,9 +1,11 @@
 import 'dart:io';
 
 import 'package:auto_novel_reader_flutter/manager/local_file_manager.dart';
+import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/file_util.dart';
 import 'package:epubx/epubx.dart' as epubx;
+import 'package:image/image.dart';
 
 final epubUtil = _EpubUtil();
 
@@ -19,17 +21,29 @@ class _EpubUtil {
   String? currentPath;
   Map<String, List<String>> chapterResourceMap = {};
   List<String> chapterTitleList = [];
+  late String uid;
 
   _EpubUtil();
 
-  Future<void> parseEpub(File epub) async {
+  Future<EpubManageData?> parseEpub(File epub) async {
     final bytes = await epub.readAsBytes();
     epubBook = await epubx.EpubReader.readBook(bytes);
+    if (epubBook == null) return null;
+
+    uid = epubBook.hashCode.toString();
+    final epubData = EpubManageData(
+      path: epub.path,
+      name: epubBook!.Title ?? uid,
+      uid: uid,
+    );
 
     parseBaseInfo();
     parseNcx();
-    await extractContent();
+    await extractContent(epubData.uid);
     await sortChapters();
+    await extractCover(uid);
+    await extractEpubBackup(epub, epubData);
+    return epubData;
   }
 
   void parseBaseInfo() {
@@ -83,13 +97,13 @@ class _EpubUtil {
     if (chapters == null) return;
   }
 
-  Future<void> extractContent() async {
+  Future<void> extractContent(String uid) async {
     final content = epubBook?.Content;
     if (content == null) return;
 
     htmlContent = content.Html?.values.toList() ?? [];
 
-    final path = '$basePath/$title';
+    final path = '$basePath/$uid';
     currentPath = path;
     final parseDir = Directory(path);
     if (parseDir.existsSync()) return;
@@ -133,6 +147,26 @@ class _EpubUtil {
   List<String> getChapterContentNameByIndex(int index) {
     if (chapterResourceMap.length <= index) throw 'chapter index out of range';
     return chapterResourceMap[pointList[index].hashCode.toString()] ?? [];
+  }
+
+  Future<void> extractCover(String uid) async {
+    if (coverImage == null) return;
+    final path = '$basePath/cover/$uid';
+    try {
+      final file = File(path);
+      file.createSync(recursive: true);
+      await file.writeAsBytes(encodePng(coverImage!));
+    } catch (e) {
+      print('Error writing to file: $e');
+    }
+  }
+
+  Future<void> extractEpubBackup(File epub, EpubManageData epubData) async {
+    final path = '$basePath/backup/${epubData.uid}';
+    final backup = File(path);
+    backup.createSync(recursive: true);
+    await backup.writeAsBytes(epub.readAsBytesSync());
+    return;
   }
 }
 

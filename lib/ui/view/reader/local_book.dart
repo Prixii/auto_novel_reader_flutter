@@ -1,11 +1,12 @@
 import 'dart:io';
 
-import 'package:auto_novel_reader_flutter/bloc/epub_viewer/epub_viewer_bloc.dart';
+import 'package:auto_novel_reader_flutter/bloc/local_file/local_file_cubit.dart';
+import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/ui/components/reader/book_list_tile.dart';
-import 'package:auto_novel_reader_flutter/ui/view/reader/epub_reader.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LocalBookView extends StatelessWidget {
   const LocalBookView({super.key});
@@ -13,8 +14,18 @@ class LocalBookView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(children: [
-      BookListTile(),
-      const Center(child: Text('LocalBookView')),
+      BlocSelector<LocalFileCubit, LocalFileState, List<EpubManageData>>(
+        selector: (state) {
+          return state.epubManageDataList;
+        },
+        builder: (context, epubList) {
+          return ListView.builder(
+            itemBuilder: (context, index) =>
+                BookListTile(epubManageData: epubList[index]),
+            itemCount: epubList.length,
+          );
+        },
+      ),
       Align(
         alignment: Alignment.bottomRight,
         child: Padding(
@@ -24,7 +35,7 @@ class LocalBookView extends StatelessWidget {
               selectEpubFile(context);
             },
             tooltip: 'Increment',
-            child: Icon(Icons.add),
+            child: const Icon(Icons.add),
           ),
         ),
       )
@@ -44,7 +55,7 @@ class LocalBookView extends StatelessWidget {
       throw Exception('epub file not found');
     }
     if (context.mounted) {
-      readEpubViewerBloc(context).add(EpubViewerEvent.open(epubFile, context));
+      readLocalFileCubit(context).selectFile(file: epubFile, context: context);
     }
   }
 }

@@ -520,6 +520,30 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "5.3.4"
+  hive:
+    dependency: "direct main"
+    description:
+      name: hive
+      sha256: "8dcf6db979d7933da8217edcec84e9df1bdb4e4edc7fc77dbd5aa74356d6d941"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.2.3"
+  hive_flutter:
+    dependency: "direct main"
+    description:
+      name: hive_flutter
+      sha256: dca1da446b1d808a51689fb5d0c6c9510c0a2ba01e22805d492c73b68e33eecc
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.1.0"
+  hive_generator:
+    dependency: "direct dev"
+    description:
+      name: hive_generator
+      sha256: "06cb8f58ace74de61f63500564931f9505368f45f98958bd7a6c35ba24159db4"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.0.1"
   html:
     dependency: transitive
     description:
@@ -553,7 +577,7 @@ packages:
     source: hosted
     version: "4.0.2"
   image:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: image
       sha256: "8e9d133755c3e84c73288363e6343157c383a0c6c56fc51afcc5d4d7180306d6"
@@ -568,22 +592,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.0.4"
-  isar:
-    dependency: "direct main"
-    description:
-      name: isar
-      sha256: "9f61cc74d160f9ed85ef30baf2f9c51cc0d027ae701dbc0051087800d14a9501"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "4.0.0-dev.3"
-  isar_flutter_libs:
-    dependency: "direct main"
-    description:
-      name: isar_flutter_libs
-      sha256: "2db3c5c34fa78c13837da1055a6e05d3f1d8a4d039bd95a94c24b6368c19f10f"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "4.0.0-dev.3"
   js:
     dependency: transitive
     description:
@@ -600,6 +608,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "4.9.0"
+  json_serializable:
+    dependency: "direct dev"
+    description:
+      name: json_serializable
+      sha256: ea1432d167339ea9b5bb153f0571d0039607a873d6e04e0117af043f14a1fd4b
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "6.8.0"
   just_audio:
     dependency: transitive
     description:
@@ -1021,6 +1037,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.5.0"
+  source_helper:
+    dependency: transitive
+    description:
+      name: source_helper
+      sha256: "6adebc0006c37dd63fe05bca0a929b99f06402fc95aa35bf36d67f5c06de01fd"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.3.4"
   source_span:
     dependency: transitive
     description:

@@ -6,8 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 
 class EpubWebview extends StatefulWidget {
-  const EpubWebview({super.key, required this.htmlFilePath});
-  final String htmlFilePath;
+  const EpubWebview({super.key});
 
   @override
   State<EpubWebview> createState() => _EpubWebviewState();

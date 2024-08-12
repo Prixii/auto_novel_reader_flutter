@@ -11,6 +11,7 @@ dependencies:
     sdk: flutter
   # epub
   epubx: ^4.0.0
+  image: ^3.3.0
   # html
   flutter_widget_from_html: ^0.15.1
   # 文件选择
@@ -39,8 +40,8 @@ dependencies:
   animations: ^2.0.11
   flutter_staggered_animations: ^1.0.0
   # 持久化
-  isar: ^4.0.0-dev.3
-  isar_flutter_libs: ^4.0.0-dev.3
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
 
 dev_dependencies:
   flutter_test:
@@ -48,6 +49,8 @@ dev_dependencies:
   flutter_lints: ^3.0.0
   # 代码生成
   build_runner: ^2.4.9
+  json_serializable: ^6.8.0
+  hive_generator: ^2.0.1
 
 flutter:
   uses-material-design: true

@@ -5,7 +5,6 @@ import 'package:auto_novel_reader_flutter/ui/view/home.dart';
 import 'package:auto_novel_reader_flutter/manager/local_file_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
@@ -50,8 +49,6 @@ class _SplashViewState extends State<SplashView> {
     initScreenSize(context);
     prefs = await SharedPreferences.getInstance();
     localFileManager.init();
-    WebViewPlatform.instance;
-    talker.debug('initFinished');
     return;
   }
 
