@@ -54,7 +54,6 @@ class _LocalFileManager {
     final basePath = '$externalStorageDirectory$epubCoverPath';
     createDirectoryIfNotExists(basePath);
     final coverFile = File('$basePath/$epubUid');
-    talker.debug('tryGetEpubCover: ${coverFile.path}');
     return coverFile.existsSync() ? coverFile : null;
   }
 

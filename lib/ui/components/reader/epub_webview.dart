@@ -1,6 +1,5 @@
 import 'package:auto_novel_reader_flutter/bloc/epub_viewer/epub_viewer_bloc.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/info_badge.dart';
-import 'package:auto_novel_reader_flutter/ui/components/universal/scroll_index_widget.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/epub_util.dart';
 import 'package:flutter/material.dart';
@@ -83,20 +82,15 @@ class _EpubWebviewState extends State<EpubWebview> {
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 32),
-        child: ScrollIndexWidget(
-          callback: (firstIndex, lastIndex) {
-            talker.debug('firstIndex: $firstIndex, lastIndex: $lastIndex');
-          },
-          child: ListView.builder(
-              controller: _scrollController,
-              shrinkWrap: true,
-              itemCount: htmlDataList.length + 1,
-              itemBuilder: (context, index) {
-                return (index == htmlDataList.length)
-                    ? _buildBottomPageSwitcher()
-                    : _buildHtmlWidget(htmlDataList, index, context);
-              }),
-        ),
+        child: ListView.builder(
+            controller: _scrollController,
+            shrinkWrap: true,
+            itemCount: htmlDataList.length + 1,
+            itemBuilder: (context, index) {
+              return (index == htmlDataList.length)
+                  ? _buildBottomPageSwitcher()
+                  : _buildHtmlWidget(htmlDataList, index, context);
+            }),
       ),
     );
   }

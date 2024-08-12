@@ -6,7 +6,6 @@ Future<void> createDirectoryIfNotExists(String path) async {
   final directory = Directory(path);
   if (!await directory.exists()) {
     await directory.create(recursive: true);
-    talker.debug('已创建文件夹: $path');
   }
 }
 
@@ -15,9 +14,7 @@ Future<void> writeStringToFile(String name, String content, String path) async {
     final file = File('$path/$name');
     if (!file.parent.existsSync()) file.parent.createSync();
     await file.writeAsString(content);
-  } catch (e) {
-    talker.error('Error writing file: $e');
-  }
+  } catch (e) {}
 }
 
 Future<void> writeImageToFile(

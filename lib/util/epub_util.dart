@@ -20,7 +20,7 @@ class _EpubUtil {
   List<epubx.EpubNavigationPoint> pointList = [];
   String? currentPath;
   Map<String, List<String>> chapterResourceMap = {};
-  List<String> chapterTitleList = [];
+  List<epubx.EpubChapter> chapterList = [];
   late String uid;
 
   _EpubUtil();
@@ -51,11 +51,7 @@ class _EpubUtil {
     title = epubBook!.Title ?? '';
     authorList = epubBook!.AuthorList ?? [];
     coverImage = epubBook!.CoverImage;
-    final chaptersObject = epubBook!.Chapters ?? [];
-    chapterTitleList = [];
-    for (var chapter in chaptersObject) {
-      chapterTitleList.add(chapter.Title ?? '');
-    }
+    chapterList = epubBook!.Chapters ?? [];
   }
 
   void parseNcx() {
@@ -89,7 +85,6 @@ class _EpubUtil {
         }
       }
     }
-    talker.info(chapterResourceMap);
   }
 
   void parseChapterList() {
@@ -140,8 +135,8 @@ class _EpubUtil {
   }
 
   String getChapterNameByIndex(int index) {
-    if (chapterTitleList.length <= index) throw 'chapter index out of range';
-    return chapterTitleList[index];
+    if (chapterList.length <= index) throw 'chapter index out of range';
+    return chapterList[index].Title ?? '';
   }
 
   List<String> getChapterContentNameByIndex(int index) {

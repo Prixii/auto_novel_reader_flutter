@@ -8,5 +8,7 @@ class EpubViewerState with _$EpubViewerState {
     @Default([]) List<String> chapterResourceList,
     @Default(null) ScrollController? scrollController,
     @Default(null) EpubManageData? epubManageData,
+    @Default([]) List<String> chapterTitleList,
+    @Default(true) bool canPop,
   }) = _Initial;
 }

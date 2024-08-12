@@ -20,7 +20,6 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
         open: (event) async => await _onOpen(event, emit),
         nextChapter: (event) async => await _onNextChapter(event, emit),
         previousChapter: (event) async => await _onPreviousChapter(event, emit),
-        goToChapter: (event) async => await _onGoToChapter(event, emit),
         clickUrl: (event) async => await _onClickUrl(event, emit),
         close: (event) async => await _onClose(event, emit),
         openSettings: (event) async => await _onOpenSettings(event, emit),
@@ -34,7 +33,14 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
   _onOpen(_Open event, Emitter<EpubViewerState> emit) async {
     final data = event.epubManageData;
     await epubUtil.parseEpub(event.epub);
-    emit(state.copyWith(epubManageData: data));
+
+    var chapterTitleList =
+        epubUtil.chapterList.map((e) => e.Title ?? '').toList();
+
+    emit(state.copyWith(
+      epubManageData: data,
+      chapterTitleList: chapterTitleList,
+    ));
     if (event.context.mounted) {
       Navigator.of(event.context).push(
           MaterialPageRoute(builder: (context) => const EpubReaderView()));
@@ -58,8 +64,6 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
     add(EpubViewerEvent.switchChapter(newIndex, 1));
   }
 
-  _onGoToChapter(_GoToChapter event, Emitter<EpubViewerState> emit) async {}
-
   _onClickUrl(_ClickUrl event, Emitter<EpubViewerState> emit) {
     /// TODO 点击事件
     /// 检查 point 目录
@@ -68,7 +72,7 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
   }
 
   _onClose(_Close event, Emitter<EpubViewerState> emit) {
-    if (state.epubManageData == null) return;
+    if (!state.canPop || state.epubManageData == null) return;
     final newEpubManageData = state.epubManageData!.copyWith(
       progress: event.progress,
       chapter: state.currentChapterIndex,
@@ -88,10 +92,13 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
   }
 
   _onSwitchChapter(_SwitchChapter event, Emitter<EpubViewerState> emit) async {
-    emit(state.copyWith(currentChapterIndex: event.index, htmlData: []));
+    emit(state.copyWith(
+        currentChapterIndex: event.index,
+        htmlData: [],
+        canPop: event.canPop ?? true));
     await for (final htmlPartList in _loadHTMLFile(event.index)) {
-      emit(state.copyWith(htmlData: [...state.htmlData, ...htmlPartList]));
-      talker.info('new paras count: ${state.htmlData.length}');
+      emit(state.copyWith(
+          htmlData: [...state.htmlData, ...htmlPartList], canPop: true));
     }
     if (state.scrollController == null) return;
     state.scrollController?.jumpTo(
