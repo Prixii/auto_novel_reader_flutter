@@ -15,6 +15,7 @@ class EpubWebview extends StatefulWidget {
 class _EpubWebviewState extends State<EpubWebview> {
   late ScrollController _scrollController;
   double readProgress = 0.0;
+  var maxHeight = 0.0;
 
   @override
   void initState() {
@@ -28,6 +29,7 @@ class _EpubWebviewState extends State<EpubWebview> {
       });
     });
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      maxHeight = MediaQuery.of(context).size.height * 0.7;
       readEpubViewerBloc(context)
           .add(EpubViewerEvent.setScrollController(_scrollController));
     });
@@ -55,6 +57,10 @@ class _EpubWebviewState extends State<EpubWebview> {
               Align(
                 alignment: Alignment.topLeft,
                 child: _buildChapterProgress(),
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: _buildProgressBar(),
               ),
             ],
           ),
@@ -161,5 +167,47 @@ class _EpubWebviewState extends State<EpubWebview> {
           info,
           style: const TextStyle(color: Colors.white),
         ));
+  }
+
+  Widget _buildProgressBar() {
+    return GestureDetector(
+      onTapDown: (detail) {
+        slideTo(detail.localPosition.dy / maxHeight);
+      },
+      onLongPressMoveUpdate: (details) {
+        slideTo(details.localPosition.dy / maxHeight);
+      },
+      child: Container(
+        height: maxHeight,
+        width: 20,
+        padding: const EdgeInsets.only(left: 4, right: 10),
+        child: Stack(
+          children: [
+            Container(
+                height: maxHeight,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(3),
+                  color: Colors.grey.withOpacity(0.5),
+                )),
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+                borderRadius: BorderRadius.circular(3),
+              ),
+              height: maxHeight * readProgress,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void slideTo(double progress) {
+    if (progress < 0 || progress > 1) return;
+    if (_scrollController.hasClients) {
+      _scrollController.jumpTo(
+        progress * _scrollController.position.maxScrollExtent,
+      );
+    }
   }
 }
