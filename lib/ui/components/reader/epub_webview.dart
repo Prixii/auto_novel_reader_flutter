@@ -108,7 +108,7 @@ class _EpubWebviewState extends State<EpubWebview> {
         }
         return null;
       },
-      buildAsync: true,
+      buildAsync: false,
       onTapUrl: (element) {
         readEpubViewerBloc(context).add(EpubViewerEvent.clickUrl(element));
         return true;

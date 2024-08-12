@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:auto_novel_reader_flutter/ui/view/reader/epub_reader.dart';
+import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/epub_util.dart';
 import 'package:auto_novel_reader_flutter/util/html_util.dart';
 import 'package:bloc/bloc.dart';
@@ -82,12 +83,13 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
 
   _onSwitchChapter(_SwitchChapter event, Emitter<EpubViewerState> emit) async {
     emit(state.copyWith(currentChapterIndex: event.index, htmlData: []));
-    await for (final newHtmlData in _loadHTMLFile(event.index)) {
-      emit(state.copyWith(htmlData: [...state.htmlData, newHtmlData]));
+    await for (final htmlPartList in _loadHTMLFile(event.index)) {
+      emit(state.copyWith(htmlData: [...state.htmlData, ...htmlPartList]));
+      talker.info('new paras count: ${state.htmlData.length}');
     }
   }
 
-  Stream<String> _loadHTMLFile(int chapterIndex) async* {
+  Stream<List<String>> _loadHTMLFile(int chapterIndex) async* {
     final currentPath = epubUtil.currentPath;
     final pointList = epubUtil.pointList;
     if (currentPath == null || pointList.length < chapterIndex) return;
@@ -96,10 +98,8 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
 
     for (var htmlFileName in resourceList) {
       final rawHtml = await File('$currentPath/$htmlFileName').readAsString();
-      final redirectedHtml =
-          htmlUtil.redirectSource(rawHtml, epubUtil.currentPath ?? '');
-      final processedData = htmlUtil.removeHeadSection(redirectedHtml);
-      yield processedData;
+
+      yield htmlUtil.pretreatHtml(rawHtml, epubUtil.currentPath ?? '');
     }
   }
 }
