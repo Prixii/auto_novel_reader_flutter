@@ -81,7 +81,7 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
       _UpdateReadingProgress event, Emitter<EpubViewerState> emit) {}
 
   _onSwitchChapter(_SwitchChapter event, Emitter<EpubViewerState> emit) async {
-    emit(state.copyWith(currentChapterIndex: event.index));
+    emit(state.copyWith(currentChapterIndex: event.index, htmlData: []));
     await for (final newHtmlData in _loadHTMLFile(event.index)) {
       emit(state.copyWith(htmlData: [...state.htmlData, newHtmlData]));
     }

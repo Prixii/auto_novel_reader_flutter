@@ -57,6 +57,12 @@ class _EpubUtil {
     var currentChapterName = '';
     for (final navPoint in pointList) {
       while (true) {
+        if (index >= htmlContent.length) {
+          currentChapterName = navPoint.hashCode.toString();
+          chapterResourceMap[currentChapterName] = htmlNameList;
+          htmlNameList = [];
+          break;
+        }
         final htmlName = htmlContent[index].FileName;
         if (navPoint.sourceName == htmlName) {
           currentChapterName = navPoint.hashCode.toString();

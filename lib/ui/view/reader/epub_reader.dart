@@ -27,11 +27,9 @@ class _EpubReaderViewState extends State<EpubReaderView> {
         // Show table of contents
         drawer: Drawer(),
         // Show epub document
-        body: SingleChildScrollView(
-          child: (epubUtil.currentPath == null)
-              ? const Text('no data!')
-              : EpubWebview(
-                  htmlFilePath: '${epubUtil.currentPath}/text00011.html'),
-        ));
+        body: (epubUtil.currentPath == null)
+            ? const Text('no data!')
+            : EpubWebview(
+                htmlFilePath: '${epubUtil.currentPath}/text00011.html'));
   }
 }

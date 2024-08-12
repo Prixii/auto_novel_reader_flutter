@@ -15,12 +15,19 @@ class EpubWebview extends StatefulWidget {
 
 class _EpubWebviewState extends State<EpubWebview> {
   late ScrollController _scrollController;
+  double readProgress = 0.0;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-
+    _scrollController.addListener(() {
+      final position = _scrollController.offset;
+      final max = _scrollController.position.maxScrollExtent;
+      setState(() {
+        readProgress = position / max;
+      });
+    });
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       readEpubViewerBloc(context)
           .add(EpubViewerEvent.setScrollController(_scrollController));
@@ -38,48 +45,122 @@ class _EpubWebviewState extends State<EpubWebview> {
           onPopInvoked: (value) {
             readEpubViewerBloc(context).add(const EpubViewerEvent.close());
           },
-          child: GestureDetector(
-            onTap: () {
-              talker.info('try next');
-              readEpubViewerBloc(context)
-                  .add(const EpubViewerEvent.nextChapter());
-            },
-            onLongPress: () => readEpubViewerBloc(context)
-                .add(const EpubViewerEvent.previousChapter()),
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 12.0, horizontal: 32),
-                child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: htmlDataList.length,
-                    itemBuilder: (context, index) {
-                      return _buildHtmlWidget(htmlDataList, index, context);
-                    }),
+          child: Stack(
+            clipBehavior: Clip.hardEdge,
+            children: [
+              _buildReaderBody(htmlDataList),
+              Align(
+                alignment: Alignment.topRight,
+                child: _buildChapterInfo(),
               ),
-            ),
+              Align(
+                alignment: Alignment.topLeft,
+                child: _buildChapterProgress(),
+              ),
+            ],
           ),
         );
       },
     );
   }
 
+  Widget _buildReaderBody(List<String> htmlDataList) {
+    return GestureDetector(
+      onHorizontalDragEnd: (detail) {
+        if (detail.velocity.pixelsPerSecond.dx < 0) {
+          nextPage();
+        } else {
+          previousPage();
+        }
+      },
+      child: SingleChildScrollView(
+        controller: _scrollController,
+        scrollDirection: Axis.vertical,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 32),
+          child: ListView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: htmlDataList.length + 1,
+              itemBuilder: (context, index) {
+                return (index == htmlDataList.length)
+                    ? _buildBottomPageSwitcher()
+                    : _buildHtmlWidget(htmlDataList, index, context);
+              }),
+        ),
+      ),
+    );
+  }
+
   HtmlWidget _buildHtmlWidget(
       List<String> htmlDataList, int index, BuildContext context) {
-    return HtmlWidget(htmlDataList[index],
-        customStylesBuilder: (element) {
-          if (element.attributes['style'] == null) return null;
-          if (element.attributes['style']!.contains('opacity:0.4')) {
-            return {'color': 'lightgrey'};
-          }
-          return null;
-        },
-        buildAsync: true,
-        onTapUrl: (element) {
-          readEpubViewerBloc(context).add(EpubViewerEvent.clickUrl(element));
-          return true;
-        },
-        baseUrl: Uri(path: epubUtil.currentPath));
+    return HtmlWidget(
+      htmlDataList[index],
+      customStylesBuilder: (element) {
+        if (element.attributes['style'] == null) return null;
+        if (element.attributes['style']!.contains('opacity:0.4')) {
+          return {'color': 'lightgrey'};
+        }
+        return null;
+      },
+      buildAsync: true,
+      onTapUrl: (element) {
+        readEpubViewerBloc(context).add(EpubViewerEvent.clickUrl(element));
+        return true;
+      },
+      baseUrl: Uri(path: epubUtil.currentPath),
+    );
+  }
+
+  Widget _buildBottomPageSwitcher() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        TextButton(onPressed: previousPage, child: const Text('上一页')),
+        TextButton(onPressed: nextPage, child: const Text('下一页'))
+      ],
+    );
+  }
+
+  void nextPage() {
+    readEpubViewerBloc(context).add(const EpubViewerEvent.nextChapter());
+  }
+
+  void previousPage() {
+    readEpubViewerBloc(context).add(const EpubViewerEvent.previousChapter());
+  }
+
+  Widget _buildChapterInfo() {
+    return BlocSelector<EpubViewerBloc, EpubViewerState, int>(
+      selector: (state) {
+        return state.currentChapterIndex;
+      },
+      builder: (context, chapterIndex) {
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: _buildInfoBadge('第${chapterIndex + 1}章'),
+        );
+      },
+    );
+  }
+
+  Widget _buildChapterProgress() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: _buildInfoBadge('${(readProgress * 100).floor()}%'),
+    );
+  }
+
+  Container _buildInfoBadge(String info) {
+    return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4),
+          color: Colors.grey.withOpacity(0.5),
+        ),
+        child: Text(
+          info,
+          style: const TextStyle(color: Colors.white),
+        ));
   }
 }
