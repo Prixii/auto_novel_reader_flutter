@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:auto_novel_reader_flutter/bloc/local_file/local_file_cubit.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
-import 'package:auto_novel_reader_flutter/ui/components/reader/book_list_tile.dart';
+import 'package:auto_novel_reader_flutter/ui/components/reader/epub_book_list.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -19,10 +19,8 @@ class LocalBookView extends StatelessWidget {
           return state.epubManageDataList;
         },
         builder: (context, epubList) {
-          return ListView.builder(
-            itemBuilder: (context, index) =>
-                BookListTile(epubManageData: epubList[index]),
-            itemCount: epubList.length,
+          return EpubBookList(
+            epubList: epubList,
           );
         },
       ),
@@ -34,7 +32,7 @@ class LocalBookView extends StatelessWidget {
             onPressed: () async {
               selectEpubFile(context);
             },
-            tooltip: 'Increment',
+            tooltip: '添加书籍',
             child: const Icon(Icons.add),
           ),
         ),

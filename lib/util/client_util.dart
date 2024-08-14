@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:auto_novel_reader_flutter/bloc/epub_viewer/epub_viewer_bloc.dart';
 import 'package:auto_novel_reader_flutter/bloc/global/global_bloc.dart';
 import 'package:auto_novel_reader_flutter/bloc/local_file/local_file_cubit.dart';
@@ -25,3 +27,12 @@ EpubViewerBloc readEpubViewerBloc(BuildContext context) =>
 
 LocalFileCubit readLocalFileCubit(BuildContext context) =>
     context.read<LocalFileCubit>();
+
+Color getRandomDarkColor() {
+  final random = Random();
+  const maxValue = 128;
+  final r = random.nextInt(maxValue);
+  final g = random.nextInt(maxValue);
+  final b = random.nextInt(maxValue);
+  return Color.fromARGB(255, r, g, b);
+}

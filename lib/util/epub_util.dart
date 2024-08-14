@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:auto_novel_reader_flutter/manager/local_file_manager.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
-import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/file_util.dart';
 import 'package:epubx/epubx.dart' as epubx;
 import 'package:image/image.dart';
@@ -19,8 +18,9 @@ class _EpubUtil {
   List<epubx.EpubTextContentFile> htmlContent = [];
   List<epubx.EpubNavigationPoint> pointList = [];
   String? currentPath;
-  Map<String, List<String>> chapterResourceMap = {};
   List<epubx.EpubChapter> chapterList = [];
+  Map<String, List<String>> chapterResourceMap = {};
+
   late String uid;
 
   _EpubUtil();
@@ -29,76 +29,86 @@ class _EpubUtil {
     final bytes = await epub.readAsBytes();
     epubBook = await epubx.EpubReader.readBook(bytes);
     if (epubBook == null) return null;
-
     uid = epubBook.hashCode.toString();
+    _parseBaseInfo();
+    _parseNcx();
+    await _extractContent(uid);
+    chapterResourceMap = await _sortChapters();
+    await _extractCover(uid);
+    await _extractEpubBackup(epub, uid);
     final epubData = EpubManageData(
       path: epub.path,
       name: epubBook!.Title ?? uid,
       uid: uid,
+      chapterResourceMap: chapterResourceMap,
     );
-
-    parseBaseInfo();
-    parseNcx();
-    await extractContent(epubData.uid);
-    await sortChapters();
-    await extractCover(uid);
-    await extractEpubBackup(epub, epubData);
     return epubData;
   }
 
-  void parseBaseInfo() {
+  void _parseBaseInfo() {
     if (epubBook == null) return;
     title = epubBook!.Title ?? '';
-    authorList = epubBook!.AuthorList ?? [];
     coverImage = epubBook!.CoverImage;
+    authorList = epubBook!.AuthorList ?? [];
     chapterList = epubBook!.Chapters ?? [];
   }
 
-  void parseNcx() {
+  void _parseNcx() {
     final ncx = epubBook?.Schema?.Navigation;
     if (ncx == null) return;
 
     pointList = ncx.NavMap?.Points ?? [];
   }
 
-  Future<void> sortChapters() async {
-    var index = 0;
+  Future<Map<String, List<String>>> _sortChapters() async {
     var htmlNameList = <String>[];
     var currentChapterName = '';
-    for (final navPoint in pointList) {
+    var chapterMap = <String, List<String>>{};
+    var addFirstChapter = false;
+    // 处理第一章
+    if (htmlContent.isNotEmpty) {
+      if (htmlContent[0].FileName != pointList[0].sourceName) {
+        chapterList.insert(0, epubx.EpubChapter());
+        addFirstChapter = true;
+      }
+    }
+    int htmlIndex = 0;
+    for (var i = 0; i < pointList.length; i++) {
+      final navPoint = pointList[i];
+      final sourceName = navPoint.sourceName;
       while (true) {
-        if (index >= htmlContent.length) {
-          currentChapterName = navPoint.hashCode.toString();
-          chapterResourceMap[currentChapterName] = htmlNameList;
-          htmlNameList = [];
-          break;
-        }
-        final htmlName = htmlContent[index].FileName;
-        if (navPoint.sourceName == htmlName) {
-          currentChapterName = navPoint.hashCode.toString();
-          chapterResourceMap[currentChapterName] = htmlNameList;
-          htmlNameList = [];
+        final htmlName = htmlContent[htmlIndex].FileName;
+        if (sourceName == htmlName) {
+          if (currentChapterName == '') {
+            currentChapterName = 'Chapter${i + 1}';
+          }
+          if (htmlNameList.isNotEmpty) {
+            chapterMap[currentChapterName] = htmlNameList;
+            htmlNameList = [htmlName ?? ''];
+          }
+          currentChapterName =
+              chapterList[i + (addFirstChapter ? 1 : 0)].Title ?? '';
+          htmlIndex++;
           break;
         } else {
           htmlNameList.add(htmlName ?? '');
-          index++;
         }
+        htmlIndex++;
       }
     }
+    currentChapterName = chapterList.last.Title ?? '';
+    chapterMap[currentChapterName] = htmlNameList;
+    htmlNameList = [];
+    return chapterMap;
   }
 
-  void parseChapterList() {
-    final chapters = epubBook?.Chapters;
-    if (chapters == null) return;
-  }
-
-  Future<void> extractContent(String uid) async {
+  Future<void> _extractContent(String uid) async {
     final content = epubBook?.Content;
     if (content == null) return;
 
     htmlContent = content.Html?.values.toList() ?? [];
 
-    final path = '$basePath/$uid';
+    final path = getPathByUid(uid);
     currentPath = path;
     final parseDir = Directory(path);
     if (parseDir.existsSync()) return;
@@ -144,25 +154,51 @@ class _EpubUtil {
     return chapterResourceMap[pointList[index].hashCode.toString()] ?? [];
   }
 
-  Future<void> extractCover(String uid) async {
-    if (coverImage == null) return;
+  Future<void> _extractCover(String uid) async {
     final path = '$basePath/cover/$uid';
-    try {
-      final file = File(path);
-      file.createSync(recursive: true);
-      await file.writeAsBytes(encodePng(coverImage!));
-    } catch (e) {
-      print('Error writing to file: $e');
+    final file = File(path);
+    file.createSync(recursive: true);
+    if (coverImage == null) {
+      final firstImageFile = epubBook?.Content?.Images?.values.toList().first;
+      if (firstImageFile == null) return;
+      await file.writeAsBytes(firstImageFile.Content ?? []);
+      return;
+    } else {
+      try {
+        await file.writeAsBytes(encodePng(coverImage!));
+      } catch (e) {
+        print('Error writing to file: $e');
+      }
     }
   }
 
-  Future<void> extractEpubBackup(File epub, EpubManageData epubData) async {
-    final path = '$basePath/backup/${epubData.uid}';
+  Future<void> _extractEpubBackup(File epub, String uid) async {
+    final path = '$basePath/backup/$uid';
     final backup = File(path);
     backup.createSync(recursive: true);
     await backup.writeAsBytes(epub.readAsBytesSync());
     return;
   }
+
+  Future<void> deleteEpubBook(EpubManageData epubData) async {
+    final coverFile = '$basePath/cover/${epubData.uid}';
+    final cover = File(coverFile);
+    if (cover.existsSync()) {
+      cover.deleteSync();
+    }
+    final backupFile = '$basePath/backup/${epubData.uid}';
+    final backup = File(backupFile);
+    if (backup.existsSync()) {
+      backup.deleteSync();
+    }
+    final path3 = '$basePath/${epubData.uid}';
+    final parseDir = Directory(path3);
+    if (parseDir.existsSync()) {
+      parseDir.deleteSync(recursive: true);
+    }
+  }
+
+  String getPathByUid(String uid) => '$basePath/$uid';
 }
 
 extension EpubNavigationPointExt on epubx.EpubNavigationPoint {

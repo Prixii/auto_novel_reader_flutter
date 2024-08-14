@@ -1,9 +1,7 @@
 import 'dart:io';
 
-import 'package:auto_novel_reader_flutter/bloc/epub_viewer/epub_viewer_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/local_file_manager.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
-import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/epub_util.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
@@ -33,10 +31,7 @@ class LocalFileCubit extends Cubit<LocalFileState> {
 
     emit(state.copyWith(
         epubManageDataList: [epubManageData, ...state.epubManageDataList]));
-    if (context.mounted) {
-      readEpubViewerBloc(context)
-          .add(EpubViewerEvent.open(file, epubManageData, context));
-    }
+    if (context.mounted) {}
   }
 
   updateEpubManageData(EpubManageData newData) {
@@ -45,5 +40,14 @@ class LocalFileCubit extends Cubit<LocalFileState> {
     dataListSnapshot = [newData, ...dataListSnapshot];
     emit(state.copyWith(epubManageDataList: dataListSnapshot));
     localFileManager.updateEpubManageData(dataListSnapshot);
+  }
+
+  deleteEpubBook(EpubManageData epubManageData) {
+    var dataListSnapshot = [...state.epubManageDataList];
+    dataListSnapshot
+        .removeWhere((element) => element.uid == epubManageData.uid);
+    emit(state.copyWith(epubManageDataList: dataListSnapshot));
+    localFileManager.updateEpubManageData(dataListSnapshot);
+    epubUtil.deleteEpubBook(epubManageData);
   }
 }

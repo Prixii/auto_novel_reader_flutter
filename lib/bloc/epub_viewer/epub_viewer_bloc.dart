@@ -32,22 +32,17 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
 
   _onOpen(_Open event, Emitter<EpubViewerState> emit) async {
     final data = event.epubManageData;
-    await epubUtil.parseEpub(event.epub);
-
-    var chapterTitleList =
-        epubUtil.chapterList.map((e) => e.Title ?? '').toList();
-
     emit(state.copyWith(
       epubManageData: data,
-      chapterTitleList: chapterTitleList,
+      chapterResourceMap: data.chapterResourceMap ?? {},
     ));
     if (event.context.mounted) {
       Navigator.of(event.context).push(
           MaterialPageRoute(builder: (context) => const EpubReaderView()));
     }
     add(EpubViewerEvent.switchChapter(
-      data.chapter,
-      data.progress,
+      data.chapter ?? 0,
+      data.progress ?? 0,
     ));
   }
 
@@ -88,7 +83,7 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
     emit(state.copyWith(scrollController: event.controller));
     state.scrollController!.jumpTo(
         state.scrollController!.position.maxScrollExtent *
-            state.epubManageData!.progress);
+            (state.epubManageData!.progress ?? 0));
   }
 
   _onSwitchChapter(_SwitchChapter event, Emitter<EpubViewerState> emit) async {
@@ -106,11 +101,12 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
   }
 
   Stream<List<String>> _loadHTMLFile(int chapterIndex) async* {
-    final currentPath = epubUtil.currentPath;
-    final pointList = epubUtil.pointList;
-    if (currentPath == null || pointList.length < chapterIndex) return;
+    final currentPath = epubUtil.getPathByUid(state.epubManageData!.uid ?? '');
+    final chapterResourceEntries =
+        state.epubManageData!.chapterResourceMap!.entries.toList();
+    if (chapterResourceEntries.length < chapterIndex) return;
 
-    final resourceList = epubUtil.getChapterContentNameByIndex(chapterIndex);
+    final resourceList = chapterResourceEntries[chapterIndex].value;
 
     for (var htmlFileName in resourceList) {
       final rawHtml = await File('$currentPath/$htmlFileName').readAsString();

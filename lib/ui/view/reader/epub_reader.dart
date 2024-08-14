@@ -30,8 +30,6 @@ class _EpubReaderViewState extends State<EpubReaderView> {
           child: ChapterList(),
         ),
         // Show epub document
-        body: (epubUtil.currentPath == null)
-            ? const Text('no data!')
-            : const EpubWebview());
+        body: const EpubWebview());
   }
 }

@@ -13,6 +13,7 @@ dependencies:
   epubx: ^4.0.0
   image: ^3.3.0
   # html
+  html: ^0.15.4
   flutter_widget_from_html: ^0.15.1
   # 文件选择
   path_provider: ^2.1.4
@@ -42,7 +43,6 @@ dependencies:
   # 持久化
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-  html: ^0.15.4
 
 dev_dependencies:
   flutter_test:

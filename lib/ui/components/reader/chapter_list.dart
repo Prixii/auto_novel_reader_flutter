@@ -27,22 +27,25 @@ class ChapterList extends StatelessWidget {
   }
 
   Widget _buildListBody() {
-    return BlocSelector<EpubViewerBloc, EpubViewerState, List<String>>(
+    return BlocSelector<EpubViewerBloc, EpubViewerState,
+        Map<String, List<String>>>(
       selector: (state) {
-        return state.chapterTitleList;
+        return state.chapterResourceMap;
       },
-      builder: (context, chapterTitleList) {
+      builder: (context, chapterResourceMap) {
+        final entries = chapterResourceMap.entries.toList();
         return ListView.builder(
           padding: const EdgeInsets.all(0),
           shrinkWrap: true,
           itemBuilder: (context, index) {
-            final chapterTitle = chapterTitleList[index];
+            final chapterEntry = entries[index];
             return ChapterListTile(
-              title: chapterTitle == '' ? '章节${index + 1}' : chapterTitle,
+              title:
+                  chapterEntry.key == '' ? '章节${index + 1}' : chapterEntry.key,
               index: index,
             );
           },
-          itemCount: chapterTitleList.length,
+          itemCount: entries.length,
         );
       },
     );

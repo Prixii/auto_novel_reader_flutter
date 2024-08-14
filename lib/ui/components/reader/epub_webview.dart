@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 
+const standardSwitchPageVelocity = 100.0;
+
 class EpubWebview extends StatefulWidget {
   const EpubWebview({super.key});
 
@@ -74,9 +76,10 @@ class _EpubWebviewState extends State<EpubWebview> {
   Widget _buildReaderBody(List<String> htmlDataList) {
     return GestureDetector(
       onHorizontalDragEnd: (detail) {
-        if (detail.velocity.pixelsPerSecond.dx < 0) {
+        if (detail.velocity.pixelsPerSecond.dx < -standardSwitchPageVelocity) {
           nextPage();
-        } else {
+        } else if (detail.velocity.pixelsPerSecond.dx >
+            standardSwitchPageVelocity) {
           previousPage();
         }
       },
