@@ -1,3 +1,4 @@
+import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 
 const htmlUtil = _HtmlUtil();
@@ -5,7 +6,7 @@ const htmlUtil = _HtmlUtil();
 class _HtmlUtil {
   const _HtmlUtil();
 
-  final maxLength = 500;
+  final maxLength = 2000;
 
   List<String> pretreatHtml(String html, String url) {
     var htmlPartList = <String>[];
@@ -50,11 +51,42 @@ class _HtmlUtil {
     return paragraphList;
   }
 
+  // TODO
+  List<String> elementExtractor(String htmlData) {
+    final document = parse(htmlData);
+    final elements = document.body?.nodes ?? [];
+    final effectiveElementList = <String>[];
+    final tagsAllowed = [
+      'p',
+      'h1',
+      'h2',
+      'h3',
+      'h4',
+      'h5',
+      'h6',
+      'div',
+      'img',
+      'svg',
+      'image',
+    ];
+    for (var element in elements) {
+      if (element is! Element) continue;
+      if (!tagsAllowed.contains(element.localName)) continue;
+      if (element.localName == 'div') {
+        effectiveElementList.addAll(paragraphExtractor(element.innerHtml));
+      } else {
+        effectiveElementList.add(element.outerHtml);
+      }
+    }
+    return effectiveElementList;
+  }
+
   List<String> combineParagraph(List<String> paragraphList) {
     final combinedList = <String>[];
     var tempCombinedPara = '';
     for (var paragraph in paragraphList) {
-      if (tempCombinedPara.length + paragraph.length > maxLength) {
+      if (tempCombinedPara.length + paragraph.length > maxLength &&
+          tempCombinedPara != '') {
         combinedList.add(tempCombinedPara);
         tempCombinedPara = '';
       }

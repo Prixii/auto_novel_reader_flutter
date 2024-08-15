@@ -108,10 +108,16 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
 
     final resourceList = chapterResourceEntries[chapterIndex].value;
 
+    final uid = state.epubManageData!.uid;
+    if (uid == null) {
+      talker.error('bad epubManageData: ${state.epubManageData}');
+      throw Exception('bad epubManageData');
+    }
+    final path = epubUtil.getPathByUid(uid);
     for (var htmlFileName in resourceList) {
       final rawHtml = await File('$currentPath/$htmlFileName').readAsString();
 
-      yield htmlUtil.pretreatHtml(rawHtml, epubUtil.currentPath ?? '');
+      yield htmlUtil.pretreatHtml(rawHtml, path);
     }
   }
 }

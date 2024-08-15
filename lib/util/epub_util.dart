@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:auto_novel_reader_flutter/manager/local_file_manager.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
+import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/file_util.dart';
 import 'package:epubx/epubx.dart' as epubx;
 import 'package:image/image.dart';
@@ -26,12 +27,17 @@ class _EpubUtil {
   _EpubUtil();
 
   Future<EpubManageData?> parseEpub(File epub) async {
+    localFileCubit.updateProgress(message: '读取 epub 文件...');
     final bytes = await epub.readAsBytes();
     epubBook = await epubx.EpubReader.readBook(bytes);
     if (epubBook == null) return null;
     uid = epubBook.hashCode.toString();
+
+    localFileCubit.updateProgress(progress: 33, message: '解析 epub 结构...');
     _parseBaseInfo();
     _parseNcx();
+
+    localFileCubit.updateProgress(progress: 66, message: '提取内容...');
     await _extractContent(uid);
     chapterResourceMap = await _sortChapters();
     await _extractCover(uid);
@@ -42,6 +48,8 @@ class _EpubUtil {
       uid: uid,
       chapterResourceMap: chapterResourceMap,
     );
+
+    localFileCubit.updateProgress(progress: 100, message: '解析完成');
     return epubData;
   }
 
@@ -77,6 +85,7 @@ class _EpubUtil {
       final navPoint = pointList[i];
       final sourceName = navPoint.sourceName;
       while (true) {
+        if (htmlIndex >= htmlContent.length) break;
         final htmlName = htmlContent[htmlIndex].FileName;
         if (sourceName == htmlName) {
           if (currentChapterName == '') {
@@ -96,7 +105,14 @@ class _EpubUtil {
         htmlIndex++;
       }
     }
-    currentChapterName = chapterList.last.Title ?? '';
+    if (htmlIndex < htmlContent.length) {
+      htmlNameList.addAll(htmlContent
+          .getRange(htmlIndex, htmlContent.length)
+          .map((e) => e.FileName ?? '')
+          .toList());
+    }
+    currentChapterName =
+        chapterList.last.Title ?? 'Chapter${chapterList.length + 1}';
     chapterMap[currentChapterName] = htmlNameList;
     htmlNameList = [];
     return chapterMap;

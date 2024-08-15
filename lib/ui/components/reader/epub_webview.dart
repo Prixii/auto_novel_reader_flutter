@@ -103,19 +103,36 @@ class _EpubWebviewState extends State<EpubWebview> {
     return HtmlWidget(
       htmlDataList[index],
       customStylesBuilder: (element) {
+        talker.debug('element: ${element.attributes['style']}');
         if (element.attributes['style'] == null) return null;
-        if (element.attributes['style']!.contains('opacity:0.4')) {
-          return {'color': 'lightgrey'};
-        }
-        return null;
+        return _buildStylesMap(element.attributes['style'] ?? '');
       },
       buildAsync: false,
+      onErrorBuilder: (_, element, error) {
+        return Text('element: ${element.outerHtml}\n error: $error');
+      },
       onTapUrl: (element) {
         readEpubViewerBloc(context).add(EpubViewerEvent.clickUrl(element));
         return true;
       },
       baseUrl: Uri(path: epubUtil.currentPath),
     );
+  }
+
+  Map<String, String> _buildStylesMap(String style) {
+    final styles = style.split(RegExp(r';|:'));
+    var stylesMap = <String, String>{};
+    for (int i = 0; i < styles.length; i += 2) {
+      final key = styles[i].trim();
+      if (key == '') continue;
+      final value = styles[i + 1].trim();
+      stylesMap[key] = value;
+    }
+    if (stylesMap.containsKey('opacity')) {
+      stylesMap['color'] = 'lightgrey';
+    }
+    debugPrint('stylesMap: $stylesMap');
+    return stylesMap;
   }
 
   Widget _buildBottomPageSwitcher() {

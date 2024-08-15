@@ -50,4 +50,12 @@ class LocalFileCubit extends Cubit<LocalFileState> {
     localFileManager.updateEpubManageData(dataListSnapshot);
     epubUtil.deleteEpubBook(epubManageData);
   }
+
+  updateProgress({int? progress, String? message}) {
+    emit(state.copyWith(
+      message: message ?? '',
+      progress: progress ?? 0,
+      loading: progress == 100,
+    ));
+  }
 }
