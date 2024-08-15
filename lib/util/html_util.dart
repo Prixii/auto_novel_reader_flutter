@@ -11,8 +11,8 @@ class _HtmlUtil {
   List<String> pretreatHtml(String html, String url) {
     var htmlPartList = <String>[];
     var rawHtml = html;
-    final paragraphList = paragraphExtractor(rawHtml);
-    final combinedParagraph = combineParagraph(paragraphList);
+    final elementList = elementExtractor(rawHtml);
+    final combinedParagraph = combineParagraph(elementList);
 
     for (var paragraph in combinedParagraph) {
       final redirectedParagraph = redirectSource(paragraph, url);
@@ -40,7 +40,7 @@ class _HtmlUtil {
     return html.substring(0, startIndex) + html.substring(endIndex);
   }
 
-  /// 获取所有段落
+  @Deprecated('use paragraphExtractor instead')
   List<String> paragraphExtractor(String htmlData) {
     final document = parse(htmlData);
     final paragraphElements = document.querySelectorAll('p');
@@ -51,7 +51,6 @@ class _HtmlUtil {
     return paragraphList;
   }
 
-  // TODO
   List<String> elementExtractor(String htmlData) {
     final document = parse(htmlData);
     final elements = document.body?.nodes ?? [];
@@ -73,7 +72,7 @@ class _HtmlUtil {
       if (element is! Element) continue;
       if (!tagsAllowed.contains(element.localName)) continue;
       if (element.localName == 'div') {
-        effectiveElementList.addAll(paragraphExtractor(element.innerHtml));
+        effectiveElementList.addAll(elementExtractor(element.innerHtml));
       } else {
         effectiveElementList.add(element.outerHtml);
       }
