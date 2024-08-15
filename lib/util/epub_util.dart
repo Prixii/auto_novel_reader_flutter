@@ -5,6 +5,7 @@ import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/file_util.dart';
 import 'package:epubx/epubx.dart' as epubx;
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image/image.dart';
 
 final epubUtil = _EpubUtil();
@@ -27,30 +28,34 @@ class _EpubUtil {
   _EpubUtil();
 
   Future<EpubManageData?> parseEpub(File epub) async {
-    localFileCubit.updateProgress(message: '读取 epub 文件...');
-    final bytes = await epub.readAsBytes();
-    epubBook = await epubx.EpubReader.readBook(bytes);
-    if (epubBook == null) return null;
-    uid = epubBook.hashCode.toString();
+    try {
+      localFileCubit.updateProgress(message: '读取 epub 文件...');
+      final bytes = await epub.readAsBytes();
+      epubBook = await epubx.EpubReader.readBook(bytes);
+      if (epubBook == null) return null;
+      uid = epubBook.hashCode.toString();
 
-    localFileCubit.updateProgress(progress: 33, message: '解析 epub 结构...');
-    _parseBaseInfo();
-    _parseNcx();
+      localFileCubit.updateProgress(progress: 33, message: '解析 epub 结构...');
+      _parseBaseInfo();
+      _parseNcx();
 
-    localFileCubit.updateProgress(progress: 66, message: '提取内容...');
-    await _extractContent(uid);
-    chapterResourceMap = await _sortChapters();
-    await _extractCover(uid);
-    await _extractEpubBackup(epub, uid);
-    final epubData = EpubManageData(
-      path: epub.path,
-      name: epubBook!.Title ?? uid,
-      uid: uid,
-      chapterResourceMap: chapterResourceMap,
-    );
+      localFileCubit.updateProgress(progress: 66, message: '提取内容...');
+      await _extractContent(uid);
+      chapterResourceMap = await _sortChapters();
+      await _extractCover(uid);
+      await _extractEpubBackup(epub, uid);
+      final epubData = EpubManageData(
+        path: epub.path,
+        name: epubBook!.Title ?? uid,
+        uid: uid,
+        chapterResourceMap: chapterResourceMap,
+      );
 
-    localFileCubit.updateProgress(progress: 100, message: '解析完成');
-    return epubData;
+      localFileCubit.updateProgress(progress: 100, message: '解析完成');
+      return epubData;
+    } catch (e) {
+      throw Exception(e);
+    }
   }
 
   void _parseBaseInfo() {

@@ -5,6 +5,7 @@ import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/util/epub_util.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'local_file_state.dart';
@@ -25,13 +26,23 @@ class LocalFileCubit extends Cubit<LocalFileState> {
     required File file,
     required BuildContext context,
   }) async {
-    final epubManageData = await epubUtil.parseEpub(file);
-    if (epubManageData == null) return;
-    localFileManager.addEpub(epubManageData);
+    try {
+      final epubManageData = await epubUtil.parseEpub(file);
+      if (epubManageData == null) return;
+      localFileManager.addEpub(epubManageData);
 
-    emit(state.copyWith(
-        epubManageDataList: [epubManageData, ...state.epubManageDataList]));
-    if (context.mounted) {}
+      emit(state.copyWith(
+          epubManageDataList: [epubManageData, ...state.epubManageDataList]));
+    } catch (e) {
+      if (context.mounted) {
+        Fluttertoast.showToast(
+            msg: e.toString(),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            textColor: Theme.of(context).colorScheme.onError);
+      }
+
+      throw Exception(e);
+    }
   }
 
   updateEpubManageData(EpubManageData newData) {
