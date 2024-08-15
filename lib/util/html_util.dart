@@ -1,12 +1,26 @@
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 
-const htmlUtil = _HtmlUtil();
+final htmlUtil = _HtmlUtil();
 
 class _HtmlUtil {
-  const _HtmlUtil();
+  _HtmlUtil();
 
-  final maxLength = 2000;
+  final maxLength = 1000;
+  final tagsAllowed = <String>[
+    'p',
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
+    'div',
+    'img',
+    'svg',
+    'image'
+  ];
+  final tagsShouldExtract = <String>['div', 'svg'];
 
   List<String> pretreatHtml(String html, String url) {
     var htmlPartList = <String>[];
@@ -54,25 +68,10 @@ class _HtmlUtil {
     final document = parse(htmlData);
     final elements = document.body?.nodes ?? [];
     final effectiveElementList = <String>[];
-    final tagsAllowed = [
-      'p',
-      'h1',
-      'h2',
-      'h3',
-      'h4',
-      'h5',
-      'h6',
-      'div',
-      'img',
-      'svg',
-      'image',
-    ];
     for (var element in elements) {
       if (element is! Element) continue;
       if (!tagsAllowed.contains(element.localName)) continue;
-      if (element.localName == 'div') {
-        effectiveElementList.addAll(elementExtractor(element.innerHtml));
-      } else if (element.localName == 'svg') {
+      if (tagsShouldExtract.contains(element.localName)) {
         effectiveElementList.addAll(elementExtractor(element.innerHtml));
       } else {
         effectiveElementList.add(element.outerHtml);

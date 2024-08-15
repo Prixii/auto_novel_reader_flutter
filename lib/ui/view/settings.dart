@@ -11,25 +11,46 @@ class SettingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildHelloPageSetter(prefs.getInt('helloPage') ?? 1),
-            _buildDivider(theme),
-            _buildInfoIcons(),
-            _buildDivider(theme),
-            IconOption(
-              icon: UniconsLine.signout,
-              text: '登出',
-              color: theme.colorScheme.error,
-              onTap: () => tryLogout(context),
-            ),
-          ],
+    return Container(
+      height: double.infinity,
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: Image.asset('assets/test.jpg').image,
+          fit: BoxFit.cover,
         ),
       ),
+      child: Scaffold(
+        backgroundColor:
+            Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5),
+        appBar: AppBar(
+          title: const Text('设置'),
+          shadowColor: Theme.of(context).colorScheme.shadow,
+          backgroundColor:
+              Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.5),
+        ),
+        body: SingleChildScrollView(
+          child: _buildOptions(theme, context),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOptions(ThemeData theme, BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildHelloPageSetter(prefs.getInt('helloPage') ?? 1),
+        _buildDivider(theme),
+        _buildInfoIcons(),
+        _buildDivider(theme),
+        IconOption(
+          icon: UniconsLine.signout,
+          text: '登出',
+          color: theme.colorScheme.error,
+          onTap: () => tryLogout(context),
+        ),
+      ],
     );
   }
 
@@ -72,7 +93,7 @@ class SettingsView extends StatelessWidget {
         ),
         IconOption(
           padding: EdgeInsets.fromLTRB(32, 10, 0, 10),
-          icon: UniconsLine.building,
+          icon: UniconsLine.question_circle,
           text: '关于',
         ),
       ],
