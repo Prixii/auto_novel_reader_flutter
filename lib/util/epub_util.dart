@@ -5,7 +5,6 @@ import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/file_util.dart';
 import 'package:epubx/epubx.dart' as epubx;
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image/image.dart';
 
 final epubUtil = _EpubUtil();

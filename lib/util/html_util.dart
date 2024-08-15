@@ -16,7 +16,8 @@ class _HtmlUtil {
 
     for (var paragraph in combinedParagraph) {
       final redirectedParagraph = redirectSource(paragraph, url);
-      htmlPartList.add(redirectedParagraph);
+      final convertedParagraph = convertXlinkToSrc(redirectedParagraph);
+      htmlPartList.add(convertedParagraph);
     }
 
     return htmlPartList;
@@ -29,18 +30,16 @@ class _HtmlUtil {
         .replaceAll('../', '');
   }
 
-  @Deprecated('use paragraphExtractor instead')
-  String removeHeadSection(String html) {
-    int startIndex = html.indexOf('<head>');
-    if (startIndex == -1) return html;
-
-    int endIndex = html.indexOf('</head>') + '</head>'.length;
-    if (endIndex == -1) return html;
-
-    return html.substring(0, startIndex) + html.substring(endIndex);
+  String convertXlinkToSrc(String html) {
+    final RegExp regex = RegExp(r'<img\s+([^>]*)xlink:href="([^"]*)"');
+    return html.replaceAllMapped(regex, (match) {
+      final attributes = match.group(1)!;
+      final href = match.group(2)!;
+      return '<img $attributes src="$href"';
+    });
   }
 
-  @Deprecated('use paragraphExtractor instead')
+  @Deprecated('use elementExtractor instead')
   List<String> paragraphExtractor(String htmlData) {
     final document = parse(htmlData);
     final paragraphElements = document.querySelectorAll('p');
@@ -72,6 +71,8 @@ class _HtmlUtil {
       if (element is! Element) continue;
       if (!tagsAllowed.contains(element.localName)) continue;
       if (element.localName == 'div') {
+        effectiveElementList.addAll(elementExtractor(element.innerHtml));
+      } else if (element.localName == 'svg') {
         effectiveElementList.addAll(elementExtractor(element.innerHtml));
       } else {
         effectiveElementList.add(element.outerHtml);

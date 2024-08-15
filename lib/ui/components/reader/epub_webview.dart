@@ -102,8 +102,8 @@ class _EpubWebviewState extends State<EpubWebview> {
       List<String> htmlDataList, int index, BuildContext context) {
     return HtmlWidget(
       htmlDataList[index],
+      // htmlDataList[index],
       customStylesBuilder: (element) {
-        talker.debug('element: ${element.attributes['style']}');
         if (element.attributes['style'] == null) return null;
         return _buildStylesMap(element.attributes['style'] ?? '');
       },
@@ -124,13 +124,16 @@ class _EpubWebviewState extends State<EpubWebview> {
     var stylesMap = <String, String>{};
     for (int i = 0; i < styles.length; i += 2) {
       final key = styles[i].trim();
-      if (key == '') continue;
       final value = styles[i + 1].trim();
+      if (key == '' || value == '') continue;
       stylesMap[key] = value;
     }
     if (stylesMap.containsKey('opacity')) {
       stylesMap['color'] = 'lightgrey';
     }
+    stylesMap.removeWhere((key, value) {
+      return (key == 'width' || key == 'height');
+    });
     debugPrint('stylesMap: $stylesMap');
     return stylesMap;
   }
