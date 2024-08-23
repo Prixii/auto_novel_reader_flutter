@@ -4,6 +4,7 @@ import 'package:auto_novel_reader_flutter/bloc/epub_viewer/epub_viewer_bloc.dart
 import 'package:auto_novel_reader_flutter/manager/local_file_manager.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/ui/components/reader/plain_text_book_cover.dart';
+import 'package:auto_novel_reader_flutter/ui/components/universal/line_button.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
 import 'package:unicons/unicons.dart';
@@ -136,13 +137,28 @@ class _BookListTileState extends State<BookListTile> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         _buildReadProgressInfo(),
-        IconButton(
-          icon: const Icon(UniconsLine.trash_alt),
-          onPressed: () async {
-            _askToDelete(context, context);
-          },
-          color: Theme.of(context).colorScheme.error,
-        )
+        PopupMenuButton(
+          icon: const Icon(UniconsLine.ellipsis_v),
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              child: const Text('编辑信息'),
+              onTap: () async {
+                _showInfoEditor(context);
+              },
+            ),
+            PopupMenuItem(
+              child: Text(
+                '删除',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              ),
+              onTap: () async {
+                _askToDelete(context);
+              },
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -161,23 +177,27 @@ class _BookListTileState extends State<BookListTile> {
     );
   }
 
-  Future<void> _askToDelete(
-      BuildContext context, BuildContext widgetContext) async {
+  Future<void> _askToDelete(BuildContext widgetContext) async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('您确定要删除此书籍吗?'),
+          title: const Text('确定删除书籍?'),
           content: const Text('阅读进度将会丢失'),
           actions: [
             TextButton(
-              child: const Text('取消'),
+              child: const Text('算了吧'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: const Text('确定'),
+              child: Text(
+                '删！',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              ),
               onPressed: () {
                 if (widgetContext.mounted) {
                   readLocalFileCubit(widgetContext)
@@ -191,4 +211,70 @@ class _BookListTileState extends State<BookListTile> {
       },
     );
   }
+
+  void _showInfoEditor(BuildContext widgetContext) {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      context: context,
+      constraints: BoxConstraints(
+        minWidth: screenSize.width,
+        maxHeight: screenSize.height * 0.8,
+      ),
+      enableDrag: true,
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(12.0),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(12),
+              topRight: Radius.circular(12),
+            ),
+          ),
+          clipBehavior: Clip.hardEdge,
+          child: Column(
+            children: [
+              SizedBox(
+                height: 198,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: _buildCover(),
+                ),
+              ),
+              const SizedBox(height: 12.0),
+              Text(
+                widget.epubManageData.name?.trim() ?? '',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              ..._buildEditOption(),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  List<Widget> _buildEditOption() => [
+        LineButton(
+          text: '设置封面（从书籍图片中选择）',
+          onPressed: () {
+            Navigator.of(context).pop();
+            // TODO
+          },
+        ),
+        LineButton(
+          text: '设置封面（从内部存储）',
+          onPressed: () {
+            Navigator.of(context).pop();
+            // TODO
+          },
+        ),
+        LineButton(
+          text: '修改标题',
+          onPressed: () {
+            Navigator.of(context).pop();
+            // TODO
+          },
+        ),
+      ];
 }

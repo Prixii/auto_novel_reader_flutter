@@ -1,7 +1,6 @@
 import 'package:auto_novel_reader_flutter/bloc/epub_viewer/epub_viewer_bloc.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/info_badge.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
-import 'package:auto_novel_reader_flutter/util/epub_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
@@ -84,7 +83,7 @@ class _EpubWebviewState extends State<EpubWebview> {
         }
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 32),
+        padding: const EdgeInsets.symmetric(horizontal: 32),
         child: ListView.builder(
             controller: _scrollController,
             shrinkWrap: true,
@@ -114,7 +113,6 @@ class _EpubWebviewState extends State<EpubWebview> {
         readEpubViewerBloc(context).add(EpubViewerEvent.clickUrl(element));
         return true;
       },
-      baseUrl: Uri(path: epubUtil.currentPath),
     );
   }
 
@@ -130,7 +128,6 @@ class _EpubWebviewState extends State<EpubWebview> {
     if (stylesMap.containsKey('opacity')) {
       stylesMap['color'] = 'lightgrey';
     }
-    debugPrint('stylesMap: $stylesMap');
     return stylesMap;
   }
 

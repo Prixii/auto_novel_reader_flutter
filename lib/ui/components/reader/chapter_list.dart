@@ -20,7 +20,8 @@ class ChapterList extends StatelessWidget {
           ),
           const SizedBox(height: 8.0),
           const Divider(),
-          _buildListBody(),
+          Expanded(child: _buildListBody()),
+          const SizedBox(height: 12.0),
         ],
       ),
     );

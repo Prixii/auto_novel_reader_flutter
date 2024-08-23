@@ -19,6 +19,9 @@ class LocalBookView extends StatelessWidget {
           return state.epubManageDataList;
         },
         builder: (context, epubList) {
+          if (epubList.isEmpty) {
+            return const Center(child: Text('没有书籍哦~'));
+          }
           return EpubBookList(
             epubList: epubList,
           );

@@ -1,6 +1,6 @@
 import 'package:auto_novel_reader_flutter/ui/components/reader/chapter_list.dart';
 import 'package:auto_novel_reader_flutter/ui/components/reader/epub_webview.dart';
-import 'package:auto_novel_reader_flutter/util/epub_util.dart';
+import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
 
 class EpubReaderView extends StatefulWidget {
@@ -18,9 +18,11 @@ class _EpubReaderViewState extends State<EpubReaderView> {
 
   @override
   Widget build(BuildContext context) {
+    final title =
+        readEpubViewerBloc(context).state.epubManageData?.name?.trim();
     return Scaffold(
         appBar: AppBar(
-          title: Text(epubUtil.title.trimLeft()),
+          title: Text(title ?? ''),
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           shadowColor: Theme.of(context).appBarTheme.shadowColor,
         ),
