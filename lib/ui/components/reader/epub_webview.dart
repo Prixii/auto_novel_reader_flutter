@@ -77,10 +77,10 @@ class _EpubWebviewState extends State<EpubWebview> {
     return GestureDetector(
       onHorizontalDragEnd: (detail) {
         if (detail.velocity.pixelsPerSecond.dx < -standardSwitchPageVelocity) {
-          nextPage();
+          if (readConfigCubit(context).state.slideShift) nextPage();
         } else if (detail.velocity.pixelsPerSecond.dx >
             standardSwitchPageVelocity) {
-          previousPage();
+          if (readConfigCubit(context).state.slideShift) previousPage();
         }
       },
       child: Padding(
@@ -102,7 +102,6 @@ class _EpubWebviewState extends State<EpubWebview> {
       List<String> htmlDataList, int index, BuildContext context) {
     return HtmlWidget(
       htmlDataList[index],
-      // htmlDataList[index],
       customStylesBuilder: (element) {
         if (element.attributes['style'] == null) return null;
         return _buildStylesMap(element.attributes['style'] ?? '');
@@ -124,16 +123,13 @@ class _EpubWebviewState extends State<EpubWebview> {
     var stylesMap = <String, String>{};
     for (int i = 0; i < styles.length; i += 2) {
       final key = styles[i].trim();
+      if (key == '') continue;
       final value = styles[i + 1].trim();
-      if (key == '' || value == '') continue;
       stylesMap[key] = value;
     }
     if (stylesMap.containsKey('opacity')) {
       stylesMap['color'] = 'lightgrey';
     }
-    stylesMap.removeWhere((key, value) {
-      return (key == 'width' || key == 'height');
-    });
     debugPrint('stylesMap: $stylesMap');
     return stylesMap;
   }

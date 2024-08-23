@@ -1,7 +1,7 @@
 name: auto_novel_reader_flutter
 description: "A new Flutter project."
 publish_to: 'none'
-version: 0.1.0
+version: 0.0.1
 
 environment:
   sdk: '>=3.4.3 <4.0.0'
@@ -43,6 +43,7 @@ dependencies:
   # 持久化
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  hydrated_bloc: ^9.1.5
 
 dev_dependencies:
   flutter_test:

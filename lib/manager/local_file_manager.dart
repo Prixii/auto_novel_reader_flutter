@@ -27,6 +27,7 @@ class _LocalFileManager {
     await getDirectory();
     await Future.wait([
       initEpubDownloadDir(),
+      // TODO 替换成 hydrated_bloc 实现
       Hive.initFlutter().then((_) async {
         Hive.registerAdapter<EpubManageData>(EpubManageDataImplAdapter());
         epubManagerBox = await Hive.openBox('epubBox');

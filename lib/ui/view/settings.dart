@@ -1,4 +1,5 @@
 import 'package:auto_novel_reader_flutter/ui/components/universal/icon_option.dart';
+import 'package:auto_novel_reader_flutter/ui/components/universal/switch_option.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/tab_option.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
@@ -41,6 +42,8 @@ class SettingsView extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         _buildHelloPageSetter(prefs.getInt('helloPage') ?? 1),
+        _buildDivider(theme),
+        _buildSlideShiftOption(context),
         _buildDivider(theme),
         _buildInfoIcons(),
         _buildDivider(theme),
@@ -113,5 +116,15 @@ class SettingsView extends StatelessWidget {
           '阅读',
           '设置',
         ]);
+  }
+
+  Widget _buildSlideShiftOption(BuildContext context) {
+    return SwitchOption(
+      label: '横向滑动切换章节',
+      value: readConfigCubit(context).state.slideShift,
+      onChanged: (value) => {
+        readConfigCubit(context).setSlideShift(value),
+      },
+    );
   }
 }

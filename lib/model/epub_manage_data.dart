@@ -12,33 +12,10 @@ class EpubManageData extends HiveObject with _$EpubManageData {
     @HiveField(4) @Default(0.0) double? progress,
     @HiveField(5) @Default(0) int? chapter,
     @HiveField(6) @Default({}) Map<String, List<String>>? chapterResourceMap,
+    @HiveField(7) @Default(false) bool? isParsed,
+    @HiveField(8) @Default(false) bool? finished,
   }) = _EpubManageData;
 
   factory EpubManageData.fromJson(Map<String, dynamic> json) =>
       _$EpubManageDataFromJson(json);
 }
-
-// class EpubManagerDataAdapter extends TypeAdapter<EpubManageData> {
-//   @override
-//   EpubManageData read(BinaryReader reader) {
-//     return EpubManageData(
-//       path: reader.read(),
-//       name: reader.read(),
-//       uid: reader.read(),
-//       progress: reader.read(),
-//       chapter: reader.read(),
-//     );
-//   }
-
-//   @override
-//   int get typeId => 0;
-
-//   @override
-//   void write(BinaryWriter writer, EpubManageData obj) {
-//     writer.writeString(obj.path);
-//     writer.writeString(obj.name);
-//     writer.writeString(obj.uid);
-//     writer.writeDouble(obj.progress);
-//     writer.writeInt(obj.chapter);
-//   }
-// }
