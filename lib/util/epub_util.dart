@@ -177,14 +177,16 @@ class _EpubUtil {
   Future<void> _extractCover(String uid) async {
     final path = '$basePath/cover/$uid';
     final file = File(path);
-    file.createSync(recursive: true);
     if (coverImage == null) {
-      final firstImageFile = epubBook?.Content?.Images?.values.toList().first;
-      if (firstImageFile == null) return;
+      final imageList = epubBook?.Content?.Images?.values.toList();
+      if (imageList == null || imageList.isEmpty) return;
+      final firstImageFile = imageList.first;
+      file.createSync(recursive: true);
       await file.writeAsBytes(firstImageFile.Content ?? []);
       return;
     } else {
       try {
+        file.createSync(recursive: true);
         await file.writeAsBytes(encodePng(coverImage!));
       } catch (e) {
         print('Error writing to file: $e');

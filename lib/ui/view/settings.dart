@@ -44,6 +44,7 @@ class SettingsView extends StatelessWidget {
         _buildHelloPageSetter(prefs.getInt('helloPage') ?? 1),
         _buildDivider(theme),
         _buildSlideShiftOption(context),
+        _buildShowErrorInfoOption(context),
         _buildDivider(theme),
         _buildInfoIcons(),
         _buildDivider(theme),
@@ -120,10 +121,22 @@ class SettingsView extends StatelessWidget {
 
   Widget _buildSlideShiftOption(BuildContext context) {
     return SwitchOption(
+      icon: UniconsLine.book_alt,
       label: '横向滑动切换章节',
       value: readConfigCubit(context).state.slideShift,
       onChanged: (value) => {
         readConfigCubit(context).setSlideShift(value),
+      },
+    );
+  }
+
+  Widget _buildShowErrorInfoOption(BuildContext context) {
+    return SwitchOption(
+      icon: UniconsLine.info_circle,
+      label: 'epub 加载失败时显示错误信息',
+      value: readConfigCubit(context).state.showErrorInfo,
+      onChanged: (value) => {
+        readConfigCubit(context).setShowErrorInfo(value),
       },
     );
   }

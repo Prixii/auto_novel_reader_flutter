@@ -8,9 +8,9 @@ part 'config_cubit.g.dart';
 class ConfigCubit extends HydratedCubit<ConfigState> {
   ConfigCubit() : super(const ConfigState.initial());
 
-  setSlideShift(bool value) {
-    emit(state.copyWith(slideShift: value));
-  }
+  setSlideShift(bool value) => emit(state.copyWith(slideShift: value));
+
+  setShowErrorInfo(bool value) => emit(state.copyWith(showErrorInfo: value));
 
   @override
   ConfigState? fromJson(Map<String, dynamic> json) =>

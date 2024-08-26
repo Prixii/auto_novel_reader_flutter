@@ -33,7 +33,6 @@ class MainApp extends StatelessWidget {
       ],
       child: const MaterialApp(
         home: SplashView(),
-        // home: Tester(),
       ),
     );
   }

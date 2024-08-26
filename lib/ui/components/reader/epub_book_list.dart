@@ -60,10 +60,16 @@ class _BookListTileState extends State<BookListTile> {
   @override
   void initState() {
     super.initState();
-    localFileManager.getCover(widget.epubManageData.uid ?? '-').then((value) {
+    localFileManager
+        .getCover(widget.epubManageData.uid ?? '-')
+        .then((coverFile) async {
+      if (coverFile != null &&
+          coverFile.existsSync() &&
+          (await coverFile.length() > 0)) {
+        cover = coverFile;
+      }
       setState(() {
         loadingCover = false;
-        cover = value;
       });
     });
   }
@@ -106,6 +112,8 @@ class _BookListTileState extends State<BookListTile> {
       children: [
         Text(
           widget.epubManageData.name?.trim() ?? '',
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
         ),
         Expanded(child: Container()),
         _buildFooter(context),
