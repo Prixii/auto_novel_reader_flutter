@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/ui/view/reader/epub_reader.dart';
+import 'package:auto_novel_reader_flutter/util/channel/key_down_channel.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/epub_util.dart';
 import 'package:auto_novel_reader_flutter/util/html_util.dart';
@@ -40,6 +41,7 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
       Navigator.of(event.context).push(
           MaterialPageRoute(builder: (context) => const EpubReaderView()));
     }
+    subscribeVolumeKeyEvent();
     add(EpubViewerEvent.switchChapter(
       data.chapter ?? 0,
       data.progress ?? 0,
@@ -48,7 +50,7 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
 
   _onNextChapter(_NextChapter event, Emitter<EpubViewerState> emit) async {
     final newIndex = state.currentChapterIndex + 1;
-    if (newIndex >= epubUtil.pointList.length) return;
+    if (newIndex >= state.chapterResourceMap.length) return;
     add(EpubViewerEvent.switchChapter(newIndex, 0));
   }
 
@@ -74,6 +76,7 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
     );
     emit(const EpubViewerState.initial());
     localFileCubit.updateEpubManageData(newEpubManageData);
+    unsubscribeVolumeKeyEvent();
   }
 
   _onOpenSettings(_OpenSettings event, Emitter<EpubViewerState> emit) {}

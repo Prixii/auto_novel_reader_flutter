@@ -107,7 +107,9 @@ class _EpubWebviewState extends State<EpubWebview> {
       },
       buildAsync: false,
       onErrorBuilder: (_, element, error) {
-        return Text('element: ${element.outerHtml}\n error: $error');
+        return readConfigCubit(context).state.showErrorInfo
+            ? Text('error: $error\nelement: ${element.outerHtml}\n ')
+            : const SizedBox.shrink();
       },
       onTapUrl: (element) {
         readEpubViewerBloc(context).add(EpubViewerEvent.clickUrl(element));
@@ -142,11 +144,13 @@ class _EpubWebviewState extends State<EpubWebview> {
   }
 
   void nextPage() {
+    talker.debug('nextPage!');
     readProgress = 0.0;
     readEpubViewerBloc(context).add(const EpubViewerEvent.nextChapter());
   }
 
   void previousPage() {
+    talker.debug('previousPage!');
     readProgress = 0.0;
     readEpubViewerBloc(context).add(const EpubViewerEvent.previousChapter());
   }

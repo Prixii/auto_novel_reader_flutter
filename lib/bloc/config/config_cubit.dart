@@ -12,6 +12,8 @@ class ConfigCubit extends HydratedCubit<ConfigState> {
 
   setShowErrorInfo(bool value) => emit(state.copyWith(showErrorInfo: value));
 
+  setVolumeKeyShift(bool value) => emit(state.copyWith(volumeKeyShift: value));
+
   @override
   ConfigState? fromJson(Map<String, dynamic> json) =>
       ConfigState.fromJson(json);

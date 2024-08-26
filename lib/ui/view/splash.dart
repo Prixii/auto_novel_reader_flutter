@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:auto_novel_reader_flutter/util/channel/key_down_channel.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/ui/view/home.dart';
 import 'package:auto_novel_reader_flutter/manager/local_file_manager.dart';
@@ -49,6 +50,7 @@ class _SplashViewState extends State<SplashView> {
     initScreenSize(context);
     prefs = await SharedPreferences.getInstance();
     localFileManager.init();
+    initKeyDownChannel();
     return;
   }
 

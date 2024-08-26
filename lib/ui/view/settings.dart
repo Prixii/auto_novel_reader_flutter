@@ -45,6 +45,7 @@ class SettingsView extends StatelessWidget {
         _buildDivider(theme),
         _buildSlideShiftOption(context),
         _buildShowErrorInfoOption(context),
+        _buildVolumeKeyShiftOption(context),
         _buildDivider(theme),
         _buildInfoIcons(),
         _buildDivider(theme),
@@ -121,7 +122,7 @@ class SettingsView extends StatelessWidget {
 
   Widget _buildSlideShiftOption(BuildContext context) {
     return SwitchOption(
-      icon: UniconsLine.book_alt,
+      icon: UniconsLine.arrows_resize_h,
       label: '横向滑动切换章节',
       value: readConfigCubit(context).state.slideShift,
       onChanged: (value) => {
@@ -133,10 +134,21 @@ class SettingsView extends StatelessWidget {
   Widget _buildShowErrorInfoOption(BuildContext context) {
     return SwitchOption(
       icon: UniconsLine.info_circle,
-      label: 'epub 加载失败时显示错误信息',
+      label: 'epub 错误信息显示',
       value: readConfigCubit(context).state.showErrorInfo,
       onChanged: (value) => {
         readConfigCubit(context).setShowErrorInfo(value),
+      },
+    );
+  }
+
+  Widget _buildVolumeKeyShiftOption(BuildContext context) {
+    return SwitchOption(
+      icon: UniconsLine.arrows_resize_v,
+      label: '音量键切换章节',
+      value: readConfigCubit(context).state.volumeKeyShift,
+      onChanged: (value) => {
+        readConfigCubit(context).setVolumeKeyShift(value),
       },
     );
   }

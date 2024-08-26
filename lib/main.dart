@@ -1,5 +1,3 @@
-import 'package:auto_novel_reader_flutter/bloc/config/config_cubit.dart';
-import 'package:auto_novel_reader_flutter/bloc/epub_viewer/epub_viewer_bloc.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/ui/view/splash.dart';
 import 'package:flutter/material.dart';
@@ -27,9 +25,9 @@ class MainApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => globalBloc),
-        BlocProvider(create: (context) => EpubViewerBloc()),
+        BlocProvider(create: (context) => epubViewerBloc),
         BlocProvider(create: (context) => localFileCubit),
-        BlocProvider(create: (context) => ConfigCubit()),
+        BlocProvider(create: (context) => configCubit),
       ],
       child: const MaterialApp(
         home: SplashView(),

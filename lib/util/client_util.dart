@@ -16,6 +16,8 @@ late double appBarHeight;
 
 final globalBloc = GlobalBloc();
 final localFileCubit = LocalFileCubit();
+final epubViewerBloc = EpubViewerBloc();
+final configCubit = ConfigCubit();
 
 void initScreenSize(BuildContext context) {
   screenSize = MediaQuery.sizeOf(context);
