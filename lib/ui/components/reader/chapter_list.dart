@@ -3,8 +3,31 @@ import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class ChapterList extends StatelessWidget {
+class ChapterList extends StatefulWidget {
   const ChapterList({super.key});
+
+  @override
+  State<ChapterList> createState() => _ChapterListState();
+}
+
+class _ChapterListState extends State<ChapterList> {
+  final _scrollController = ScrollController();
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToIndex();
+    });
+  }
+
+  void _scrollToIndex() {
+    final state = readEpubViewerBloc(context).state;
+    final index = state.currentChapterIndex;
+    final itemCount = state.chapterResourceMap.length;
+    if (index >= itemCount) return;
+    _scrollController
+        .jumpTo(_scrollController.position.maxScrollExtent / itemCount * index);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,8 +59,10 @@ class ChapterList extends StatelessWidget {
       builder: (context, chapterResourceMap) {
         final entries = chapterResourceMap.entries.toList();
         return ListView.builder(
+          controller: _scrollController,
           padding: const EdgeInsets.all(0),
           shrinkWrap: true,
+          prototypeItem: const ChapterListTile(title: '章节', index: 0),
           itemBuilder: (context, index) {
             final chapterEntry = entries[index];
             return ChapterListTile(
