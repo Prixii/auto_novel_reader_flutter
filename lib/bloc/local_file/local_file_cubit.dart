@@ -53,6 +53,17 @@ class LocalFileCubit extends Cubit<LocalFileState> {
     localFileManager.updateEpubManageData(dataListSnapshot);
   }
 
+  cleanEpubManageData() async {
+    emit(state.copyWith(epubManageDataList: []));
+    await Future.wait([
+      localFileManager.updateEpubManageData([]),
+      localFileManager.cleanParseDir(),
+    ]);
+    Fluttertoast.showToast(
+      msg: '清理完成',
+    );
+  }
+
   deleteEpubBook(EpubManageData epubManageData) {
     var dataListSnapshot = [...state.epubManageDataList];
     dataListSnapshot

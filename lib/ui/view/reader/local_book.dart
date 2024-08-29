@@ -62,14 +62,5 @@ class LocalBookView extends StatelessWidget {
             .selectFile(file: epubFile, context: context);
       }
     }
-    // final path = result.files.single.path;
-    // if (path == null) return;
-    // final epubFile = File(path);
-    // if (!epubFile.existsSync()) {
-    //   throw Exception('epub file not found');
-    // }
-    // if (context.mounted) {
-    //   readLocalFileCubit(context).selectFile(file: epubFile, context: context);
-    // }
   }
 }

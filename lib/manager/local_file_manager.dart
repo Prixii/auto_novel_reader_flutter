@@ -17,6 +17,7 @@ class _LocalFileManager {
   var epubManageDataList = <EpubManageData>[];
   var epubNameList = <String>[];
 
+  final parseDirPath = '/parse/epub';
   final epubDownloadPath = '/downloads/epub';
   final epubCoverPath = '/parse/epub/cover';
   final backupPath = '/parse/epub/backup';
@@ -74,6 +75,11 @@ class _LocalFileManager {
   }
 
   Future<void> updateEpubManageData(List<EpubManageData> newDataList) async {
-    epubManagerBox.put('epubManageDataList', newDataList);
+    await epubManagerBox.put('epubManageDataList', newDataList);
+  }
+
+  Future<void> cleanParseDir() async {
+    final path = '$externalStorageDirectory$parseDirPath';
+    await deleteDirectory(path);
   }
 }

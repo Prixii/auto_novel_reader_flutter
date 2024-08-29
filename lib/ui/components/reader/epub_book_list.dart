@@ -90,10 +90,11 @@ class _BookListTileState extends State<BookListTile> {
           height: 128,
           child: Row(
             children: [
-              SizedBox(
-                width: 80,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8.0),
+                child: SizedBox(
+                  height: double.infinity,
+                  width: 80,
                   child: _buildCover(),
                 ),
               ),
@@ -134,7 +135,7 @@ class _BookListTileState extends State<BookListTile> {
     }
     return Image.file(
       cover!,
-      fit: BoxFit.cover,
+      fit: BoxFit.fitHeight,
       key: Key(
         widget.epubManageData.uid ?? widget.epubManageData.hashCode.toString(),
       ),

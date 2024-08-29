@@ -29,3 +29,10 @@ Future<void> writeImageToFile(
     talker.error('Error writing image: $e');
   }
 }
+
+Future<void> deleteDirectory(String path) async {
+  final directory = Directory(path);
+  if (await directory.exists()) {
+    await directory.delete(recursive: true);
+  }
+}

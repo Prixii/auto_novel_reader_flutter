@@ -12,26 +12,15 @@ class SettingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Container(
-      height: double.infinity,
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: Image.asset('assets/test.jpg').image,
-          fit: BoxFit.cover,
-        ),
-      ),
-      child: Scaffold(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('设置'),
+        shadowColor: Theme.of(context).colorScheme.shadow,
         backgroundColor:
-            Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5),
-        appBar: AppBar(
-          title: const Text('设置'),
-          shadowColor: Theme.of(context).colorScheme.shadow,
-          backgroundColor:
-              Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.5),
-        ),
-        body: SingleChildScrollView(
-          child: _buildOptions(theme, context),
-        ),
+            Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.5),
+      ),
+      body: SingleChildScrollView(
+        child: _buildOptions(theme, context),
       ),
     );
   }
@@ -49,6 +38,11 @@ class SettingsView extends StatelessWidget {
         _buildDivider(theme),
         _buildInfoIcons(),
         _buildDivider(theme),
+        IconOption(
+          icon: UniconsLine.brush_alt,
+          text: '清空缓存',
+          onTap: () => _cleanCache(context),
+        ),
         IconOption(
           icon: UniconsLine.signout,
           text: '登出',
@@ -151,5 +145,9 @@ class SettingsView extends StatelessWidget {
         readConfigCubit(context).setVolumeKeyShift(value),
       },
     );
+  }
+
+  void _cleanCache(BuildContext context) {
+    readLocalFileCubit(context).cleanEpubManageData();
   }
 }

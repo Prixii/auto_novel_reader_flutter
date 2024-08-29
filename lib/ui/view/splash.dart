@@ -31,12 +31,16 @@ class _SplashViewState extends State<SplashView> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Color.fromARGB(255, 57, 134, 198),
+    return Scaffold(
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
-          FlutterLogo(),
-          Center(child: CircularProgressIndicator()),
+          Center(
+              child: Image.asset(
+            'assets/img/character.webp',
+            height: 128,
+            width: 128,
+          )),
         ],
       ),
     );
@@ -55,9 +59,7 @@ class _SplashViewState extends State<SplashView> {
     return;
   }
 
-  Future<void> _precacheImages() async {
-    precacheImage(const AssetImage('assets/test.jpg'), context);
-  }
+  Future<void> _precacheImages() async {}
 
   void _leaveSplash() async {
     if (prefs.getBool('autoLogin') == true) {

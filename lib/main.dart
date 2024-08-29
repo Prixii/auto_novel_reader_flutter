@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/ui/view/splash.dart';
 import 'package:flutter/material.dart';
@@ -29,8 +30,17 @@ class MainApp extends StatelessWidget {
         BlocProvider(create: (context) => localFileCubit),
         BlocProvider(create: (context) => configCubit),
       ],
-      child: const MaterialApp(
-        home: SplashView(),
+      child: MaterialApp(
+        theme: ThemeData(
+          colorSchemeSeed: const Color(0xFF18A058),
+          useMaterial3: true,
+          dividerColor: Colors.grey[300],
+          pageTransitionsTheme: const PageTransitionsTheme(builders: {
+            TargetPlatform.android: FadeThroughPageTransitionsBuilder(),
+            TargetPlatform.iOS: FadeThroughPageTransitionsBuilder(),
+          }),
+        ),
+        home: const SplashView(),
       ),
     );
   }
