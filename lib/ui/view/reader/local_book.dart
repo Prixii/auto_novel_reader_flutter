@@ -45,18 +45,31 @@ class LocalBookView extends StatelessWidget {
 
   void selectEpubFile(BuildContext context) async {
     final result = await FilePicker.platform.pickFiles(
+      allowMultiple: true,
       type: FileType.custom,
       allowedExtensions: ['epub'],
     );
     if (result == null) return;
-    final path = result.files.single.path;
-    if (path == null) return;
-    final epubFile = File(path);
-    if (!epubFile.existsSync()) {
-      throw Exception('epub file not found');
+    for (var file in result.files) {
+      final path = file.path;
+      if (path == null) return;
+      final epubFile = File(path);
+      if (!epubFile.existsSync()) {
+        throw Exception('epub file not found');
+      }
+      if (context.mounted) {
+        await readLocalFileCubit(context)
+            .selectFile(file: epubFile, context: context);
+      }
     }
-    if (context.mounted) {
-      readLocalFileCubit(context).selectFile(file: epubFile, context: context);
-    }
+    // final path = result.files.single.path;
+    // if (path == null) return;
+    // final epubFile = File(path);
+    // if (!epubFile.existsSync()) {
+    //   throw Exception('epub file not found');
+    // }
+    // if (context.mounted) {
+    //   readLocalFileCubit(context).selectFile(file: epubFile, context: context);
+    // }
   }
 }

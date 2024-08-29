@@ -189,7 +189,7 @@ class _EpubUtil {
         file.createSync(recursive: true);
         await file.writeAsBytes(encodePng(coverImage!));
       } catch (e) {
-        print('Error writing to file: $e');
+        talker.error('Error writing to file: $e');
       }
     }
   }

@@ -104,7 +104,6 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
   }
 
   Stream<List<String>> _loadHTMLFile(int chapterIndex) async* {
-    final currentPath = epubUtil.getPathByUid(state.epubManageData!.uid ?? '');
     final chapterResourceEntries =
         state.epubManageData!.chapterResourceMap!.entries.toList();
     if (chapterResourceEntries.length < chapterIndex) return;
@@ -118,7 +117,7 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
     }
     final path = epubUtil.getPathByUid(uid);
     for (var htmlFileName in resourceList) {
-      final rawHtml = await File('$currentPath/$htmlFileName').readAsString();
+      final rawHtml = await File('$path/$htmlFileName').readAsString();
 
       yield htmlUtil.pretreatHtml(rawHtml, path);
     }

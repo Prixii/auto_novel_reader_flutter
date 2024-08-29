@@ -18,9 +18,11 @@ class _HtmlUtil {
     'div',
     'img',
     'svg',
-    'image'
+    'image',
+    'section',
+    'nav'
   ];
-  final tagsShouldExtract = <String>['div', 'svg'];
+  final tagsShouldExtract = <String>['div', 'svg', 'section'];
 
   List<String> pretreatHtml(String html, String url) {
     var htmlPartList = <String>[];

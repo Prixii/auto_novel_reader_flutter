@@ -52,6 +52,7 @@ class _EpubWebviewState extends State<EpubWebview> {
       builder: (context, htmlDataList) {
         return PopScope(
           onPopInvoked: (value) {
+            if (Scaffold.of(context).isDrawerOpen) return;
             readEpubViewerBloc(context)
                 .add(EpubViewerEvent.close(readProgress));
             handleSetVolumeShift(false);

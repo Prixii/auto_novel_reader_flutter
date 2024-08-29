@@ -68,9 +68,11 @@ class _BookListTileState extends State<BookListTile> {
           (await coverFile.length() > 0)) {
         cover = coverFile;
       }
-      setState(() {
-        loadingCover = false;
-      });
+      if (mounted) {
+        setState(() {
+          loadingCover = false;
+        });
+      }
     });
   }
 

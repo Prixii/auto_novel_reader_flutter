@@ -24,6 +24,7 @@ class _SplashViewState extends State<SplashView> {
       Future.wait([
         _justWait(),
         _startInit(),
+        _precacheImages(),
       ]).then((_) => _leaveSplash());
     });
   }
@@ -52,6 +53,10 @@ class _SplashViewState extends State<SplashView> {
     localFileManager.init();
     initKeyDownChannel();
     return;
+  }
+
+  Future<void> _precacheImages() async {
+    precacheImage(const AssetImage('assets/test.jpg'), context);
   }
 
   void _leaveSplash() async {
