@@ -1,0 +1,75 @@
+import 'package:auto_novel_reader_flutter/ui/components/settings/auth_tab.dart';
+import 'package:auto_novel_reader_flutter/ui/components/universal/custom_text_field.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
+class RegisterForm extends StatefulWidget {
+  const RegisterForm({super.key});
+
+  @override
+  State<RegisterForm> createState() => _RegisterFormState();
+}
+
+class _RegisterFormState extends State<RegisterForm> {
+  late TextEditingController _phoneController,
+      _passwordController,
+      _confirmPasswordController;
+  bool isRememberMeChecked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _phoneController = TextEditingController();
+    _passwordController = TextEditingController();
+    _confirmPasswordController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        buildTextField('用户名/邮箱', _phoneController, inputFormatters: [
+          FilteringTextInputFormatter.digitsOnly,
+          LengthLimitingTextInputFormatter(11),
+        ]),
+        space,
+        buildTextField('密码', _passwordController, obscureText: true),
+        space,
+        buildTextField('确认密码', _passwordController, obscureText: true),
+        space,
+        buildRoundButton(() => _doRegister(context)),
+      ],
+    );
+  }
+
+  void _doRegister(BuildContext context) {
+    FocusScope.of(context).unfocus();
+    if (_formFinished()) {
+      // TODO
+    } else {
+      _showToast(context);
+    }
+  }
+
+  bool _formFinished() {
+    return (_phoneController.text != '') && (_passwordController.text != '');
+  }
+
+  void _showToast(BuildContext context) {
+    final isPasswordMatch =
+        _passwordController.text == _confirmPasswordController.text;
+    (!_formFinished() || isPasswordMatch)
+        ? Fluttertoast.showToast(msg: '请填写完整信息')
+        : Fluttertoast.showToast(msg: '两次密码不一致');
+  }
+}

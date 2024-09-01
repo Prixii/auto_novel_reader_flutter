@@ -29,6 +29,7 @@ class MainApp extends StatelessWidget {
         BlocProvider(create: (context) => epubViewerBloc),
         BlocProvider(create: (context) => localFileCubit),
         BlocProvider(create: (context) => configCubit),
+        BlocProvider(create: (context) => userCubit),
       ],
       child: MaterialApp(
         theme: ThemeData(

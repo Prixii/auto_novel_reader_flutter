@@ -1,3 +1,4 @@
+import 'package:auto_novel_reader_flutter/ui/components/settings/user_info_tile.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/icon_option.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/switch_option.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/tab_option.dart';
@@ -30,6 +31,9 @@ class SettingsView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
+        const SizedBox(height: 8.0),
+        const UserInfoTile(),
+        _buildDivider(theme),
         _buildHelloPageSetter(prefs.getInt('helloPage') ?? 1),
         _buildDivider(theme),
         _buildSlideShiftOption(context),
