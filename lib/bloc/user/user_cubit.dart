@@ -17,7 +17,7 @@ class UserCubit extends HydratedCubit<UserState> {
     String password, {
     bool autoLogin = false,
   }) async {
-    final signInResponse = await authService.signIn({
+    final signInResponse = await authService.postSignIn({
       'emailOrUsername': emailOrUsername,
       'password': password,
     });
