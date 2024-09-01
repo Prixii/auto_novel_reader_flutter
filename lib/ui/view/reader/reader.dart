@@ -18,8 +18,8 @@ class ReaderView extends StatelessWidget {
         body: const TabBarView(
           children: [
             LocalBookView(),
-            Icon(Icons.directions_transit),
-            Icon(Icons.directions_bike),
+            Text('历史'),
+            Text('收藏'),
           ],
         ),
       ),

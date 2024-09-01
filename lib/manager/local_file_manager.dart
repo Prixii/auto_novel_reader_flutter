@@ -1,31 +1,24 @@
 import 'dart:io';
 
+import 'package:auto_novel_reader_flutter/manager/path_manager.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/file_util.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:path_provider/path_provider.dart';
 
 final localFileManager = _LocalFileManager();
 
 // IDEA 通过 PathManager 统一存储路径获取方式
 
 class _LocalFileManager {
-  late String externalStorageDirectory;
   late Box epubManagerBox;
 
   var epubManageDataList = <EpubManageData>[];
   var epubNameList = <String>[];
 
-  final parseDirPath = '/parse/epub';
-  final epubDownloadPath = '/downloads/epub';
-  final epubCoverPath = '/parse/epub/cover';
-  final backupPath = '/parse/epub/backup';
-
   _LocalFileManager();
 
   Future<void> init() async {
-    await getDirectory();
     await Future.wait([
       initEpubDownloadDir(),
       // TODO 替换成 hydrated_bloc 实现
@@ -53,25 +46,15 @@ class _LocalFileManager {
   }
 
   Future<File?> getCover(String epubUid) async {
-    final basePath = '$externalStorageDirectory$epubCoverPath';
-    createDirectoryIfNotExists(basePath);
-    final coverFile = File('$basePath/$epubUid');
+    final coverPath = pathManager.getCoverFilePath(epubUid);
+    if (coverPath == null) return null;
+    final coverFile = File(coverPath);
     return coverFile.existsSync() ? coverFile : null;
   }
 
-  Future<void> getDirectory() async {
-    final directory = await getExternalStorageDirectory();
-    if (directory == null) throw Exception('no external storage');
-    externalStorageDirectory = directory.path;
-  }
-
   Future<void> initEpubDownloadDir() async {
-    final path = '$externalStorageDirectory$epubDownloadPath';
+    final path = pathManager.epubDownloadPath;
     createDirectoryIfNotExists(path);
-  }
-
-  String? getEpubFilePath(String fileName) {
-    return '$externalStorageDirectory$backupPath/$fileName';
   }
 
   Future<void> updateEpubManageData(List<EpubManageData> newDataList) async {
@@ -79,7 +62,7 @@ class _LocalFileManager {
   }
 
   Future<void> cleanParseDir() async {
-    final path = '$externalStorageDirectory$parseDirPath';
+    final path = pathManager.parseDirPath;
     await deleteDirectory(path);
   }
 }

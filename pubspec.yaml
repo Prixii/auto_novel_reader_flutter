@@ -29,7 +29,7 @@ dependencies:
   # 图标
   unicons: ^2.1.1
   # 吐司
-  fluttertoast: ^8.2.6
+  fluttertoast: ^8.2.8
   # 代码生成
   freezed: ^2.5.2
   freezed_annotation: ^2.4.1
