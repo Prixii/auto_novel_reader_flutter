@@ -1,6 +1,8 @@
 import 'dart:io';
 
-import 'package:auto_novel_reader_flutter/manager/local_file_manager.dart';
+import 'package:auto_novel_reader_flutter/bloc/global/global_bloc.dart';
+import 'package:auto_novel_reader_flutter/manager/path_manager.dart';
+import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/file_util.dart';
@@ -10,7 +12,7 @@ import 'package:image/image.dart';
 final epubUtil = _EpubUtil();
 
 class _EpubUtil {
-  final basePath = '${localFileManager.externalStorageDirectory}/parse/epub';
+  final basePath = pathManager.parseDirPath;
 
   epubx.EpubBook? epubBook;
   String title = '';
@@ -28,20 +30,31 @@ class _EpubUtil {
 
   Future<EpubManageData?> parseEpub(File epub) async {
     try {
-      localFileCubit.updateProgress(message: '读取 epub 文件...');
+      globalBloc.add(const GlobalEvent.startProgress(
+        ProgressType.parsingEpub,
+        '读取 epub 文件...',
+      ));
       final bytes = await epub.readAsBytes();
       epubBook = await epubx.EpubReader.readBook(bytes);
       if (epubBook == null) return null;
       uid = epubBook.hashCode.toString();
 
-      localFileCubit.updateProgress(progress: 33, message: '解析 epub 结构...');
+      globalBloc.add(const GlobalEvent.updateProgress(
+          ProgressType.parsingEpub, 10, '解析 epub 结构...'));
       _parseBaseInfo();
       _parseNcx();
 
-      localFileCubit.updateProgress(progress: 66, message: '提取内容...');
+      globalBloc.add(const GlobalEvent.updateProgress(
+          ProgressType.parsingEpub, 20, '提取内容...'));
       await _extractContent(uid);
+      globalBloc.add(const GlobalEvent.updateProgress(
+          ProgressType.parsingEpub, 50, '章节划分...'));
       chapterResourceMap = await _sortChapters();
+      globalBloc.add(const GlobalEvent.updateProgress(
+          ProgressType.parsingEpub, 70, '提取封面...'));
       await _extractCover(uid);
+      globalBloc.add(const GlobalEvent.updateProgress(
+          ProgressType.parsingEpub, 80, '备份源文件...'));
       await _extractEpubBackup(epub, uid);
       final epubData = EpubManageData(
         path: epub.path,
@@ -50,7 +63,11 @@ class _EpubUtil {
         chapterResourceMap: chapterResourceMap,
       );
 
-      localFileCubit.updateProgress(progress: 100, message: '解析完成');
+      globalBloc.add(const GlobalEvent.updateProgress(
+          ProgressType.parsingEpub, 100, '解析完成'));
+      await Future.delayed(const Duration(milliseconds: 200), () {
+        globalBloc.add(const GlobalEvent.endProgress(ProgressType.parsingEpub));
+      });
       return epubData;
     } catch (e) {
       throw Exception(e);

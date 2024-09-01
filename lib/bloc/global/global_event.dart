@@ -10,19 +10,19 @@ class GlobalEvent with _$GlobalEvent {
     required bool isRememberMeChecked,
     @Default(false) bool isAutoLogin,
   }) = _Login;
-
   const factory GlobalEvent.logout() = _Logout;
-
   const factory GlobalEvent.register({
     required String phone,
     required String password,
   }) = _Register;
-
   const factory GlobalEvent.switchNavigationDestination({
     @Default(1) int destinationIndex,
   }) = _SwitchNavigationDestination;
-
   const factory GlobalEvent.initConfig() = _InitConfig;
-
   const factory GlobalEvent.getUserInfo() = _GetUserInfo;
+  const factory GlobalEvent.startProgress(ProgressType type, String message) =
+      _StartProgress;
+  const factory GlobalEvent.updateProgress(
+      ProgressType type, int progress, String message) = _UpdateProgress;
+  const factory GlobalEvent.endProgress(ProgressType type) = _EndProgress;
 }

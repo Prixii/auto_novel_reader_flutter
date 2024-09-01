@@ -1,3 +1,4 @@
+import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/ui/view/splash.dart';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -17,6 +18,9 @@ class GlobalBloc extends Bloc<GlobalEvent, GlobalState> {
             await _onSwitchNavigationDestination(event, emit),
         initConfig: (event) async => await _onInitConfig(event, emit),
         getUserInfo: (event) async => await _onGetUserInfo(event, emit),
+        startProgress: (event) => _onStartProgress(event, emit),
+        updateProgress: (event) => _onUpdateProgress(event, emit),
+        endProgress: (event) => _onEndProgress(event, emit),
       );
     });
   }
@@ -85,4 +89,31 @@ class GlobalBloc extends Bloc<GlobalEvent, GlobalState> {
   }
 
   _onGetUserInfo(_GetUserInfo event, Emitter<GlobalState> emit) async {}
+  _onStartProgress(_StartProgress event, Emitter<GlobalState> emit) async {
+    if (state.progressTypeValue != null) return;
+    emit(state.copyWith(
+      progressTypeValue: event.type.value,
+      progressValue: 0,
+      progressMessage: event.message,
+    ));
+  }
+
+  _onUpdateProgress(_UpdateProgress event, Emitter<GlobalState> emit) {
+    if (state.progressTypeValue == null) return;
+    if (event.type.value != state.progressTypeValue) return;
+    emit(state.copyWith(
+      progressMessage: event.message,
+      progressValue: event.progress,
+    ));
+  }
+
+  _onEndProgress(_EndProgress event, Emitter<GlobalState> emit) {
+    if (state.progressTypeValue == null) return;
+    if (event.type.value != state.progressTypeValue) return;
+    emit(state.copyWith(
+      progressTypeValue: null,
+      progressValue: 0,
+      progressMessage: '',
+    ));
+  }
 }

@@ -113,10 +113,12 @@ class _BookListTileState extends State<BookListTile> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: 4.0),
         Text(
           widget.epubManageData.name?.trim() ?? '',
           maxLines: 3,
           overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.titleSmall,
         ),
         Expanded(child: Container()),
         _buildFooter(context),

@@ -10,8 +10,10 @@ class _PathManager {
   final _epubCoverPath = '/parse/epub/cover';
   final _backupPath = '/parse/epub/backup';
 
-  _PathManager() {
-    _getExternalStorageDirectory();
+  _PathManager();
+
+  Future<void> init() async {
+    await _getExternalStorageDirectory();
   }
 
   Future<void> _getExternalStorageDirectory() async {
@@ -21,15 +23,22 @@ class _PathManager {
   }
 
   String? getEpubFilePath(String fileName) {
-    return '$epubDownloadPath$fileName';
+    return '$epubDownloadPath/$fileName';
   }
 
   String? getCoverFilePath(String fileName) {
-    return '$epubCoverPath$fileName';
+    return '$epubCoverPath/$fileName';
   }
 
+  /// externalStorageDirectory/parse/epub/cover
   String get epubCoverPath => externalStorageDirectory + _epubCoverPath;
+
+  /// externalStorageDirectory/downloads/epub
   String get epubDownloadPath => externalStorageDirectory + _epubDownloadPath;
+
+  /// externalStorageDirectory/parse/epub
   String get parseDirPath => externalStorageDirectory + _parseDirPath;
+
+  /// externalStorageDirectory/parse/epub/backup
   String get backupPath => externalStorageDirectory + _backupPath;
 }
