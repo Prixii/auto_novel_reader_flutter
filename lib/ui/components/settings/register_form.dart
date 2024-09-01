@@ -12,7 +12,7 @@ class RegisterForm extends StatefulWidget {
 }
 
 class _RegisterFormState extends State<RegisterForm> {
-  late TextEditingController _phoneController,
+  late TextEditingController _emailOrUsernameController,
       _passwordController,
       _confirmPasswordController;
   bool isRememberMeChecked = false;
@@ -20,14 +20,14 @@ class _RegisterFormState extends State<RegisterForm> {
   @override
   void initState() {
     super.initState();
-    _phoneController = TextEditingController();
+    _emailOrUsernameController = TextEditingController();
     _passwordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
   }
 
   @override
   void dispose() {
-    _phoneController.dispose();
+    _emailOrUsernameController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -38,7 +38,7 @@ class _RegisterFormState extends State<RegisterForm> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        buildTextField('用户名/邮箱', _phoneController, inputFormatters: [
+        buildTextField('用户名/邮箱', _emailOrUsernameController, inputFormatters: [
           FilteringTextInputFormatter.digitsOnly,
           LengthLimitingTextInputFormatter(11),
         ]),
@@ -62,7 +62,8 @@ class _RegisterFormState extends State<RegisterForm> {
   }
 
   bool _formFinished() {
-    return (_phoneController.text != '') && (_passwordController.text != '');
+    return (_emailOrUsernameController.text != '') &&
+        (_passwordController.text != '');
   }
 
   void _showToast(BuildContext context) {

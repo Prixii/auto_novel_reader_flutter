@@ -7,6 +7,7 @@ class UserState with _$UserState {
     @Default('') String emailOrUsername,
     @Default('') String password,
     @Default('') String nickname,
+    @Default(false) bool autoLogin,
   }) = _Initial;
 
   factory UserState.fromJson(Map<String, dynamic> json) =>

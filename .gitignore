@@ -45,6 +45,7 @@ app.*.map.json
 # 代码生成
 **.g.dart
 **.freezed.dart
+**.chopper.dart
 
 # 工作区设置
 .vscode/pinned-files.json

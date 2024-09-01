@@ -35,6 +35,7 @@ class SettingsView extends StatelessWidget {
         const UserInfoTile(),
         _buildDivider(theme),
         _buildHelloPageSetter(prefs.getInt('helloPage') ?? 1),
+        _buildUrlSetter(context),
         _buildDivider(theme),
         _buildSlideShiftOption(context),
         _buildShowErrorInfoOption(context),
@@ -47,12 +48,6 @@ class SettingsView extends StatelessWidget {
           text: '清空缓存',
           onTap: () => _cleanCache(context),
         ),
-        IconOption(
-          icon: UniconsLine.signout,
-          text: '登出',
-          color: theme.colorScheme.error,
-          onTap: () => tryLogout(context),
-        ),
       ],
     );
   }
@@ -62,27 +57,6 @@ class SettingsView extends StatelessWidget {
       indent: dividerIndent,
       endIndent: dividerIndent,
       color: theme.dividerColor,
-    );
-  }
-
-  void tryLogout(BuildContext context) async {
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('确定登出'),
-        content: const Text('确定要登出吗?'),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('取消')),
-          TextButton(
-              onPressed: () {
-                // TODO 登出
-                Navigator.of(context).pop(true);
-              },
-              child: const Text('确定')),
-        ],
-      ),
     );
   }
 
@@ -116,6 +90,21 @@ class SettingsView extends StatelessWidget {
           '阅读',
           '设置',
         ]);
+  }
+
+  Widget _buildUrlSetter(BuildContext context) {
+    const urls = [
+      'books.fishhawk.top',
+      'books1.fishhawk.top',
+      'books2.fishhawk.top',
+    ];
+    final cubit = readConfigCubit(context);
+    return TabOption(
+        initValue: urls.indexOf(cubit.state.url),
+        label: '绿站 host',
+        onTap: (value, index) => cubit.setUrl(value),
+        icon: UniconsLine.estate,
+        tabs: urls);
   }
 
   Widget _buildSlideShiftOption(BuildContext context) {

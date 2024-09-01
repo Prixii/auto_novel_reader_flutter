@@ -1,7 +1,7 @@
 import 'package:auto_novel_reader_flutter/ui/components/settings/auth_tab.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/custom_text_field.dart';
+import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class LoginForm extends StatefulWidget {
@@ -12,19 +12,19 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<LoginForm> {
-  late TextEditingController _phoneController, _passwordController;
+  late TextEditingController _emailOrUsernameController, _passwordController;
   bool isRememberMeChecked = false;
 
   @override
   void initState() {
     super.initState();
-    _phoneController = TextEditingController();
+    _emailOrUsernameController = TextEditingController();
     _passwordController = TextEditingController();
   }
 
   @override
   void dispose() {
-    _phoneController.dispose();
+    _emailOrUsernameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -34,10 +34,7 @@ class _LoginFormState extends State<LoginForm> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        buildTextField('用户名/邮箱', _phoneController, inputFormatters: [
-          FilteringTextInputFormatter.digitsOnly,
-          LengthLimitingTextInputFormatter(11),
-        ]),
+        buildTextField('用户名/邮箱', _emailOrUsernameController),
         space,
         buildTextField('密码', _passwordController, obscureText: true),
         space,
@@ -50,9 +47,9 @@ class _LoginFormState extends State<LoginForm> {
               },
               visualDensity: VisualDensity.compact,
             ),
-            Text(
+            const Text(
               '记住我',
-              style: const TextStyle(color: Colors.black87, fontSize: 14),
+              style: TextStyle(color: Colors.black87, fontSize: 14),
             ),
             Expanded(child: Container()),
           ],
@@ -66,14 +63,20 @@ class _LoginFormState extends State<LoginForm> {
   void _doLogin(BuildContext context) {
     FocusScope.of(context).unfocus();
     if (_formFinished()) {
-      // TODO
+      readUserCubit(context).signIn(
+        context,
+        _emailOrUsernameController.text,
+        _passwordController.text,
+        autoLogin: isRememberMeChecked,
+      );
     } else {
       _showToast(context);
     }
   }
 
   bool _formFinished() {
-    return (_phoneController.text != '') && (_passwordController.text != '');
+    return (_emailOrUsernameController.text != '') &&
+        (_passwordController.text != '');
   }
 
   void _showToast(BuildContext context) {

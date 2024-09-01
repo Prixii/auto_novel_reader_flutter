@@ -29,7 +29,20 @@ class UserInfoTile extends StatelessWidget {
   }
 
   Widget _buildForUser(BuildContext context) {
-    return Container();
+    final state = readUserCubit(context).state;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(state.nickname),
+          IconButton(
+              onPressed: () => tryLogout(context),
+              icon: const Icon(UniconsLine.signout),
+              color: Theme.of(context).colorScheme.error),
+        ],
+      ),
+    );
   }
 
   Future<void> login(BuildContext context) async {
@@ -45,6 +58,27 @@ class UserInfoTile extends StatelessWidget {
           child: const AuthTab(),
         );
       },
+    );
+  }
+
+  void tryLogout(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('确定登出'),
+        content: const Text('确定要登出吗?'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('取消')),
+          TextButton(
+              onPressed: () {
+                // TODO 登出
+                Navigator.of(context).pop(true);
+              },
+              child: const Text('确定')),
+        ],
+      ),
     );
   }
 }

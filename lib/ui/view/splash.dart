@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:auto_novel_reader_flutter/util/channel/key_down_channel.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/ui/view/home.dart';
@@ -25,6 +26,7 @@ class _SplashViewState extends State<SplashView> {
         _justWait(),
         _startInit(),
         _precacheImages(),
+        _initChopperClient()
       ]).then((_) => _leaveSplash());
     });
   }
@@ -77,6 +79,11 @@ class _SplashViewState extends State<SplashView> {
       clearSharedPreference();
       return;
     }
+  }
+
+  Future<void> _initChopperClient() async {
+    createChopper();
+    await userCubit.activateAuth();
   }
 }
 

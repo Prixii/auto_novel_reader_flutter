@@ -103,6 +103,8 @@ class _TabOptionState extends State<TabOption> with TickerProviderStateMixin {
               child: Text(
                 widget.tabs[_tabController.index],
                 style: theme.textTheme.bodyMedium,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             const Icon(UniconsLine.angle_down),

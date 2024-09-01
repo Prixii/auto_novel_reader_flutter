@@ -1,3 +1,4 @@
+import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
@@ -13,6 +14,12 @@ class ConfigCubit extends HydratedCubit<ConfigState> {
   setShowErrorInfo(bool value) => emit(state.copyWith(showErrorInfo: value));
 
   setVolumeKeyShift(bool value) => emit(state.copyWith(volumeKeyShift: value));
+
+  setUrl(String value) {
+    if (value == state.url) return;
+    emit(state.copyWith(url: value));
+    createChopper();
+  }
 
   @override
   ConfigState? fromJson(Map<String, dynamic> json) =>
