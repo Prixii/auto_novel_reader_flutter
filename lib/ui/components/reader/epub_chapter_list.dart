@@ -3,14 +3,14 @@ import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class ChapterList extends StatefulWidget {
-  const ChapterList({super.key});
+class EpubChapterList extends StatefulWidget {
+  const EpubChapterList({super.key});
 
   @override
-  State<ChapterList> createState() => _ChapterListState();
+  State<EpubChapterList> createState() => _EpubChapterListState();
 }
 
-class _ChapterListState extends State<ChapterList> {
+class _EpubChapterListState extends State<EpubChapterList> {
   final _scrollController = ScrollController();
   @override
   void initState() {
@@ -62,10 +62,10 @@ class _ChapterListState extends State<ChapterList> {
           controller: _scrollController,
           padding: const EdgeInsets.all(0),
           shrinkWrap: true,
-          prototypeItem: const ChapterListTile(title: '章节', index: 0),
+          prototypeItem: const EpubChapterListTile(title: '章节', index: 0),
           itemBuilder: (context, index) {
             final chapterEntry = entries[index];
-            return ChapterListTile(
+            return EpubChapterListTile(
               title:
                   chapterEntry.key == '' ? '章节${index + 1}' : chapterEntry.key,
               index: index,
@@ -78,8 +78,9 @@ class _ChapterListState extends State<ChapterList> {
   }
 }
 
-class ChapterListTile extends StatelessWidget {
-  const ChapterListTile({super.key, required this.title, required this.index});
+class EpubChapterListTile extends StatelessWidget {
+  const EpubChapterListTile(
+      {super.key, required this.title, required this.index});
 
   final String title;
   final int index;

@@ -209,3 +209,25 @@ final _explanationsNonR18 = <PresetKeywordsExplanation>[
 final _groupsR18 = <PresetKeywordsGroup>[];
 
 final _explanationsR18 = <PresetKeywordsExplanation>[];
+
+List<WenkuNovelOutline> parseToWenkuNovelOutline(dynamic body) {
+  try {
+    final items = body['items'] as List<dynamic>;
+    var wenkuNovelOutlines = <WenkuNovelOutline>[];
+    for (final item in items) {
+      wenkuNovelOutlines.add(
+        WenkuNovelOutline(
+          item['id'],
+          item['title'],
+          item['titleZh'],
+          item['cover'],
+          favored: item['favored'],
+        ),
+      );
+    }
+    return wenkuNovelOutlines;
+  } catch (e) {
+    talker.error(e);
+    return [];
+  }
+}

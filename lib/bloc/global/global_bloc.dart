@@ -12,9 +12,9 @@ class GlobalBloc extends Bloc<GlobalEvent, GlobalState> {
       await event.map(
         switchNavigationDestination: (event) async =>
             await _onSwitchNavigationDestination(event, emit),
-        startProgress: (event) => _onStartProgress(event, emit),
-        updateProgress: (event) => _onUpdateProgress(event, emit),
-        endProgress: (event) => _onEndProgress(event, emit),
+        startProgress: (event) async => await _onStartProgress(event, emit),
+        updateProgress: (event) async => await _onUpdateProgress(event, emit),
+        endProgress: (event) async => await _onEndProgress(event, emit),
       );
     });
   }

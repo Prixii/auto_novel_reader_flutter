@@ -1,6 +1,8 @@
+import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/info_badge.dart';
+import 'package:auto_novel_reader_flutter/ui/view/novel_detail.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
 
@@ -14,17 +16,22 @@ class WebNovelTile extends StatelessWidget {
     return webNovel.map(
       webNovelChapter: (novel) => const SizedBox.shrink(),
       webNovelDto: (novel) => const SizedBox.shrink(),
-      webNovelOutline: (novel) => _buildForWebOutline(novel),
+      webNovelOutline: (novel) => _buildForWebOutline(novel, context),
       webNovelToc: (novel) => const SizedBox.shrink(),
     );
   }
 
-  Widget _buildForWebOutline(WebNovelOutline webOutline) {
+  Widget _buildForWebOutline(WebNovelOutline webOutline, BuildContext context) {
     return Card(
       clipBehavior: Clip.hardEdge,
       child: InkWell(
         onTap: () {
-          talker.debug(webOutline);
+          readWebHomeBloc(context).add(WebHomeEvent.toNovelDetail(
+            webOutline.providerId,
+            webOutline.novelId,
+          ));
+          Navigator.push(
+              context, MaterialPageRoute(builder: (_) => const NovelDetail()));
         },
         child: Container(
           padding: const EdgeInsets.all(8.0),
@@ -34,7 +41,7 @@ class WebNovelTile extends StatelessWidget {
               Text(webOutline.titleJp,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: styleManager.primaryColorTitle),
+                  style: styleManager.primaryColorTitleSmall),
               Text(
                 webOutline.titleZh ?? '',
                 maxLines: 2,

@@ -1,4 +1,4 @@
-import 'package:auto_novel_reader_flutter/ui/components/reader/chapter_list.dart';
+import 'package:auto_novel_reader_flutter/ui/components/reader/epub_chapter_list.dart';
 import 'package:auto_novel_reader_flutter/ui/components/reader/epub_webview.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +29,7 @@ class _EpubReaderViewState extends State<EpubReaderView> {
 
         // Show table of contents
         drawer: const Drawer(
-          child: ChapterList(),
+          child: EpubChapterList(),
         ),
         // Show epub document
         body: const EpubWebview());

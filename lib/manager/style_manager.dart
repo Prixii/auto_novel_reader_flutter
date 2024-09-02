@@ -9,8 +9,16 @@ class _StyleManager {
     _theme = theme;
   }
 
-  TextStyle? get primaryColorTitle => _theme.textTheme.titleSmall?.copyWith(
+  TextStyle? get primaryColorTitleSmall =>
+      _theme.textTheme.titleSmall?.copyWith(
         color: _theme.colorScheme.primary,
+      );
+  TextStyle? get primaryColorTitleLarge =>
+      _theme.textTheme.titleLarge?.copyWith(
+        color: _theme.colorScheme.primary,
+      );
+  TextStyle? get greyTitleMedium => _theme.textTheme.titleMedium?.copyWith(
+        color: Colors.grey,
       );
 
   TextStyle? get titleSmall => _theme.textTheme.titleSmall;

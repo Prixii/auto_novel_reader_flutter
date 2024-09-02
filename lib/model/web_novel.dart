@@ -41,6 +41,7 @@ class WebNovel with _$WebNovel {
 
   const factory WebNovel.webNovelDto(
     String titleJp, {
+    String? titleZh,
     @Default([]) List<Author> authors,
     required String type,
     @Default([]) List<String> keywords,
@@ -73,4 +74,63 @@ class WebNovel with _$WebNovel {
     List<String>? gptParagraphs,
     List<String>? sakuraParagraphs,
   }) = WebNovelChapter;
+}
+
+List<Author> parseToAuthorList(dynamic body) {
+  try {
+    final authorList = <Author>[];
+    for (final item in body.cast<Map<String, dynamic>>()) {
+      authorList.add(Author(name: item['name'], link: item['link']));
+    }
+    return authorList;
+  } catch (e) {
+    talker.error(e);
+    return [];
+  }
+}
+
+List<WebNovelToc> parseTocList(dynamic body) {
+  try {
+    final tocList = <WebNovelToc>[];
+    for (final item in body.cast<Map<String, dynamic>>()) {
+      tocList.add(WebNovelToc(item['titleJp'],
+          titleZh: item['titleZh'],
+          chapterId: item['chapterId'],
+          createAt: item['createAt']));
+    }
+    return tocList;
+  } catch (e) {
+    talker.error(e);
+    return [];
+  }
+}
+
+List<WebNovelOutline> parseToWebNovelOutline(dynamic body) {
+  try {
+    final items = body['items'] as List<dynamic>;
+    var webNovelOutlines = <WebNovelOutline>[];
+    for (final item in items) {
+      webNovelOutlines.add(
+        WebNovelOutline(
+          item['titleJp'],
+          item['providerId'],
+          item['novelId'],
+          titleZh: item['titleZh'],
+          type: item['type'],
+          attentions: item['attentions'].cast<String>(),
+          keywords: item['keywords'].cast<String>(),
+          total: item['total'],
+          jp: item['jp'],
+          baidu: item['baidu'],
+          youdao: item['youdao'],
+          gpt: item['gpt'],
+          sakura: item['sakura'],
+          updateAt: item['updateAt'],
+        ),
+      );
+    }
+    return webNovelOutlines;
+  } catch (e) {
+    return [];
+  }
 }

@@ -23,7 +23,7 @@ class LineButton extends StatelessWidget {
       child: FilledButton(
         style: FilledButton.styleFrom(
           backgroundColor:
-              backgroundColor ?? theme.colorScheme.primaryContainer,
+              backgroundColor ?? theme.colorScheme.secondaryContainer,
         ),
         onPressed: onPressed,
         child: SizedBox(
@@ -32,7 +32,7 @@ class LineButton extends StatelessWidget {
             child: Text(
               text,
               style: TextStyle(
-                  color: textColor ?? theme.colorScheme.onPrimaryContainer),
+                  color: textColor ?? theme.colorScheme.onSecondaryContainer),
             ),
           ),
         ),

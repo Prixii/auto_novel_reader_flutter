@@ -1,6 +1,7 @@
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
+import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -12,14 +13,15 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   WebHomeBloc() : super(const _Initial()) {
     on<WebHomeEvent>((event, emit) async {
       await event.map(
-        init: (_Init value) async => await _onInit(event, emit),
-        refreshFavoredWeb: (_RefreshFavoredWeb value) async =>
+        init: (event) async => await _onInit(event, emit),
+        refreshFavoredWeb: (event) async =>
             await _onRefreshFavoredWeb(event, emit),
+        toNovelDetail: (event) async => await _onToNovelDetail(event, emit),
       );
     });
   }
 
-  _onInit(WebHomeEvent event, Emitter<WebHomeState> emit) async {
+  _onInit(_Init event, Emitter<WebHomeState> emit) async {
     if (state.inInit) return;
     emit(state.copyWith(inInit: true));
     await Future.wait([
@@ -56,57 +58,6 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     emit(state.copyWith(inInit: false));
   }
 
-  List<WebNovelOutline> parseToWebNovelOutline(dynamic body) {
-    try {
-      final items = body['items'] as List<dynamic>;
-      var webNovelOutlines = <WebNovelOutline>[];
-      for (final item in items) {
-        webNovelOutlines.add(
-          WebNovelOutline(
-            item['titleJp'],
-            item['providerId'],
-            item['novelId'],
-            titleZh: item['titleZh'],
-            type: item['type'],
-            attentions: item['attentions'].cast<String>(),
-            keywords: item['keywords'].cast<String>(),
-            total: item['total'],
-            jp: item['jp'],
-            baidu: item['baidu'],
-            youdao: item['youdao'],
-            gpt: item['gpt'],
-            sakura: item['sakura'],
-            updateAt: item['updateAt'],
-          ),
-        );
-      }
-      return webNovelOutlines;
-    } catch (e) {
-      return [];
-    }
-  }
-
-  List<WenkuNovelOutline> parseToWenkuNovelOutline(dynamic body) {
-    try {
-      final items = body['items'] as List<dynamic>;
-      var wenkuNovelOutlines = <WenkuNovelOutline>[];
-      for (final item in items) {
-        wenkuNovelOutlines.add(
-          WenkuNovelOutline(
-            item['id'],
-            item['title'],
-            item['titleZh'],
-            item['cover'],
-            favored: item['favored'],
-          ),
-        );
-      }
-      return wenkuNovelOutlines;
-    } catch (e) {
-      return [];
-    }
-  }
-
   Future<List<WebNovelOutline>> refreshFavoredWeb() async {
     return apiClient.userFavoredWebService
         .getIdList(
@@ -122,8 +73,60 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     });
   }
 
-  _onRefreshFavoredWeb(WebHomeEvent event, Emitter<WebHomeState> emit) async {
+  _onRefreshFavoredWeb(
+      _RefreshFavoredWeb event, Emitter<WebHomeState> emit) async {
     final webNovelOutlines = await refreshFavoredWeb();
     emit(state.copyWith(favoredWeb: webNovelOutlines));
+  }
+
+  _onToNovelDetail(_ToNovelDetail event, Emitter<WebHomeState> emit) async {
+    if (state.webNovelDtoMap['${event.providerId}${event.novelId}'] != null) {
+      emit(state.copyWith(
+        currentNovelId: event.novelId,
+        currentNovelProviderId: event.providerId,
+      ));
+      return;
+    }
+
+    emit(state.copyWith(
+      loadingNovelDetail: true,
+      currentNovelId: event.novelId,
+      currentNovelProviderId: event.providerId,
+    ));
+    final response = await apiClient.webNovelService
+        .getNovelId(event.providerId, event.novelId);
+    final body = response.body;
+    try {
+      final key = event.providerId + event.novelId;
+
+      final webNovelDto = WebNovelDto(
+        body['titleJp'],
+        attentions: body['attentions'].cast<String>(),
+        authors: parseToAuthorList(body['authors']),
+        baidu: body['baidu'],
+        favored: body['favored'],
+        glossary: Map<String, String>.from(body['glossary']),
+        gpt: body['gpt'],
+        introductionJp: body['introductionJp'],
+        introductionZh: body['introductionZh'],
+        jp: body['jp'],
+        keywords: body['keywords'].cast<String>(),
+        points: body['points'],
+        sakura: body['sakura'],
+        syncAt: body['syncAt'],
+        titleZh: body['titleZh'],
+        toc: parseTocList(body['toc']),
+        totalCharacters: body['totalCharacters'],
+        type: body['type'],
+        visited: body['visited'],
+        youdao: body['youdao'],
+      );
+
+      emit(state.copyWith(
+        webNovelDtoMap: {...state.webNovelDtoMap, key: webNovelDto},
+      ));
+    } catch (e) {
+      talker.error(e);
+    }
   }
 }
