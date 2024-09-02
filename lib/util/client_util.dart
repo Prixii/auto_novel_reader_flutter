@@ -5,6 +5,8 @@ import 'package:auto_novel_reader_flutter/bloc/epub_viewer/epub_viewer_bloc.dart
 import 'package:auto_novel_reader_flutter/bloc/global/global_bloc.dart';
 import 'package:auto_novel_reader_flutter/bloc/local_file/local_file_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/user/user_cubit.dart';
+import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
+import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -15,8 +17,6 @@ final talker = Talker();
 late SharedPreferences prefs;
 late Size screenSize;
 late double appBarHeight;
-late Color errorContainerColor;
-late Color onErrorContainerColor;
 
 final globalBloc = GlobalBloc();
 final localFileCubit = LocalFileCubit();
@@ -29,17 +29,11 @@ void initScreenSize(BuildContext context) {
   appBarHeight = MediaQueryData.fromView(View.of(context)).padding.top;
 }
 
-void initColor(BuildContext context) {
-  final colorScheme = Theme.of(context).colorScheme;
-  errorContainerColor = colorScheme.errorContainer;
-  onErrorContainerColor = colorScheme.onErrorContainer;
-}
-
 void showErrorToast(String message) {
   Fluttertoast.showToast(
     msg: message,
-    textColor: onErrorContainerColor,
-    backgroundColor: errorContainerColor,
+    textColor: styleManager.colorScheme.onErrorContainer,
+    backgroundColor: styleManager.colorScheme.errorContainer,
   );
 }
 
@@ -51,8 +45,9 @@ LocalFileCubit readLocalFileCubit(BuildContext context) =>
     context.read<LocalFileCubit>();
 ConfigCubit readConfigCubit(BuildContext context) =>
     context.read<ConfigCubit>();
-
 UserCubit readUserCubit(BuildContext context) => context.read<UserCubit>();
+WebHomeBloc readWebHomeBloc(BuildContext context) =>
+    context.read<WebHomeBloc>();
 
 Color getRandomDarkColor() {
   final random = Random();

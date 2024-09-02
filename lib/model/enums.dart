@@ -35,14 +35,14 @@ enum ProgressType {
 }
 
 enum SearchSortType {
-  create('create'),
-  update('update');
+  create,
+  update;
+}
 
-  final String value;
-
-  const SearchSortType(this.value);
-
-  factory SearchSortType.fromIndex(String value) =>
-      SearchSortType.values.firstWhere((element) => element.value == value,
-          orElse: () => throw Exception('Invalid index'));
+enum UserRole {
+  admin,
+  maintainer,
+  trusted,
+  normal,
+  banned;
 }

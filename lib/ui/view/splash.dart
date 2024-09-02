@@ -1,11 +1,14 @@
 import 'dart:async';
 
+import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
+import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:auto_novel_reader_flutter/util/channel/key_down_channel.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/ui/view/home.dart';
 import 'package:auto_novel_reader_flutter/manager/local_file_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashView extends StatefulWidget {
@@ -54,7 +57,7 @@ class _SplashViewState extends State<SplashView> {
   }
 
   Future<void> _startInit() async {
-    initColor(context);
+    styleManager.setTheme(Theme.of(context));
     initScreenSize(context);
     prefs = await SharedPreferences.getInstance();
     localFileManager.init();
@@ -69,7 +72,12 @@ class _SplashViewState extends State<SplashView> {
       _doAutoLogin();
     } else {
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => const HomeView()));
+          context,
+          MaterialPageRoute(
+              builder: (context) => BlocProvider(
+                    create: (context) => WebHomeBloc(),
+                    child: const HomeView(),
+                  )));
     }
   }
 

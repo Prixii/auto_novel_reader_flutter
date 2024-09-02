@@ -37,6 +37,10 @@ class UserCubit extends HydratedCubit<UserState> {
 
   /// 在 apiClient 初始化完成后调用
   Future<void> activateAuth(BuildContext context) async {
+    if (!state.autoSignIn) {
+      emit(const UserState.initial());
+      return;
+    }
     if (state.token == null) return;
     final signInTime = state.signInTime;
     if (signInTime == null) {

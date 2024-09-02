@@ -1,36 +1,46 @@
-import 'package:auto_novel_reader_flutter/model/enums.dart';
-import 'package:auto_novel_reader_flutter/network/api_client.dart';
-import 'package:auto_novel_reader_flutter/util/html_util.dart';
+import 'package:auto_novel_reader_flutter/ui/components/web_home/home/home.dart';
+import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_rank/novel_rank.dart';
+import 'package:auto_novel_reader_flutter/ui/components/web_home/web_novel/web_novel.dart';
+import 'package:auto_novel_reader_flutter/ui/components/web_home/wenku_novel/wenku_novel.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class WebHomeView extends StatelessWidget {
   const WebHomeView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    initData();
-    return Center(
-        child: TextButton(
-      onPressed: () {
-        rootBundle.loadString('assets/html/3.html').then((html) {
-          htmlUtil.paragraphExtractor(html);
-        });
-      },
-      child: const Text('test'),
-    ));
+    return DefaultTabController(
+      length: 4,
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          shadowColor: Theme.of(context).colorScheme.shadow,
+          backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+          title: _buildTabBar(),
+        ),
+        body: const TabBarView(
+          children: [
+            Home(),
+            WebNovel(),
+            WenkuNovel(),
+            NovelRank(),
+          ],
+        ),
+      ),
+    );
   }
 
-  void initData() {
-    apiClient.userFavoredWebService
-        .getIdList('/default', 0, 8, SearchSortType.update.value);
-    apiClient.webNovelService.getList(
-      0,
-      8,
-      provider: 'kakuyomu,syosetu,novelup,hameln,pixiv,alphapolis',
-      sort: 1,
-      level: 1,
+  TabBar _buildTabBar() {
+    return const TabBar(
+      indicatorSize: TabBarIndicatorSize.label,
+      tabAlignment: TabAlignment.start,
+      isScrollable: true,
+      tabs: [
+        Tab(text: '首页'),
+        Tab(text: '网络'),
+        Tab(text: '文库'),
+        Tab(text: '排行'),
+      ],
     );
-    apiClient.wenkuNovelService.getList(0, 12, level: 1);
   }
 }

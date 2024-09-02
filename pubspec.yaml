@@ -46,6 +46,8 @@ dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   hydrated_bloc: ^9.1.5
+  # 网络图片
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_test:
