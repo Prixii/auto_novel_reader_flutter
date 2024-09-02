@@ -13,6 +13,8 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     on<WebHomeEvent>((event, emit) async {
       await event.map(
         init: (_Init value) async => await _onInit(event, emit),
+        refreshFavoredWeb: (_RefreshFavoredWeb value) async =>
+            await _onRefreshFavoredWeb(event, emit),
       );
     });
   }
@@ -21,18 +23,11 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     if (state.inInit) return;
     emit(state.copyWith(inInit: true));
     await Future.wait([
-      apiClient.userFavoredWebService
-          .getIdList(
-        '/default',
-        0,
-        8,
-        SearchSortType.update.name,
-      )
-          .then((response) {
-        final body = response.body;
-        final webNovelOutlines = parseToWebNovelOutline(body);
-        emit(state.copyWith(favoredWeb: webNovelOutlines));
-      }),
+      refreshFavoredWeb().then(
+        (webNovelOutlines) => emit(
+          state.copyWith(favoredWeb: webNovelOutlines),
+        ),
+      ),
       apiClient.webNovelService
           .getList(
         0,
@@ -110,5 +105,25 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     } catch (e) {
       return [];
     }
+  }
+
+  Future<List<WebNovelOutline>> refreshFavoredWeb() async {
+    return apiClient.userFavoredWebService
+        .getIdList(
+      'default',
+      0,
+      8,
+      SearchSortType.update.name,
+    )
+        .then((response) {
+      final body = response?.body;
+      final webNovelOutlines = parseToWebNovelOutline(body);
+      return webNovelOutlines;
+    });
+  }
+
+  _onRefreshFavoredWeb(WebHomeEvent event, Emitter<WebHomeState> emit) async {
+    final webNovelOutlines = await refreshFavoredWeb();
+    emit(state.copyWith(favoredWeb: webNovelOutlines));
   }
 }

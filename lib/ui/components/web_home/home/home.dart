@@ -19,7 +19,7 @@ class Home extends StatelessWidget {
           FavoredWebList(),
           WebMostVisited(),
           WenkuLatestUpdate(),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
         ],
       ),
     );

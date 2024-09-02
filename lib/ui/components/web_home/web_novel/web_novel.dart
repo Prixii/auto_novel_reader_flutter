@@ -5,6 +5,6 @@ class WebNovel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text('施工中ヾ(≧▽≦*)o');
+    return const Text('施工中ヾ(≧▽≦*)o');
   }
 }

@@ -10,11 +10,9 @@ import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 final talker = Talker();
-late SharedPreferences prefs;
 late Size screenSize;
 late double appBarHeight;
 
@@ -23,6 +21,7 @@ final localFileCubit = LocalFileCubit();
 final epubViewerBloc = EpubViewerBloc();
 final configCubit = ConfigCubit();
 final userCubit = UserCubit();
+final webHomeBloc = WebHomeBloc();
 
 void initScreenSize(BuildContext context) {
   screenSize = MediaQuery.sizeOf(context);

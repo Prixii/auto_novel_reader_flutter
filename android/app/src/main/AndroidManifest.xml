@@ -2,7 +2,7 @@
     package="com.prixii.auto_novel_reader_flutter">
     <uses-permission android:name="android.permission.INTERNET" />
     <application
-        android:label="绿站阅读器"
+        android:label="掌绿"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

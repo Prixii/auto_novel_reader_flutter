@@ -55,19 +55,22 @@ class _LoginFormState extends State<LoginForm> {
           ],
         ),
         space,
-        buildRoundButton(() => _doLogin(context)),
+        buildRoundButton(() => _doSignIn(context)),
       ],
     );
   }
 
-  void _doLogin(BuildContext context) {
+  void _doSignIn(BuildContext context) async {
     FocusScope.of(context).unfocus();
     if (_formFinished()) {
-      readUserCubit(context).signIn(
+      final isSignInSucceed = await readUserCubit(context).signIn(
         _emailOrUsernameController.text,
         _passwordController.text,
         autoSignIn: isRememberMeChecked,
       );
+      if (isSignInSucceed && context.mounted) {
+        Navigator.pop(context);
+      }
     } else {
       _showToast(context);
     }

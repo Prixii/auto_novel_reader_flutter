@@ -13,6 +13,8 @@ class ConfigCubit extends HydratedCubit<ConfigState> {
 
   setShowErrorInfo(bool value) => emit(state.copyWith(showErrorInfo: value));
 
+  setHelloPage(int value) => emit(state.copyWith(helloPageIndex: value));
+
   setVolumeKeyShift(bool value) => emit(state.copyWith(volumeKeyShift: value));
 
   setUrl(String value) {

@@ -1,3 +1,4 @@
+import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +33,7 @@ class UserCubit extends HydratedCubit<UserState> {
       token: token,
       signInTime: DateTime.now(),
     ));
+    webHomeBloc.add(const WebHomeEvent.refreshFavoredWeb());
     return true;
   }
 

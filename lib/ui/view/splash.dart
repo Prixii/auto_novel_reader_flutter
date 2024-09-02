@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:auto_novel_reader_flutter/util/channel/key_down_channel.dart';
@@ -8,8 +7,6 @@ import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/ui/view/home.dart';
 import 'package:auto_novel_reader_flutter/manager/local_file_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
@@ -52,14 +49,13 @@ class _SplashViewState extends State<SplashView> {
   }
 
   Future<void> _justWait() async {
-    await Future.delayed(const Duration(milliseconds: 500), () {});
+    await Future.delayed(const Duration(milliseconds: 800), () {});
     return;
   }
 
   Future<void> _startInit() async {
     styleManager.setTheme(Theme.of(context));
     initScreenSize(context);
-    prefs = await SharedPreferences.getInstance();
     localFileManager.init();
     initKeyDownChannel();
     return;
@@ -68,37 +64,16 @@ class _SplashViewState extends State<SplashView> {
   Future<void> _precacheImages() async {}
 
   void _leaveSplash() async {
-    if (prefs.getBool('autoLogin') == true) {
-      _doAutoLogin();
-    } else {
-      Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) => BlocProvider(
-                    create: (context) => WebHomeBloc(),
-                    child: const HomeView(),
-                  )));
-    }
-  }
-
-  _doAutoLogin() {
-    final phone = prefs.getString('phone');
-    final password = prefs.getString('password');
-    if (phone == null || password == null) {
-      clearSharedPreference();
-      return;
-    }
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const HomeView(),
+      ),
+    );
   }
 
   Future<void> _initChopperClient() async {
     apiClient.createChopper();
     await userCubit.activateAuth(context);
   }
-}
-
-void clearSharedPreference() async {
-  prefs.setString('phone', '');
-  prefs.setString('password', '');
-  prefs.setBool('autoLogin', false);
-  prefs.setInt('helloPage', 0);
 }

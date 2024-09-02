@@ -62,3 +62,12 @@ class _ApiClient {
     wenkuNovelService = chopper!.getService<WenkuNovelService>();
   }
 }
+
+///对于需要 token 的 api,需要在外层封装一层该函数
+Future<Response<T>?> tokenRequest<T>(
+  Future<Response<T>> Function() body,
+) async {
+  final token = userCubit.state.token;
+  if (token == null) return null;
+  return await body.call();
+}

@@ -34,7 +34,7 @@ class SettingsView extends StatelessWidget {
         const SizedBox(height: 8.0),
         const UserInfoTile(),
         _buildDivider(theme),
-        _buildHelloPageSetter(prefs.getInt('helloPage') ?? 1),
+        _buildHelloPageSetter(context),
         _buildUrlSetter(context),
         _buildDivider(theme),
         _buildSlideShiftOption(context),
@@ -77,13 +77,12 @@ class SettingsView extends StatelessWidget {
     );
   }
 
-  Widget _buildHelloPageSetter(int helloPageIndex) {
+  Widget _buildHelloPageSetter(BuildContext context) {
+    final cubit = readConfigCubit(context);
     return TabOption(
-        initValue: helloPageIndex,
+        initValue: cubit.state.helloPageIndex,
         label: '欢迎页',
-        onTap: (value, index) => {
-              prefs.setInt('helloPage', index),
-            },
+        onTap: (value, index) => cubit.setHelloPage(index),
         icon: UniconsLine.estate,
         tabs: const [
           '首页',

@@ -30,6 +30,7 @@ class MainApp extends StatelessWidget {
         BlocProvider(create: (context) => localFileCubit),
         BlocProvider(create: (context) => configCubit),
         BlocProvider(create: (context) => userCubit),
+        BlocProvider(create: (context) => webHomeBloc),
       ],
       child: MaterialApp(
         theme: ThemeData(

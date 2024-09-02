@@ -23,8 +23,6 @@ dependencies:
   file: ^7.0.0
   # 权限申请
   permission_handler: ^11.3.1
-  # 持久化
-  shared_preferences: ^2.2.3
   # log 打印
   talker_dio_logger: ^4.2.0
   talker_flutter: ^4.2.0
