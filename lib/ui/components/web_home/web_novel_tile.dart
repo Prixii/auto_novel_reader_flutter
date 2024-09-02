@@ -1,6 +1,7 @@
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/info_badge.dart';
+import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
 
 class WebNovelTile extends StatelessWidget {
@@ -20,23 +21,29 @@ class WebNovelTile extends StatelessWidget {
 
   Widget _buildForWebOutline(WebNovelOutline webOutline) {
     return Card(
-      child: Container(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(webOutline.titleJp,
+      clipBehavior: Clip.hardEdge,
+      child: InkWell(
+        onTap: () {
+          talker.debug(webOutline);
+        },
+        child: Container(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(webOutline.titleJp,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: styleManager.primaryColorTitle),
+              Text(
+                webOutline.titleZh ?? '',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: styleManager.primaryColorTitle),
-            Text(
-              webOutline.titleZh ?? '',
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            Expanded(child: Container()),
-            _buildFooter(webOutline),
-          ],
+              ),
+              Expanded(child: Container()),
+              _buildFooter(webOutline),
+            ],
+          ),
         ),
       ),
     );

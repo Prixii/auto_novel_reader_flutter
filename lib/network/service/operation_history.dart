@@ -9,10 +9,13 @@ abstract class OperationHistoryService extends ChopperService {
   Future<Response> getTocList();
 
   @Delete(path: '/{id}')
-  Future<Response> delId(@Path() String id);
+  Future<Response> _delId(@Path() String id);
+  Future<Response?> delId(@Path() String id) => tokenRequest(() => _delId(id));
 
   @Delete(path: '/toc-merge/{id}')
-  Future<Response> delTocId(@Path() String id);
+  Future<Response> _delTocId(@Path() String id);
+  Future<Response?> delTocId(@Path() String id) =>
+      tokenRequest(() => _delTocId(id));
 
   static OperationHistoryService create([ChopperClient? client]) =>
       _$OperationHistoryService(client);

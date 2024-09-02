@@ -9,7 +9,8 @@ abstract class AuthService extends ChopperService {
   Future<Response> postSignUp();
 
   @Get(path: '/renew')
-  Future<Response> getRenew();
+  Future<Response> _getRenew();
+  Future<Response?> getRenew() => tokenRequest(() => _getRenew());
 
   @Post(path: '/verify-email')
   Future<Response> postVerifyEmail();

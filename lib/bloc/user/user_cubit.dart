@@ -72,7 +72,7 @@ class UserCubit extends HydratedCubit<UserState> {
     if (state.token == null) return;
 
     final renewResponse = await apiClient.authService.getRenew();
-    final token = renewResponse.body;
+    final token = renewResponse?.body;
     if (token == null || token.isEmpty) return;
     emit(state.copyWith(
       token: token,
