@@ -12,4 +12,5 @@ class GlobalEvent with _$GlobalEvent {
   const factory GlobalEvent.updateProgress(
       ProgressType type, int progress, String message) = _UpdateProgress;
   const factory GlobalEvent.endProgress(ProgressType type) = _EndProgress;
+  const factory GlobalEvent.setReadType(ReadType readType) = _SetReadType;
 }

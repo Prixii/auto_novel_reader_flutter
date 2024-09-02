@@ -30,8 +30,10 @@ class WebNovelTile extends StatelessWidget {
             webOutline.providerId,
             webOutline.novelId,
           ));
-          Navigator.push(context,
-              MaterialPageRoute(builder: (_) => const WebNovelDetail()));
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) => const WebNovelDetailContainer()));
         },
         child: Container(
           padding: const EdgeInsets.all(8.0),

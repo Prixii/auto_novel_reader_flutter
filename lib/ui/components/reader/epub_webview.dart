@@ -1,6 +1,5 @@
 import 'package:auto_novel_reader_flutter/bloc/epub_viewer/epub_viewer_bloc.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/info_badge.dart';
-import 'package:auto_novel_reader_flutter/util/channel/method_channel.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,7 +23,6 @@ class _EpubWebviewState extends State<EpubWebview> {
   void initState() {
     super.initState();
     initScrollController();
-    handleSetVolumeShift(readConfigCubit(context).state.volumeKeyShift);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       maxHeight = MediaQuery.of(context).size.height * 0.7;
       readEpubViewerBloc(context)
@@ -55,7 +53,6 @@ class _EpubWebviewState extends State<EpubWebview> {
             if (Scaffold.of(context).isDrawerOpen) return;
             readEpubViewerBloc(context)
                 .add(EpubViewerEvent.close(readProgress));
-            handleSetVolumeShift(false);
           },
           child: Stack(
             clipBehavior: Clip.hardEdge,

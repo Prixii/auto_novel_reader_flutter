@@ -10,4 +10,6 @@ class WebHomeEvent with _$WebHomeEvent {
   const factory WebHomeEvent.nextChapter() = _NextChapter;
   const factory WebHomeEvent.previousChapter() = _PreviousChapter;
   const factory WebHomeEvent.jumpToChapter(String index) = _JumpToChapter;
+  const factory WebHomeEvent.closeNovel() = _CloseNovel;
+  const factory WebHomeEvent.leaveDetail() = _LeaveDetail;
 }

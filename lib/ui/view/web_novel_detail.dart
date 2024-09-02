@@ -11,18 +11,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:unicons/unicons.dart';
 
-class WebNovelDetail extends StatelessWidget {
-  const WebNovelDetail({super.key});
+class WebNovelDetailContainer extends StatelessWidget {
+  const WebNovelDetailContainer({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocSelector<WebHomeBloc, WebHomeState, WebNovelDto?>(
-      selector: (state) {
-        return state.webNovelDtoMap[
-            '${state.currentNovelProviderId}${state.currentNovelId}'];
-      },
-      builder: (context, novelDto) {
-        return Scaffold(
+        selector: (state) {
+      return state.webNovelDtoMap[
+          '${state.currentNovelProviderId}${state.currentNovelId}'];
+    }, builder: (context, novelDto) {
+      return Scaffold(
           appBar: AppBar(
             shadowColor: styleManager.colorScheme.shadow,
             backgroundColor: styleManager.colorScheme.secondaryContainer,
@@ -32,17 +31,53 @@ class WebNovelDetail extends StatelessWidget {
           drawer: Drawer(
             child: ChapterList(tocList: novelDto?.toc ?? []),
           ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 8.0,
-            ),
-            child: (novelDto == null)
-                ? const Center(child: CircularProgressIndicator())
-                : _buildNovelDetail(novelDto, context),
-          ),
-        );
+          body: WebNovelDetail(
+            novelDto: novelDto,
+          ));
+    });
+  }
+
+  List<Widget> get _buildActions {
+    return [
+      IconButton(
+        onPressed: () {
+          // TODO 编辑
+          Fluttertoast.showToast(msg: '这个功能还没有做呢');
+        },
+        icon: const Icon(UniconsLine.edit),
+      ),
+      IconButton(
+        onPressed: () {
+          // TODO 复制链接到剪贴板
+          Fluttertoast.showToast(msg: '这个功能还没有做呢');
+        },
+        icon: const Icon(UniconsLine.link),
+      ),
+    ];
+  }
+}
+
+class WebNovelDetail extends StatelessWidget {
+  const WebNovelDetail({super.key, required this.novelDto});
+
+  final WebNovelDto? novelDto;
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      onPopInvoked: (_) {
+        if (Scaffold.of(context).isDrawerOpen) return;
+        readWebHomeBloc(context).add(const WebHomeEvent.leaveDetail());
       },
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16.0,
+          vertical: 8.0,
+        ),
+        child: (novelDto == null)
+            ? const Center(child: CircularProgressIndicator())
+            : _buildNovelDetail(novelDto!, context),
+      ),
     );
   }
 
@@ -71,25 +106,6 @@ class WebNovelDetail extends StatelessWidget {
         const SizedBox(height: 64.0),
       ],
     );
-  }
-
-  List<Widget> get _buildActions {
-    return [
-      IconButton(
-        onPressed: () {
-          // TODO 编辑
-          Fluttertoast.showToast(msg: '这个功能还没有做呢');
-        },
-        icon: const Icon(UniconsLine.edit),
-      ),
-      IconButton(
-        onPressed: () {
-          // TODO 复制链接到剪贴板
-          Fluttertoast.showToast(msg: '这个功能还没有做呢');
-        },
-        icon: const Icon(UniconsLine.link),
-      ),
-    ];
   }
 
   Widget _buildAuthorInfo(WebNovelDto novelDto) {
@@ -250,7 +266,7 @@ class WebNovelDetail extends StatelessWidget {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const PlainTextNovelReader(),
+                    builder: (context) => const PlainTextNovelReaderContainer(),
                   ));
             },
             text: (novelDto.lastReadChapterId == null) ? '开始阅读' : '继续阅读'),

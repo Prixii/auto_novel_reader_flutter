@@ -1,4 +1,7 @@
 import 'package:auto_novel_reader_flutter/model/enums.dart';
+import 'package:auto_novel_reader_flutter/util/channel/key_down_channel.dart';
+import 'package:auto_novel_reader_flutter/util/channel/method_channel.dart';
+import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -15,6 +18,7 @@ class GlobalBloc extends Bloc<GlobalEvent, GlobalState> {
         startProgress: (event) async => await _onStartProgress(event, emit),
         updateProgress: (event) async => await _onUpdateProgress(event, emit),
         endProgress: (event) async => await _onEndProgress(event, emit),
+        setReadType: (event) async => await _onSetReadType(event, emit),
       );
     });
   }
@@ -50,5 +54,19 @@ class GlobalBloc extends Bloc<GlobalEvent, GlobalState> {
       progressValue: 0,
       progressMessage: '',
     ));
+  }
+
+  _onSetReadType(_SetReadType event, Emitter<GlobalState> emit) {
+    if (configCubit.state.volumeKeyShift == false) return;
+    if (event.readType == state.readType) return;
+
+    if (event.readType == ReadType.none) {
+      unsubscribeVolumeKeyEvent();
+      handleSetVolumeShift(false);
+    } else {
+      handleSetVolumeShift(configCubit.state.volumeKeyShift);
+      subscribeVolumeKeyEvent();
+    }
+    emit(state.copyWith(readType: event.readType));
   }
 }

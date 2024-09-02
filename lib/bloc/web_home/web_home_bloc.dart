@@ -1,3 +1,4 @@
+import 'package:auto_novel_reader_flutter/bloc/global/global_bloc.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
@@ -22,6 +23,8 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
         nextChapter: (event) async => await _onNextChapter(event, emit),
         previousChapter: (event) async => await _onPreviousChapter(event, emit),
         jumpToChapter: (event) async => await _onJumpToChapter(event, emit),
+        closeNovel: (event) async => await _onCloseNovel(event, emit),
+        leaveDetail: (event) async => await _onLeaveDetail(event, emit),
       );
     });
   }
@@ -154,14 +157,21 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   }
 
   _onReadChapter(_ReadChapter event, Emitter<WebHomeState> emit) async {
+    globalBloc.add(const GlobalEvent.setReadType(ReadType.web));
     emit(state.copyWith(loadingNovelChapter: true));
     final targetChapterId = state.currentChapterIndex ?? '';
     final providerId = state.currentNovelProviderId ?? '';
     final novelId = state.currentNovelId ?? '';
     final chapterKey = providerId + novelId + targetChapterId;
-
-    if (state.chapterDtoMap[chapterKey] != null) {
-      emit(state.copyWith(loadingNovelChapter: false));
+    final existDto = state.chapterDtoMap[chapterKey];
+    if (existDto != null) {
+      emit(
+        state.copyWith(
+          loadingNovelChapter: false,
+          currentChapterDto: existDto,
+          currentChapterIndex: targetChapterId,
+        ),
+      );
       return;
     }
 
@@ -220,7 +230,7 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
         youdaoParagraphs: body['youdaoParagraphs']?.cast<String>(),
         gptParagraphs: body['gptParagraphs']?.cast<String>(),
         sakuraParagraphs: body['sakuraParagraphs']?.cast<String>(),
-        previousId: body['previousId'],
+        previousId: body['prevId'],
         nextId: body['nextId'],
         titleJp: body['titleJp'],
         titleZh: body['titleZh'],
@@ -248,5 +258,21 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   _onJumpToChapter(_JumpToChapter event, Emitter<WebHomeState> emit) async {
     emit(state.copyWith(currentChapterIndex: event.index));
     add(const WebHomeEvent.readChapter());
+  }
+
+  _onCloseNovel(_CloseNovel event, Emitter<WebHomeState> emit) {
+    globalBloc.add(const GlobalEvent.setReadType(ReadType.none));
+  }
+
+  _onLeaveDetail(_LeaveDetail event, Emitter<WebHomeState> emit) {
+    final novelDtoMapSnapshot = {...state.webNovelDtoMap};
+    final updatedCurrentNovelDto = state.currentWebNovelDto?.copyWith(
+      lastReadChapterId: state.currentChapterIndex,
+    );
+    if (updatedCurrentNovelDto != null) {
+      novelDtoMapSnapshot[(state.currentNovelProviderId ?? '') +
+          (state.currentNovelId ?? '')] = updatedCurrentNovelDto;
+      emit(state.copyWith(webNovelDtoMap: novelDtoMapSnapshot));
+    }
   }
 }

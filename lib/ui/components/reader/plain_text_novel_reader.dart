@@ -9,8 +9,8 @@ import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class PlainTextNovelReader extends StatelessWidget {
-  const PlainTextNovelReader({super.key});
+class PlainTextNovelReaderContainer extends StatelessWidget {
+  const PlainTextNovelReaderContainer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -39,30 +39,46 @@ class PlainTextNovelReader extends StatelessWidget {
           ),
           body: dto == null
               ? const Center(child: CircularProgressIndicator())
-              : _buildNovelBody(dto),
+              : PlainTextNovelReader(dto: dto),
         );
       },
     );
   }
+}
 
-  Widget _buildNovelBody(ChapterDto dto) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-      child: Column(
-        children: [
-          Text(
-            dto.titleJp ?? '',
-            style: styleManager.primaryColorTitleLarge,
-          ),
-          Text(
-            dto.titleZh ?? '',
-            style: styleManager.titleSmall,
-          ),
-          const Divider(),
-          NovelRender(
-            chapterDto: dto,
-          )
-        ],
+class PlainTextNovelReader extends StatelessWidget {
+  const PlainTextNovelReader({
+    super.key,
+    required this.dto,
+  });
+
+  final ChapterDto dto;
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      onPopInvoked: (value) {
+        if (Scaffold.of(context).isDrawerOpen) return;
+        readWebHomeBloc(context).add(const WebHomeEvent.closeNovel());
+      },
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+        child: Column(
+          children: [
+            Text(
+              dto.titleJp ?? '',
+              style: styleManager.primaryColorTitleLarge,
+            ),
+            Text(
+              dto.titleZh ?? '',
+              style: styleManager.titleSmall,
+            ),
+            const Divider(),
+            NovelRender(
+              chapterDto: dto,
+            )
+          ],
+        ),
       ),
     );
   }

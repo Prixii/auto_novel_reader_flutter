@@ -8,6 +8,7 @@ class GlobalState with _$GlobalState {
     @Default(0) int progressValue,
     @Default('') String progressMessage,
     @Default(false) bool isLoading,
-    @Default(null) int? progressTypeValue,
+    int? progressTypeValue,
+    @Default(ReadType.none) ReadType readType,
   }) = _Initial;
 }

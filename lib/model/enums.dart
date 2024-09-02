@@ -72,3 +72,9 @@ enum TranslationSource {
         TranslationSource.sakura => 'Sakura',
       };
 }
+
+enum ReadType {
+  epub,
+  web,
+  none,
+}

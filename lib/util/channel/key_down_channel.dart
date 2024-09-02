@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:auto_novel_reader_flutter/bloc/epub_viewer/epub_viewer_bloc.dart';
+import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
+import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/services.dart';
 
@@ -41,9 +43,25 @@ void unsubscribeVolumeKeyEvent() {
 }
 
 void handleVolumeDown() {
-  epubViewerBloc.add(const EpubViewerEvent.nextChapter());
+  final readType = globalBloc.state.readType;
+  switch (readType) {
+    case ReadType.epub:
+      epubViewerBloc.add(const EpubViewerEvent.nextChapter());
+    case ReadType.web:
+      webHomeBloc.add(const WebHomeEvent.nextChapter());
+    case ReadType.none:
+      break;
+  }
 }
 
 void handleVolumeUp() {
-  epubViewerBloc.add(const EpubViewerEvent.previousChapter());
+  final readType = globalBloc.state.readType;
+  switch (readType) {
+    case ReadType.epub:
+      epubViewerBloc.add(const EpubViewerEvent.previousChapter());
+    case ReadType.web:
+      webHomeBloc.add(const WebHomeEvent.previousChapter());
+    case ReadType.none:
+      break;
+  }
 }
