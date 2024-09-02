@@ -32,7 +32,8 @@ class PlainTextNovelReader extends StatelessWidget {
                     '${state.currentNovelProviderId}${state.currentNovelId}'];
               },
               builder: (context, novelDto) {
-                return ChapterList(tocList: novelDto?.toc ?? []);
+                return ChapterList(
+                    tocList: novelDto?.toc ?? [], readMode: true);
               },
             ),
           ),
@@ -46,6 +47,7 @@ class PlainTextNovelReader extends StatelessWidget {
 
   Widget _buildNovelBody(ChapterDto dto) {
     return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
       child: Column(
         children: [
           Text(
@@ -84,7 +86,7 @@ class NovelRender extends StatelessWidget {
     return ListView.builder(
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20),
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       itemBuilder: (context, index) {
         late List<TextSpan> spans;
         switch (config.language) {

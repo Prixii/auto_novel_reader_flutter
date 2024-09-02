@@ -7,9 +7,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 const _chapterTileHeight = 58.0;
 
 class ChapterList extends StatelessWidget {
-  const ChapterList({super.key, required this.tocList});
+  const ChapterList({super.key, required this.tocList, this.readMode = false});
 
   final List<WebNovelToc> tocList;
+  final bool readMode;
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -43,6 +44,7 @@ class ChapterList extends StatelessWidget {
           titleJp: tocList[index].titleJp,
           titleZh: tocList[index].titleZh,
           index: tocList[index].chapterId,
+          readMode: readMode,
         );
       },
       itemCount: tocList.length,
@@ -52,11 +54,16 @@ class ChapterList extends StatelessWidget {
 
 class ChapterListTile extends StatelessWidget {
   const ChapterListTile(
-      {super.key, required this.titleJp, this.titleZh, required this.index});
+      {super.key,
+      required this.titleJp,
+      this.titleZh,
+      required this.index,
+      this.readMode = false});
 
   final String titleJp;
   final String? titleZh;
   final String? index;
+  final bool readMode;
 
   @override
   Widget build(BuildContext context) {
@@ -65,13 +72,16 @@ class ChapterListTile extends StatelessWidget {
         return state.currentChapterIndex;
       },
       builder: (context, chapterDto) {
-        final isCurrent = chapterDto == index;
+        final isCurrent = (readMode && (chapterDto == index));
         return InkWell(
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(8.0),
             bottomLeft: Radius.circular(8.0),
           ),
           onTap: () {
+            if (!readMode) return;
+            if (index == null) return;
+            context.read<WebHomeBloc>().add(WebHomeEvent.jumpToChapter(index!));
             Navigator.pop(context);
           },
           child: Container(

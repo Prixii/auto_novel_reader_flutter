@@ -19,6 +19,9 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
             await _onRefreshFavoredWeb(event, emit),
         toNovelDetail: (event) async => await _onToNovelDetail(event, emit),
         readChapter: (event) async => await _onReadChapter(event, emit),
+        nextChapter: (event) async => await _onNextChapter(event, emit),
+        previousChapter: (event) async => await _onPreviousChapter(event, emit),
+        jumpToChapter: (event) async => await _onJumpToChapter(event, emit),
       );
     });
   }
@@ -86,10 +89,14 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   }
 
   _onToNovelDetail(_ToNovelDetail event, Emitter<WebHomeState> emit) async {
-    if (state.webNovelDtoMap['${event.providerId}${event.novelId}'] != null) {
+    final existDto =
+        state.webNovelDtoMap['${event.providerId}${event.novelId}'];
+    if (existDto != null) {
       emit(state.copyWith(
         currentNovelId: event.novelId,
         currentNovelProviderId: event.providerId,
+        currentWebNovelDto: existDto,
+        currentChapterIndex: existDto.lastReadChapterId,
       ));
       return;
     }
@@ -139,6 +146,7 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
       emit(state.copyWith(
         loadingNovelDetail: false,
         webNovelDtoMap: {...state.webNovelDtoMap, key: webNovelDto},
+        currentChapterIndex: _findChapterId(webNovelDto),
       ));
     } catch (e) {
       talker.error(e);
@@ -147,8 +155,10 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
 
   _onReadChapter(_ReadChapter event, Emitter<WebHomeState> emit) async {
     emit(state.copyWith(loadingNovelChapter: true));
-    final targetChapterId = _findChapterId(event.webNovelDto);
-    final chapterKey = event.providerId + event.novelId + targetChapterId;
+    final targetChapterId = state.currentChapterIndex ?? '';
+    final providerId = state.currentNovelProviderId ?? '';
+    final novelId = state.currentNovelId ?? '';
+    final chapterKey = providerId + novelId + targetChapterId;
 
     if (state.chapterDtoMap[chapterKey] != null) {
       emit(state.copyWith(loadingNovelChapter: false));
@@ -156,8 +166,8 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     }
 
     final chapterDto = await requestNovelChapter(
-      event.providerId,
-      event.novelId,
+      providerId,
+      novelId,
       targetChapterId,
     );
     if (chapterDto != null) {
@@ -220,5 +230,23 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
       talker.error(e);
       return null;
     }
+  }
+
+  _onNextChapter(_NextChapter event, Emitter<WebHomeState> emit) async {
+    if (state.currentChapterDto?.nextId == null) return;
+    emit(state.copyWith(currentChapterIndex: state.currentChapterDto?.nextId));
+    add(const WebHomeEvent.readChapter());
+  }
+
+  _onPreviousChapter(_PreviousChapter event, Emitter<WebHomeState> emit) async {
+    if (state.currentChapterDto?.previousId == null) return;
+    emit(state.copyWith(
+        currentChapterIndex: state.currentChapterDto?.previousId));
+    add(const WebHomeEvent.readChapter());
+  }
+
+  _onJumpToChapter(_JumpToChapter event, Emitter<WebHomeState> emit) async {
+    emit(state.copyWith(currentChapterIndex: event.index));
+    add(const WebHomeEvent.readChapter());
   }
 }

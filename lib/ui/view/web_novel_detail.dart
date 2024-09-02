@@ -246,11 +246,7 @@ class WebNovelDetail extends StatelessWidget {
         child: LineButton(
             onPressed: () {
               final state = readWebHomeBloc(context).state;
-              readWebHomeBloc(context).add(WebHomeEvent.readChapter(
-                novelDto,
-                state.currentNovelProviderId ?? '',
-                state.currentNovelId ?? '',
-              ));
+              readWebHomeBloc(context).add(const WebHomeEvent.readChapter());
               Navigator.push(
                   context,
                   MaterialPageRoute(
