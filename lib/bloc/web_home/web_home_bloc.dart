@@ -3,6 +3,7 @@ import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:bloc/bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'web_home_event.dart';
@@ -17,6 +18,7 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
         refreshFavoredWeb: (event) async =>
             await _onRefreshFavoredWeb(event, emit),
         toNovelDetail: (event) async => await _onToNovelDetail(event, emit),
+        readChapter: (event) async => await _onReadChapter(event, emit),
       );
     });
   }
@@ -67,6 +69,10 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
       SearchSortType.update.name,
     )
         .then((response) {
+      if (response?.statusCode == 502) {
+        Fluttertoast.showToast(msg: '服务器维护中');
+        return [];
+      }
       final body = response?.body;
       final webNovelOutlines = parseToWebNovelOutline(body);
       return webNovelOutlines;
@@ -95,6 +101,13 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     ));
     final response = await apiClient.webNovelService
         .getNovelId(event.providerId, event.novelId);
+    if (response.statusCode == 502) {
+      emit(state.copyWith(
+        loadingNovelDetail: false,
+      ));
+      Fluttertoast.showToast(msg: '服务器维护中');
+      return [];
+    }
     final body = response.body;
     try {
       final key = event.providerId + event.novelId;
@@ -109,6 +122,7 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
         gpt: body['gpt'],
         introductionJp: body['introductionJp'],
         introductionZh: body['introductionZh'],
+        lastReadChapterId: body['lastReadChapterId'],
         jp: body['jp'],
         keywords: body['keywords'].cast<String>(),
         points: body['points'],
@@ -123,10 +137,88 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
       );
 
       emit(state.copyWith(
+        loadingNovelDetail: false,
         webNovelDtoMap: {...state.webNovelDtoMap, key: webNovelDto},
       ));
     } catch (e) {
       talker.error(e);
+    }
+  }
+
+  _onReadChapter(_ReadChapter event, Emitter<WebHomeState> emit) async {
+    emit(state.copyWith(loadingNovelChapter: true));
+    final targetChapterId = _findChapterId(event.webNovelDto);
+    final chapterKey = event.providerId + event.novelId + targetChapterId;
+
+    if (state.chapterDtoMap[chapterKey] != null) {
+      emit(state.copyWith(loadingNovelChapter: false));
+      return;
+    }
+
+    final chapterDto = await requestNovelChapter(
+      event.providerId,
+      event.novelId,
+      targetChapterId,
+    );
+    if (chapterDto != null) {
+      emit(state.copyWith(
+        chapterDtoMap: {...state.chapterDtoMap, chapterKey: chapterDto},
+        currentChapterDto: chapterDto,
+        currentChapterIndex: targetChapterId,
+      ));
+    }
+    emit(state.copyWith(loadingNovelChapter: false));
+  }
+
+  String _findChapterId(WebNovelDto webNovelDto) {
+    final tocList = webNovelDto.toc;
+    String? targetChapterId;
+    if (tocList == null) {
+      targetChapterId = '0';
+    } else {
+      for (final toc in tocList) {
+        if (toc.chapterId != null &&
+            toc.chapterId == webNovelDto.lastReadChapterId) {
+          targetChapterId = toc.chapterId!;
+          break;
+        }
+      }
+    }
+    if (targetChapterId == null) {
+      Fluttertoast.showToast(msg: '没有找到上次阅读的章节, 将从第一章开始阅读');
+      targetChapterId = '1';
+    }
+    return targetChapterId;
+  }
+
+  Future<ChapterDto?> requestNovelChapter(
+    String providerId,
+    String novelId,
+    String chapterId,
+  ) async {
+    final response = await apiClient.webNovelService
+        .getChapter(providerId, novelId, chapterId);
+    if (response.statusCode == 502) {
+      Fluttertoast.showToast(msg: '服务器维护中');
+      return null;
+    }
+    final body = response.body;
+    try {
+      final chapterDto = ChapterDto(
+        baiduParagraphs: body['youdaoParagraphs']?.cast<String>(),
+        originalParagraphs: body['paragraphs']?.cast<String>(),
+        youdaoParagraphs: body['youdaoParagraphs']?.cast<String>(),
+        gptParagraphs: body['gptParagraphs']?.cast<String>(),
+        sakuraParagraphs: body['sakuraParagraphs']?.cast<String>(),
+        previousId: body['previousId'],
+        nextId: body['nextId'],
+        titleJp: body['titleJp'],
+        titleZh: body['titleZh'],
+      );
+      return chapterDto;
+    } catch (e) {
+      talker.error(e);
+      return null;
     }
   }
 }

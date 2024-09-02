@@ -1,16 +1,18 @@
 import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
+import 'package:auto_novel_reader_flutter/ui/components/reader/plain_text_novel_reader.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/info_badge.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/line_button.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/chapter_list.dart';
+import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:unicons/unicons.dart';
 
-class NovelDetail extends StatelessWidget {
-  const NovelDetail({super.key});
+class WebNovelDetail extends StatelessWidget {
+  const WebNovelDetail({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,8 +24,8 @@ class NovelDetail extends StatelessWidget {
       builder: (context, novelDto) {
         return Scaffold(
           appBar: AppBar(
-            shadowColor: Theme.of(context).colorScheme.shadow,
-            backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+            shadowColor: styleManager.colorScheme.shadow,
+            backgroundColor: styleManager.colorScheme.secondaryContainer,
             title: const Text('小说详情'),
             actions: _buildActions,
           ),
@@ -37,14 +39,14 @@ class NovelDetail extends StatelessWidget {
             ),
             child: (novelDto == null)
                 ? const Center(child: CircularProgressIndicator())
-                : _buildNovelDetail(novelDto),
+                : _buildNovelDetail(novelDto, context),
           ),
         );
       },
     );
   }
 
-  Widget _buildNovelDetail(WebNovelDto novelDto) {
+  Widget _buildNovelDetail(WebNovelDto novelDto, BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,7 +58,7 @@ class NovelDetail extends StatelessWidget {
         _buildAuthorInfo(novelDto),
         _buildUpdateInfo(novelDto),
         const SizedBox(height: 8.0),
-        _buildButtonGroup(novelDto),
+        _buildButtonGroup(novelDto, context),
         const SizedBox(height: 8.0),
         ..._buildIntroduction(novelDto),
         const SizedBox(height: 8.0),
@@ -104,14 +106,15 @@ class NovelDetail extends StatelessWidget {
     return Row(
       children: [
         Text(novelDto.type, style: styleManager.tipText),
-        Text('/', style: styleManager.tipText),
+        Text(' / ', style: styleManager.tipText),
         Text('${parseLargeNumber(novelDto.totalCharacters ?? 0)} 字',
             style: styleManager.tipText),
-        Text('/', style: styleManager.tipText),
+        Text(' / ', style: styleManager.tipText),
         Text('${parseLargeNumber(novelDto.visited)} 浏览',
             style: styleManager.tipText),
         Expanded(child: Container()),
-        Text('最近更新${parseTimeStamp((novelDto.toc?.last.createAt ?? 0) * 1000)}',
+        Text(
+            '最近更新 ${parseTimeStamp((novelDto.toc?.last.createAt ?? 0) * 1000)}',
             style: styleManager.tipText),
       ],
     );
@@ -237,14 +240,29 @@ class NovelDetail extends StatelessWidget {
     return authorName;
   }
 
-  Widget _buildButtonGroup(WebNovelDto novelDto) {
+  Widget _buildButtonGroup(WebNovelDto novelDto, BuildContext context) {
     return Row(children: [
       Expanded(
-        child: LineButton(onPressed: () {}, text: '继续阅读'),
+        child: LineButton(
+            onPressed: () {
+              final state = readWebHomeBloc(context).state;
+              readWebHomeBloc(context).add(WebHomeEvent.readChapter(
+                novelDto,
+                state.currentNovelProviderId ?? '',
+                state.currentNovelId ?? '',
+              ));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PlainTextNovelReader(),
+                  ));
+            },
+            text: (novelDto.lastReadChapterId == null) ? '开始阅读' : '继续阅读'),
       ),
       const SizedBox(width: 8),
       Expanded(
-        child: LineButton(onPressed: () {}, text: '收藏'),
+        child: LineButton(
+            onPressed: () {}, text: (novelDto.favored == null) ? '收藏' : '已收藏'),
       )
     ]);
   }

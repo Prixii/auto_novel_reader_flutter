@@ -2,7 +2,7 @@ import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/info_badge.dart';
-import 'package:auto_novel_reader_flutter/ui/view/novel_detail.dart';
+import 'package:auto_novel_reader_flutter/ui/view/web_novel_detail.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
 
@@ -30,8 +30,8 @@ class WebNovelTile extends StatelessWidget {
             webOutline.providerId,
             webOutline.novelId,
           ));
-          Navigator.push(
-              context, MaterialPageRoute(builder: (_) => const NovelDetail()));
+          Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const WebNovelDetail()));
         },
         child: Container(
           padding: const EdgeInsets.all(8.0),

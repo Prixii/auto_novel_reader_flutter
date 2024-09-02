@@ -2,6 +2,7 @@ import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
@@ -21,6 +22,10 @@ class UserCubit extends HydratedCubit<UserState> {
       'emailOrUsername': emailOrUsername,
       'password': password,
     });
+    if (signInResponse.statusCode == 502) {
+      Fluttertoast.showToast(msg: '服务器维护中');
+      return false;
+    }
     final token = signInResponse.body;
     if (token == null || token.isEmpty) {
       showErrorToast('登录失败, 用户名或密码错误');
@@ -72,6 +77,10 @@ class UserCubit extends HydratedCubit<UserState> {
     if (state.token == null) return;
 
     final renewResponse = await apiClient.authService.getRenew();
+    if (renewResponse?.statusCode == 502) {
+      Fluttertoast.showToast(msg: '服务器维护中');
+      return;
+    }
     final token = renewResponse?.body;
     if (token == null || token.isEmpty) return;
     emit(state.copyWith(

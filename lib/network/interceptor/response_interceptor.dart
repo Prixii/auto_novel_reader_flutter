@@ -16,6 +16,10 @@ class ResponseInterceptor implements Interceptor {
     if (kDebugMode) {
       talker.error(response.error);
     }
-    throw Exception(response.error);
+    if (response.statusCode == 502) {
+      return response;
+    } else {
+      throw Exception(response.error);
+    }
   }
 }

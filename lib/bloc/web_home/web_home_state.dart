@@ -7,10 +7,16 @@ class WebHomeState with _$WebHomeState {
     List<WenkuNovelOutline>? wenkuLatestUpdate,
     List<WebNovelOutline>? webMostVisited,
     List<WebNovelOutline>? favoredWeb,
-    //
+    // 小说详情
     @Default({}) Map<String, WebNovelDto> webNovelDtoMap,
+    WebNovelDto? currentWebNovelDto,
     String? currentNovelId,
     String? currentNovelProviderId,
     @Default(false) bool loadingNovelDetail,
+    // 小说正文
+    @Default(false) bool loadingNovelChapter,
+    @Default({}) Map<String, ChapterDto> chapterDtoMap,
+    String? currentChapterIndex,
+    ChapterDto? currentChapterDto,
   }) = _Initial;
 }

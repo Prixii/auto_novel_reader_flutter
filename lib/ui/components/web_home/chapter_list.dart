@@ -1,6 +1,8 @@
+import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 const _chapterTileHeight = 58.0;
 
@@ -40,7 +42,7 @@ class ChapterList extends StatelessWidget {
         return ChapterListTile(
           titleJp: tocList[index].titleJp,
           titleZh: tocList[index].titleZh,
-          index: index,
+          index: tocList[index].chapterId,
         );
       },
       itemCount: tocList.length,
@@ -54,54 +56,79 @@ class ChapterListTile extends StatelessWidget {
 
   final String titleJp;
   final String? titleZh;
-  final int index;
+  final String? index;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: const BorderRadius.only(
-        topLeft: Radius.circular(8.0),
-        bottomLeft: Radius.circular(8.0),
-      ),
-      onTap: () {
-        Navigator.pop(context);
+    return BlocSelector<WebHomeBloc, WebHomeState, String?>(
+      selector: (state) {
+        return state.currentChapterIndex;
       },
-      child: Container(
-        height: _chapterTileHeight,
-        color: Colors.transparent,
-        width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(12, 0, 8, 0),
-        alignment: Alignment.centerLeft,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(titleJp,
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                      style: styleManager.primaryColorTitleSmall),
-                  Text(
-                    titleZh ?? '',
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  )
-                ],
+      builder: (context, chapterDto) {
+        final isCurrent = chapterDto == index;
+        return InkWell(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(8.0),
+            bottomLeft: Radius.circular(8.0),
+          ),
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: Container(
+            height: _chapterTileHeight,
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(8.0),
+                bottomLeft: Radius.circular(8.0),
               ),
+              color: isCurrent
+                  ? styleManager.colorScheme.primaryContainer
+                  : Colors.transparent,
             ),
-            Text(
-              '${index + 1}',
-              style: styleManager.textTheme.titleLarge?.copyWith(
-                color: Colors.grey[300],
-                fontWeight: FontWeight.bold,
-              ),
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(12, 0, 8, 0),
+            alignment: Alignment.centerLeft,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(titleJp,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          style: styleManager.primaryColorTitleSmall?.copyWith(
+                            color: isCurrent
+                                ? styleManager.colorScheme.onPrimaryContainer
+                                : styleManager.colorScheme.primary,
+                          )),
+                      Text(titleZh ?? '',
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          style: styleManager.titleSmall?.copyWith(
+                            color: isCurrent
+                                ? styleManager.colorScheme.onSecondaryContainer
+                                : Colors.black54,
+                          ))
+                    ],
+                  ),
+                ),
+                Text(
+                  index ?? '',
+                  style: styleManager.textTheme.titleLarge?.copyWith(
+                    color: isCurrent
+                        ? styleManager.colorScheme.primary
+                        : Colors.grey[300],
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

@@ -46,3 +46,29 @@ enum UserRole {
   normal,
   banned;
 }
+
+enum Language {
+  jp,
+  zh,
+  zhJp,
+  jpZh,
+}
+
+enum TranslationMode {
+  priority,
+  parallel,
+}
+
+enum TranslationSource {
+  baidu,
+  youdao,
+  gpt,
+  sakura;
+
+  String get zhName => switch (this) {
+        TranslationSource.baidu => '百度',
+        TranslationSource.youdao => '有道',
+        TranslationSource.gpt => 'GPT',
+        TranslationSource.sakura => 'Sakura',
+      };
+}

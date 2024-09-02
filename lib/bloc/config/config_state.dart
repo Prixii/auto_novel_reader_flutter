@@ -8,6 +8,7 @@ class ConfigState with _$ConfigState {
     @Default(true) bool volumeKeyShift, // 音量键控制翻页
     @Default(1) int helloPageIndex, // 欢迎页,
     @Default('books.fishhawk.top') String url, // 网站地址
+    @Default(WebNovelConfig()) WebNovelConfig webNovelConfig,
   }) = _Initial;
 
   factory ConfigState.fromJson(Map<String, dynamic> json) =>
