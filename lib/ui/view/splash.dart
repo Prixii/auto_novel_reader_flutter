@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:auto_novel_reader_flutter/bloc/global/global_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:auto_novel_reader_flutter/util/channel/key_down_channel.dart';
@@ -58,6 +59,8 @@ class _SplashViewState extends State<SplashView> {
     initScreenSize(context);
     localFileManager.init();
     initKeyDownChannel();
+    globalBloc.add(GlobalEvent.switchNavigationDestination(
+        destinationIndex: configCubit.state.helloPageIndex));
     return;
   }
 
