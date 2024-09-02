@@ -1,3 +1,4 @@
+import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:chopper/chopper.dart';
 
 part 'auth.dart';

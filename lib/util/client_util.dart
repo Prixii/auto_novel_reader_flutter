@@ -7,6 +7,7 @@ import 'package:auto_novel_reader_flutter/bloc/local_file/local_file_cubit.dart'
 import 'package:auto_novel_reader_flutter/bloc/user/user_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
@@ -14,6 +15,8 @@ final talker = Talker();
 late SharedPreferences prefs;
 late Size screenSize;
 late double appBarHeight;
+late Color errorContainerColor;
+late Color onErrorContainerColor;
 
 final globalBloc = GlobalBloc();
 final localFileCubit = LocalFileCubit();
@@ -24,6 +27,20 @@ final userCubit = UserCubit();
 void initScreenSize(BuildContext context) {
   screenSize = MediaQuery.sizeOf(context);
   appBarHeight = MediaQueryData.fromView(View.of(context)).padding.top;
+}
+
+void initColor(BuildContext context) {
+  final colorScheme = Theme.of(context).colorScheme;
+  errorContainerColor = colorScheme.errorContainer;
+  onErrorContainerColor = colorScheme.onErrorContainer;
+}
+
+void showErrorToast(String message) {
+  Fluttertoast.showToast(
+    msg: message,
+    textColor: onErrorContainerColor,
+    backgroundColor: errorContainerColor,
+  );
 }
 
 GlobalBloc readGlobalBloc(BuildContext context) => context.read<GlobalBloc>();

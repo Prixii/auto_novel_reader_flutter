@@ -54,6 +54,7 @@ class _SplashViewState extends State<SplashView> {
   }
 
   Future<void> _startInit() async {
+    initColor(context);
     initScreenSize(context);
     prefs = await SharedPreferences.getInstance();
     localFileManager.init();
@@ -82,8 +83,8 @@ class _SplashViewState extends State<SplashView> {
   }
 
   Future<void> _initChopperClient() async {
-    createChopper();
-    await userCubit.activateAuth();
+    apiClient.createChopper();
+    await userCubit.activateAuth(context);
   }
 }
 

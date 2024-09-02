@@ -3,7 +3,12 @@ part of 'service.dart';
 @ChopperApi(baseUrl: '/wenku')
 abstract class WenkuNovelService extends ChopperService {
   @Get(path: '')
-  Future<Response> getList();
+  Future<Response> getList(
+    @Query() int page,
+    @Query() int pageSize, {
+    @Query() String? query,
+    @Query() int level = 0,
+  });
 
   @Get(path: '/{novelId}')
   Future<Response> getId(@Path() String novelId);

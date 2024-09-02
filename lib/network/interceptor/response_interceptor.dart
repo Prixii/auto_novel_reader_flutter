@@ -13,7 +13,9 @@ class ResponseInterceptor implements Interceptor {
       talker.info('${response.body}\n ${response.error}');
     }
     if (response.isSuccessful) return response;
-    talker.error(response.error);
+    if (kDebugMode) {
+      talker.error(response.error);
+    }
     throw Exception(response.error);
   }
 }

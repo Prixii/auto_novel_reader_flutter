@@ -3,7 +3,16 @@ part of 'service.dart';
 @ChopperApi(baseUrl: '/novel')
 abstract class WebNovelService extends ChopperService {
   @Get(path: '')
-  Future<Response> getList();
+  Future<Response> getList(
+    @Query() int page,
+    @Query() int pageSize, {
+    @Query() String provider = "",
+    @Query() int type = 0,
+    @Query() int level = 0,
+    @Query() int translate = 0,
+    @Query() int sort = 0,
+    @Query() String? query,
+  });
 
   @Get(path: '/rank/{providerId}')
   Future<Response> getRank(@Path() String providerId);

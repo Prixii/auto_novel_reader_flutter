@@ -64,10 +64,9 @@ class _LoginFormState extends State<LoginForm> {
     FocusScope.of(context).unfocus();
     if (_formFinished()) {
       readUserCubit(context).signIn(
-        context,
         _emailOrUsernameController.text,
         _passwordController.text,
-        autoLogin: isRememberMeChecked,
+        autoSignIn: isRememberMeChecked,
       );
     } else {
       _showToast(context);

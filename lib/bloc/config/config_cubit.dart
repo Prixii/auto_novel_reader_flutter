@@ -18,7 +18,7 @@ class ConfigCubit extends HydratedCubit<ConfigState> {
   setUrl(String value) {
     if (value == state.url) return;
     emit(state.copyWith(url: value));
-    createChopper();
+    apiClient.createChopper();
   }
 
   @override

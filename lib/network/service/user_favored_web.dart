@@ -6,13 +6,16 @@ abstract class UserFavoredWebService extends ChopperService {
   Future<Response> postWeb();
 
   @Put(path: '/{favoredId}')
-  Future<Response> putId(@Path() String favoredId);
+  Future<Response> putId(
+    @Path() String favoredId,
+  );
 
   @Delete(path: '/{favoredId}')
   Future<Response> delId(@Path() String favoredId);
 
   @Get(path: '/{favoredId}')
-  Future<Response> getIdList(@Path() String favoredId);
+  Future<Response> getIdList(@Path() String favoredId, @Query() int page,
+      @Query() int pageSize, @Query() String sort);
 
   @Put(path: '/{favoredId}/{providerId}/{novelId}')
   Future<Response> putNovelId(@Path() String favoredId,

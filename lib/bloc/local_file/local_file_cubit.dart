@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:auto_novel_reader_flutter/manager/local_file_manager.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
+import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/epub_util.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -26,13 +27,7 @@ class LocalFileCubit extends HydratedCubit<LocalFileState> {
       emit(state.copyWith(
           epubManageDataList: [epubManageData, ...state.epubManageDataList]));
     } catch (e) {
-      if (context.mounted) {
-        Fluttertoast.showToast(
-            msg: e.toString(),
-            backgroundColor: Theme.of(context).colorScheme.error,
-            textColor: Theme.of(context).colorScheme.onError);
-      }
-
+      showErrorToast(e.toString());
       throw Exception(e);
     }
   }

@@ -3,13 +3,13 @@ part of 'service.dart';
 @ChopperApi(baseUrl: '/auth')
 abstract class AuthService extends ChopperService {
   @Post(path: '/sign-in')
-  Future<Response> postSignIn(@Body() Map<String, dynamic> body);
+  Future<Response> postSignIn(@Body() JsonBody body);
 
   @Post(path: '/sign-up')
   Future<Response> postSignUp();
 
-  @Post(path: '/renew')
-  Future<Response> postRenew();
+  @Get(path: '/renew')
+  Future<Response> getRenew();
 
   @Post(path: '/verify-email')
   Future<Response> postVerifyEmail();
