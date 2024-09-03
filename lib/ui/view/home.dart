@@ -1,6 +1,7 @@
 import 'package:animations/animations.dart';
 import 'package:auto_novel_reader_flutter/bloc/global/global_bloc.dart';
 import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
+import 'package:auto_novel_reader_flutter/bloc/wenku_home/wenku_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/ui/view/reader/reader.dart';
@@ -25,7 +26,7 @@ class HomeView extends StatelessWidget {
 
     readWebHomeBloc(context).add(const WebHomeEvent.init());
     readWebCacheCubit(context).refreshFavored();
-
+    readWenkuHomeBloc(context).add(const WenkuHomeEvent.init());
     return BlocBuilder<GlobalBloc, GlobalState>(
       buildWhen: (prev, state) =>
           prev.destinationIndex != state.destinationIndex,

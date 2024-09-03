@@ -7,6 +7,7 @@ import 'package:auto_novel_reader_flutter/bloc/local_file/local_file_cubit.dart'
 import 'package:auto_novel_reader_flutter/bloc/user/user_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/web_cache/web_cache_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
+import 'package:auto_novel_reader_flutter/bloc/wenku_home/wenku_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -23,7 +24,23 @@ final epubViewerBloc = EpubViewerBloc();
 final configCubit = ConfigCubit();
 final userCubit = UserCubit();
 final webHomeBloc = WebHomeBloc();
+final wenkuHomeBloc = WenkuHomeBloc();
 final webCacheCubit = WebCacheCubit();
+
+GlobalBloc readGlobalBloc(BuildContext context) => context.read<GlobalBloc>();
+EpubViewerBloc readEpubViewerBloc(BuildContext context) =>
+    context.read<EpubViewerBloc>();
+LocalFileCubit readLocalFileCubit(BuildContext context) =>
+    context.read<LocalFileCubit>();
+ConfigCubit readConfigCubit(BuildContext context) =>
+    context.read<ConfigCubit>();
+UserCubit readUserCubit(BuildContext context) => context.read<UserCubit>();
+WebHomeBloc readWebHomeBloc(BuildContext context) =>
+    context.read<WebHomeBloc>();
+WebCacheCubit readWebCacheCubit(BuildContext context) =>
+    context.read<WebCacheCubit>();
+WenkuHomeBloc readWenkuHomeBloc(BuildContext context) =>
+    context.read<WenkuHomeBloc>();
 
 void initScreenSize(BuildContext context) {
   screenSize = MediaQuery.sizeOf(context);
@@ -59,19 +76,15 @@ String parseTimeStamp(int timeStamp) {
   return date.toString().substring(0, 10);
 }
 
-GlobalBloc readGlobalBloc(BuildContext context) => context.read<GlobalBloc>();
-EpubViewerBloc readEpubViewerBloc(BuildContext context) =>
-    context.read<EpubViewerBloc>();
-
-LocalFileCubit readLocalFileCubit(BuildContext context) =>
-    context.read<LocalFileCubit>();
-ConfigCubit readConfigCubit(BuildContext context) =>
-    context.read<ConfigCubit>();
-UserCubit readUserCubit(BuildContext context) => context.read<UserCubit>();
-WebHomeBloc readWebHomeBloc(BuildContext context) =>
-    context.read<WebHomeBloc>();
-WebCacheCubit readWebCacheCubit(BuildContext context) =>
-    context.read<WebCacheCubit>();
+String parseLargeNumber(int number) {
+  if (number >= 1000000) {
+    return '${(number / 1000000).toStringAsFixed(1)}M';
+  } else if (number >= 1000) {
+    return '${(number / 1000).toStringAsFixed(1)}K';
+  } else {
+    return '$number';
+  }
+}
 
 Color getRandomDarkColor() {
   final random = Random();

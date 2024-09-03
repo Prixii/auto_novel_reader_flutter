@@ -4,7 +4,6 @@ part of 'web_home_bloc.dart';
 class WebHomeState with _$WebHomeState {
   const factory WebHomeState.initial({
     @Default(false) bool inInit,
-    List<WenkuNovelOutline>? wenkuLatestUpdate,
     List<WebNovelOutline>? webMostVisited,
     @Default({}) Map<String, WebNovelOutline> favoredWebMap,
     // 小说大纲缓存

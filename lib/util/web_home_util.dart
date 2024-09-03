@@ -177,9 +177,7 @@ Future<ChapterDto?> loadNovelChapter(
 
   // 检查是否有缓存
   final existDto = webHomeBloc.state.chapterDtoMap[chapterKey];
-  if (existDto != null) {
-    return existDto;
-  }
+  if (existDto != null) return existDto;
 
   onRequest?.call();
   // 没有缓存，则请求
@@ -221,4 +219,95 @@ Future<ChapterDto?> _requestNovelChapter(
     talker.error(e);
     return null;
   }
+}
+
+Future<WenkuNovelDto?> loadWenkuNovelDto(
+  String novelId, {
+  Function? onRequest,
+  Function? onRequestFinished,
+}) async {
+  final existDto = wenkuHomeBloc.state.wenkuNovelDtoMap[novelId];
+  if (existDto != null) return existDto;
+  onRequest?.call();
+  final wenkuDto = await _requestWenkuNovelDto(novelId);
+  onRequestFinished?.call();
+  return wenkuDto;
+}
+
+Future<WenkuNovelDto?> _requestWenkuNovelDto(String novelId) async {
+  try {
+    final response = await apiClient.wenkuNovelService.getId(novelId);
+    final body = response.body;
+    if (response.statusCode == 502) {
+      Fluttertoast.showToast(msg: '服务器维护中');
+      return null;
+    }
+    final wenkuDto = WenkuNovelDto(
+      body['title'],
+      body['titleZh'],
+      cover: body['cover'],
+      authors: body['authors'].cast<String>(),
+      artists: body['artists'].cast<String>(),
+      keywords: body['keywords'].cast<String>(),
+      publisher: body['publisher'],
+      imprint: body['imprint'],
+      latestPublishAt: body['latestPublishAt'],
+      level: body['level'],
+      introduction: body['introduction'],
+      glossary: Map<String, String>.from(body['glossary']),
+      webIds: body['webIds'].cast<String>(),
+      volumes: _parseWenkuVolumeList(body['volumes']),
+      visited: body['visited'],
+      volumeZh: body['volumeZh'].cast<String>(),
+      volumeJp: _parseVolumeJpDtoList(body['volumeJp']),
+    );
+    return wenkuDto;
+  } catch (e) {
+    talker.error(e);
+    return null;
+  }
+}
+
+List<VolumeJpDto> _parseVolumeJpDtoList(body) {
+  var list = <VolumeJpDto>[];
+  try {
+    for (var item in body) {
+      list.add(
+        VolumeJpDto(
+          item['volumeId'],
+          item['total'],
+          item['baidu'],
+          item['youdao'],
+          item['gpt'],
+          item['sakura'],
+        ),
+      );
+    }
+  } catch (e) {
+    talker.error(e);
+  }
+  return list;
+}
+
+List<WenkuVolumeDto> _parseWenkuVolumeList(body) {
+  var list = <WenkuVolumeDto>[];
+  try {
+    for (var item in body) {
+      list.add(
+        WenkuVolumeDto(
+          item['asin'],
+          item['title'],
+          titleZh: item['titleZh'],
+          cover: item['cover'],
+          coverHires: item['coverHires'],
+          publisher: item['publisher'],
+          imprint: item['imprint'],
+          publishAt: item['publishAt'],
+        ),
+      );
+    }
+  } catch (e) {
+    talker.error(e);
+  }
+  return list;
 }

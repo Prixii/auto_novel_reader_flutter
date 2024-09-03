@@ -31,6 +31,7 @@ class MainApp extends StatelessWidget {
         BlocProvider(create: (context) => configCubit),
         BlocProvider(create: (context) => userCubit),
         BlocProvider(create: (context) => webHomeBloc),
+        BlocProvider(create: (context) => wenkuHomeBloc),
         BlocProvider(create: (context) => webCacheCubit),
       ],
       child: MaterialApp(

@@ -25,16 +25,7 @@ class WebNovelTile extends StatelessWidget {
     return Card(
       clipBehavior: Clip.hardEdge,
       child: InkWell(
-        onTap: () {
-          readWebHomeBloc(context).add(WebHomeEvent.toNovelDetail(
-            webOutline.providerId,
-            webOutline.novelId,
-          ));
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (_) => const WebNovelDetailContainer()));
-        },
+        onTap: () => _toDetail(context, webOutline),
         child: Container(
           padding: const EdgeInsets.all(8.0),
           child: Column(
@@ -56,6 +47,15 @@ class WebNovelTile extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _toDetail(BuildContext context, WebNovelOutline webOutline) {
+    readWebHomeBloc(context).add(WebHomeEvent.toNovelDetail(
+      webOutline.providerId,
+      webOutline.novelId,
+    ));
+    Navigator.push(context,
+        MaterialPageRoute(builder: (_) => const WebNovelDetailContainer()));
   }
 
   Widget _buildFooter(WebNovelOutline webOutline, BuildContext context) {

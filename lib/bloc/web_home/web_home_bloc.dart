@@ -52,8 +52,6 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
         emit(state.copyWith(webMostVisited: webNovelOutlines));
         newWebOutlines.addAll(webNovelOutlines);
       }),
-      loadPagedWenkuOutline(level: 1).then((wenkuNovelOutlines) =>
-          emit(state.copyWith(wenkuLatestUpdate: wenkuNovelOutlines))),
     ]);
     var webNovelOutlineMapSnapshot = {...state.webNovelOutlineMap};
     for (var webNovelOutline in newWebOutlines) {

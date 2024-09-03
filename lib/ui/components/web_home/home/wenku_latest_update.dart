@@ -1,4 +1,4 @@
-import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
+import 'package:auto_novel_reader_flutter/bloc/wenku_home/wenku_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/nav_title.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/wenku_novel_tile.dart';
@@ -36,7 +36,7 @@ class WenkuLatestUpdate extends StatelessWidget {
       jumpTo: () => {});
 
   Widget _buildFavoredWebList() {
-    return BlocSelector<WebHomeBloc, WebHomeState, List<WenkuNovel>>(
+    return BlocSelector<WenkuHomeBloc, WenkuHomeState, List<WenkuNovel>>(
       selector: (state) {
         return state.wenkuLatestUpdate ?? [];
       },

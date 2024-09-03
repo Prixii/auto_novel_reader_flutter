@@ -1,28 +1,25 @@
-import 'package:auto_novel_reader_flutter/bloc/web_cache/web_cache_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
+import 'package:auto_novel_reader_flutter/bloc/wenku_home/wenku_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
-import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
-import 'package:auto_novel_reader_flutter/ui/components/reader/plain_text_novel_reader.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/line_button.dart';
-import 'package:auto_novel_reader_flutter/ui/components/web_home/chapter_list.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_detail/flow_tag.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_detail/introduction_card.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:unicons/unicons.dart';
 
-class WebNovelDetailContainer extends StatelessWidget {
-  const WebNovelDetailContainer({super.key});
+class WenkuNovelDetailContainer extends StatelessWidget {
+  const WenkuNovelDetailContainer({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocSelector<WebHomeBloc, WebHomeState, WebNovelDto?>(
+    return BlocSelector<WenkuHomeBloc, WenkuHomeState, WenkuNovelDto?>(
         selector: (state) {
-      return state.webNovelDtoMap[
-          '${state.currentNovelProviderId}${state.currentNovelId}'];
+      return state.wenkuNovelDtoMap[state.currentNovelId];
     }, builder: (context, novelDto) {
       final state = readWebHomeBloc(context).state;
       final novelKey = '${state.currentNovelProviderId}${state.currentNovelId}';
@@ -33,13 +30,7 @@ class WebNovelDetailContainer extends StatelessWidget {
             title: const Text('小说详情'),
             actions: _buildActions,
           ),
-          drawer: Drawer(
-            child: ChapterList(
-              tocList: novelDto?.toc ?? [],
-              novelKey: novelKey,
-            ),
-          ),
-          body: WebNovelDetail(
+          body: WenkuNovelDetail(
             novelDto: novelDto,
             novelKey: novelKey,
           ));
@@ -66,42 +57,40 @@ class WebNovelDetailContainer extends StatelessWidget {
   }
 }
 
-class WebNovelDetail extends StatelessWidget {
-  const WebNovelDetail(
+class WenkuNovelDetail extends StatelessWidget {
+  const WenkuNovelDetail(
       {super.key, required this.novelDto, required this.novelKey});
 
-  final WebNovelDto? novelDto;
+  final WenkuNovelDto? novelDto;
   final String novelKey;
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      onPopInvoked: (_) {
-        if (Scaffold.of(context).isDrawerOpen) return;
-        readWebHomeBloc(context).add(const WebHomeEvent.leaveDetail());
-      },
-      child: (novelDto == null)
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 8.0,
-              ),
-              child: _buildNovelDetail(novelDto!, context),
+    return (novelDto == null)
+        ? const Center(child: CircularProgressIndicator())
+        : SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
             ),
-    );
+            child: _buildNovelDetail(novelDto!, context),
+          );
   }
 
-  Widget _buildNovelDetail(WebNovelDto novelDto, BuildContext context) {
+  Widget _buildNovelDetail(WenkuNovelDto novelDto, BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _buildCovers(_getCoverUrls(novelDto)),
+        const SizedBox(height: 8.0),
         ..._buildTitle(novelDto),
         const SizedBox(height: 8.0),
-        FlowTag(attentions: novelDto.attentions, keywords: novelDto.keywords),
+        FlowTag(attentions: const [], keywords: novelDto.keywords),
         const SizedBox(height: 8.0),
-        _buildAuthorInfo(novelDto),
+        _buildAuthorsInfo(novelDto),
+        _buildArtistsInfo(novelDto),
+        _buildPublisherInfo(novelDto),
         _buildUpdateInfo(novelDto),
         const SizedBox(height: 8.0),
         _buildButtonGroup(context),
@@ -118,48 +107,96 @@ class WebNovelDetail extends StatelessWidget {
     );
   }
 
-  Widget _buildAuthorInfo(WebNovelDto novelDto) {
+  Widget _buildCovers(List<String> urls) {
+    return SizedBox(
+      height: 328,
+      child: PageView.builder(
+        itemBuilder: (context, index) => CachedNetworkImage(
+          imageUrl: urls[index],
+          fit: BoxFit.fitHeight,
+        ),
+        itemCount: urls.length,
+      ),
+    );
+  }
+
+  List<String> _getCoverUrls(WenkuNovelDto novelDto) {
+    var urls = <String>[];
+    if (novelDto.cover != null) {
+      urls.add(novelDto.cover!);
+    }
+    for (var volume in novelDto.volumes) {
+      if (volume.cover != null) {
+        urls.add(volume.cover!);
+      }
+    }
+    return urls;
+  }
+
+  Widget _buildAuthorsInfo(WenkuNovelDto novelDto) {
     return Row(children: [
       Text('作者: ', style: styleManager.tipText),
-      Text(_getAuthors(novelDto),
+      Text(_uniteMembers(novelDto.authors),
           style: styleManager.tipText?.copyWith(
             color: styleManager.colorScheme.primary,
           )),
     ]);
   }
 
-  Widget _buildUpdateInfo(WebNovelDto novelDto) {
+  Widget _buildArtistsInfo(WenkuNovelDto novelDto) {
+    return Row(children: [
+      Text('插图: ', style: styleManager.tipText),
+      Text(_uniteMembers(novelDto.artists),
+          style: styleManager.tipText?.copyWith(
+            color: styleManager.colorScheme.primary,
+          )),
+    ]);
+  }
+
+  Widget _buildPublisherInfo(WenkuNovelDto novelDto) {
+    return Row(children: [
+      Text('出版: ', style: styleManager.tipText),
+      Text('${novelDto.publisher} ',
+          style: styleManager.tipText?.copyWith(
+            color: styleManager.colorScheme.primary,
+          )),
+      Text(novelDto.imprint ?? '',
+          style: styleManager.tipText?.copyWith(
+            color: styleManager.colorScheme.primary,
+          )),
+    ]);
+  }
+
+  Widget _buildUpdateInfo(WenkuNovelDto novelDto) {
     return Row(
       children: [
-        Text(novelDto.type, style: styleManager.tipText),
+        Text(novelDto.level, style: styleManager.tipText),
         Text(' / ', style: styleManager.tipText),
-        Text('${parseLargeNumber(novelDto.totalCharacters ?? 0)} 字',
-            style: styleManager.tipText),
+        Text('共 ${novelDto.volumes.length} 卷', style: styleManager.tipText),
         Text(' / ', style: styleManager.tipText),
         Text('${parseLargeNumber(novelDto.visited)} 浏览',
             style: styleManager.tipText),
         Expanded(child: Container()),
-        Text(
-            '最近更新 ${parseTimeStamp((novelDto.toc?.last.createAt ?? 0) * 1000)}',
+        Text('最新出版 ${parseTimeStamp((novelDto.latestPublishAt ?? 0) * 1000)}',
             style: styleManager.tipText),
       ],
     );
   }
 
-  List<Widget> _buildTitle(WebNovelDto novelDto) {
+  List<Widget> _buildTitle(WenkuNovelDto novelDto) {
     return [
       Text(
-        novelDto.titleJp,
+        novelDto.title,
         style: styleManager.primaryColorTitleLarge,
       ),
       Text(
-        novelDto.titleZh ?? '',
+        novelDto.titleZh,
         style: styleManager.greyTitleMedium,
       ),
     ];
   }
 
-  List<Widget> _buildIntroduction(WebNovelDto novelDto) {
+  List<Widget> _buildIntroduction(WenkuNovelDto novelDto) {
     return [
       Text(
         '简介',
@@ -167,44 +204,29 @@ class WebNovelDetail extends StatelessWidget {
             ?.copyWith(fontWeight: FontWeight.bold),
       ),
       IntroductionCard(
-        content: novelDto.introductionZh ?? '',
+        content: novelDto.introduction,
         style: styleManager.textTheme.bodyMedium,
-      ),
-      IntroductionCard(
-        content: novelDto.introductionJp,
-        style: styleManager.tipText,
       ),
     ];
   }
 
-  String _getAuthors(WebNovelDto novelDto) {
-    final authors = novelDto.authors;
-    if (authors.isEmpty) return '未知';
-    var authorName = '';
-    for (var author in authors) {
-      if (authorName.isNotEmpty) {
-        authorName += ' / ';
+  String _uniteMembers(List<String> members) {
+    var result = '';
+    for (var item in members) {
+      if (result.isNotEmpty) {
+        result += ' / ';
       }
-      authorName += author.name;
+      result += item;
     }
-    return authorName;
+    return result;
   }
 
   Widget _buildButtonGroup(BuildContext context) {
     return Row(children: [
       Expanded(
-        child: BlocSelector<WebCacheCubit, WebCacheState, String?>(
-          selector: (state) {
-            return readWebCacheCubit(context)
-                .state
-                .lastReadChapterMap[novelKey];
-          },
-          builder: (context, lastReadChapterId) {
-            return LineButton(
-              onPressed: () => _readNovel(context, lastReadChapterId),
-              text: (lastReadChapterId == null) ? '开始阅读' : '继续阅读',
-            );
-          },
+        child: LineButton(
+          onPressed: () => _toDownload(context),
+          text: '阅读',
         ),
       ),
       const SizedBox(width: 8),
@@ -217,11 +239,11 @@ class WebNovelDetail extends StatelessWidget {
             return LineButton(
                 onPressed: () {
                   if (favored) {
-                    readWebHomeBloc(context)
-                        .add(const WebHomeEvent.unFavorNovel(NovelType.web));
+                    readWenkuHomeBloc(context)
+                        .add(const WenkuHomeEvent.unFavorNovel());
                   } else {
-                    readWebHomeBloc(context).add(
-                      const WebHomeEvent.favorNovel(NovelType.web),
+                    readWenkuHomeBloc(context).add(
+                      const WenkuHomeEvent.favorNovel(),
                     );
                   }
                 },
@@ -234,13 +256,5 @@ class WebNovelDetail extends StatelessWidget {
     ]);
   }
 
-  void _readNovel(BuildContext context, String? lastReadChapterId) {
-    readWebHomeBloc(context).add(WebHomeEvent.readChapter(lastReadChapterId));
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const PlainTextNovelReaderContainer(),
-      ),
-    );
-  }
+  _toDownload(BuildContext context) {}
 }

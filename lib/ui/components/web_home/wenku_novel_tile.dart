@@ -1,7 +1,10 @@
 import 'dart:ui';
 
+import 'package:auto_novel_reader_flutter/bloc/wenku_home/wenku_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
+import 'package:auto_novel_reader_flutter/ui/view/wenku_novel_detail.dart';
+import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -11,7 +14,7 @@ class WenkuNovelTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return wenkuNovel.map(
-      wenkuNovelOutline: (novel) => _buildForWenkuNovelOutline(novel),
+      wenkuNovelOutline: (novel) => _buildForWenkuNovelOutline(context, novel),
       wenkuNovelDto: (novel) => _buildForWenkuNovelDto(novel),
       wenkuVolumeDto: (novel) => _buildForWenkuVolumeDto(novel),
       amazonNovel: (novel) => _buildForAmazonNovel(novel),
@@ -19,41 +22,60 @@ class WenkuNovelTile extends StatelessWidget {
     );
   }
 
-  Widget _buildForWenkuNovelOutline(WenkuNovelOutline novel) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
+  Widget _buildForWenkuNovelOutline(
+      BuildContext context, WenkuNovelOutline novel) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
       clipBehavior: Clip.hardEdge,
-      child: Stack(
-        children: [
-          CachedNetworkImage(
-            imageUrl: novel.cover,
-            fit: BoxFit.cover,
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: ClipRect(
-              clipBehavior: Clip.hardEdge,
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                height: 46,
-                width: double.infinity,
-                color: Colors.black.withOpacity(0.4),
-                child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-                    child: Text(
-                      novel.titleZh,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.start,
-                      style: styleManager.titleSmall
-                          ?.copyWith(color: styleManager.colorScheme.onPrimary),
-                    )),
-              ),
+      child: InkWell(
+        onTap: () => _toDetail(context, novel.id),
+        radius: 8,
+        child: Stack(
+          children: [
+            CachedNetworkImage(
+              imageUrl: novel.cover,
+              fit: BoxFit.cover,
             ),
-          ),
-        ],
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: _buildMicaTitle(novel),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  Widget _buildMicaTitle(WenkuNovelOutline novel) {
+    return ClipRect(
+      clipBehavior: Clip.hardEdge,
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        height: 46,
+        width: double.infinity,
+        color: Colors.white.withOpacity(0.8),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+          child: Text(
+            novel.titleZh,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.start,
+            style: styleManager.titleSmall?.copyWith(
+              color: styleManager.colorScheme.onPrimaryContainer,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _toDetail(BuildContext context, String novelId) async {
+    readWenkuHomeBloc(context).add(WenkuHomeEvent.toDetail(novelId));
+    Navigator.push(context,
+        MaterialPageRoute(builder: (_) => const WenkuNovelDetailContainer()));
   }
 
   Widget _buildForWenkuNovelDto(WenkuNovelDto novel) {
