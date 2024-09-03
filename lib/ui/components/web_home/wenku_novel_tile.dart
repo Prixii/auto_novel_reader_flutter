@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:auto_novel_reader_flutter/bloc/wenku_home/wenku_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
-import 'package:auto_novel_reader_flutter/ui/view/wenku_novel_detail.dart';
+import 'package:auto_novel_reader_flutter/ui/view/home/wenku_novel_detail.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';

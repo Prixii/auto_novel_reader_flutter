@@ -27,6 +27,8 @@ class _StyleManager {
       );
 
   TextStyle? get titleSmall => theme.textTheme.titleSmall;
+  TextStyle? get boldMediumTitle =>
+      textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold);
 
   TextStyle? get tipText =>
       theme.textTheme.bodySmall?.copyWith(color: Colors.grey);

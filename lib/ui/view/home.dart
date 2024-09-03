@@ -6,7 +6,7 @@ import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/ui/view/reader/reader.dart';
 import 'package:auto_novel_reader_flutter/ui/view/settings.dart';
-import 'package:auto_novel_reader_flutter/ui/view/web_home.dart';
+import 'package:auto_novel_reader_flutter/ui/view/home/web_home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:unicons/unicons.dart';

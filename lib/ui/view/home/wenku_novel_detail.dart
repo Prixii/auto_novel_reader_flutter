@@ -5,8 +5,9 @@ import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/line_button.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_detail/flow_tag.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_detail/introduction_card.dart';
+import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_detail/paged_cover.dart';
+import 'package:auto_novel_reader_flutter/ui/components/web_home/wenku_novel/download_list.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -21,8 +22,6 @@ class WenkuNovelDetailContainer extends StatelessWidget {
         selector: (state) {
       return state.wenkuNovelDtoMap[state.currentNovelId];
     }, builder: (context, novelDto) {
-      final state = readWebHomeBloc(context).state;
-      final novelKey = '${state.currentNovelProviderId}${state.currentNovelId}';
       return Scaffold(
           appBar: AppBar(
             shadowColor: styleManager.colorScheme.shadow,
@@ -32,7 +31,7 @@ class WenkuNovelDetailContainer extends StatelessWidget {
           ),
           body: WenkuNovelDetail(
             novelDto: novelDto,
-            novelKey: novelKey,
+            novelId: readWenkuHomeBloc(context).state.currentNovelId,
           ));
     });
   }
@@ -59,10 +58,10 @@ class WenkuNovelDetailContainer extends StatelessWidget {
 
 class WenkuNovelDetail extends StatelessWidget {
   const WenkuNovelDetail(
-      {super.key, required this.novelDto, required this.novelKey});
+      {super.key, required this.novelDto, required this.novelId});
 
   final WenkuNovelDto? novelDto;
-  final String novelKey;
+  final String novelId;
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +81,7 @@ class WenkuNovelDetail extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildCovers(_getCoverUrls(novelDto)),
+        PagedCover(urls: _getCoverUrls(novelDto)),
         const SizedBox(height: 8.0),
         ..._buildTitle(novelDto),
         const SizedBox(height: 8.0),
@@ -104,19 +103,6 @@ class WenkuNovelDetail extends StatelessWidget {
         ),
         const SizedBox(height: 64.0),
       ],
-    );
-  }
-
-  Widget _buildCovers(List<String> urls) {
-    return SizedBox(
-      height: 328,
-      child: PageView.builder(
-        itemBuilder: (context, index) => CachedNetworkImage(
-          imageUrl: urls[index],
-          fit: BoxFit.fitHeight,
-        ),
-        itemCount: urls.length,
-      ),
     );
   }
 
@@ -233,7 +219,7 @@ class WenkuNovelDetail extends StatelessWidget {
       Expanded(
         child: BlocSelector<WebHomeBloc, WebHomeState, bool>(
           selector: (state) {
-            return state.favoredWebMap[novelKey] != null;
+            return state.favoredWebMap[novelId] != null;
           },
           builder: (context, favored) {
             return LineButton(
@@ -256,5 +242,8 @@ class WenkuNovelDetail extends StatelessWidget {
     ]);
   }
 
-  _toDownload(BuildContext context) {}
+  _toDownload(BuildContext context) {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (_) => const DownloadList()));
+  }
 }

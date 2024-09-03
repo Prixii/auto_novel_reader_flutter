@@ -108,11 +108,7 @@ class WebNovelDetail extends StatelessWidget {
         const SizedBox(height: 8.0),
         ..._buildIntroduction(novelDto),
         const SizedBox(height: 8.0),
-        Text(
-          '评论',
-          style: styleManager.textTheme.titleMedium
-              ?.copyWith(fontWeight: FontWeight.bold),
-        ),
+        Text('评论', style: styleManager.boldMediumTitle),
         const SizedBox(height: 64.0),
       ],
     );
