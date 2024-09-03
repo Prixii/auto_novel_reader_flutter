@@ -9,6 +9,7 @@ class ConfigState with _$ConfigState {
     @Default(1) int helloPageIndex, // 欢迎页,
     @Default('books.fishhawk.top') String url, // 网站地址
     @Default(WebNovelConfig()) WebNovelConfig webNovelConfig,
+    @Default(true) bool preloadNovel, // 预加载小说
   }) = _Initial;
 
   factory ConfigState.fromJson(Map<String, dynamic> json) =>

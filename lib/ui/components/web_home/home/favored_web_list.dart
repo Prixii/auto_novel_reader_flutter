@@ -46,8 +46,7 @@ class FavoredWebList extends StatelessWidget {
         jumpTo: () {});
   }
 
-  BlocSelector<WebHomeBloc, WebHomeState, List<WebNovel>>
-      _buildFavoredWebList() {
+  Widget _buildFavoredWebList() {
     return BlocSelector<WebHomeBloc, WebHomeState, List<WebNovel>>(
       selector: (state) {
         return state.favoredWebMap.values.toList();

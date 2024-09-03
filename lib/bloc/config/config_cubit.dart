@@ -11,12 +11,10 @@ class ConfigCubit extends HydratedCubit<ConfigState> {
   ConfigCubit() : super(const ConfigState.initial());
 
   setSlideShift(bool value) => emit(state.copyWith(slideShift: value));
-
   setShowErrorInfo(bool value) => emit(state.copyWith(showErrorInfo: value));
-
   setHelloPage(int value) => emit(state.copyWith(helloPageIndex: value));
-
   setVolumeKeyShift(bool value) => emit(state.copyWith(volumeKeyShift: value));
+  setPreloadNovel(bool value) => emit(state.copyWith(preloadNovel: value));
 
   setUrl(String value) {
     if (value == state.url) return;
