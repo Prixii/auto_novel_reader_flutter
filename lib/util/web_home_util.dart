@@ -111,7 +111,88 @@ String _findFirstChapterInToc(List<WebNovelToc> tocList) {
   throw Exception('webNovelDto.toc is null');
 }
 
-Future<ChapterDto?> requestNovelChapter(
+Future<WebNovelDto?> loadWebNovelDto(
+  String providerId,
+  String novelId, {
+  Function? onRequest,
+  Function? onRequestFinished,
+}) async {
+  // 检查是否有缓存
+  final existDto = webHomeBloc.state.webNovelDtoMap['$providerId$novelId'];
+  if (existDto != null) {
+    return existDto;
+  }
+  // 没有缓存，则请求
+  onRequest?.call();
+  final response =
+      await apiClient.webNovelService.getNovelId(providerId, novelId);
+  if (response.statusCode == 502) {
+    Fluttertoast.showToast(msg: '服务器维护中');
+    onRequestFinished?.call();
+    return null;
+  }
+  final body = response.body;
+  try {
+    final webNovelDto = WebNovelDto(
+      body['titleJp'],
+      attentions: body['attentions'].cast<String>(),
+      authors: parseToAuthorList(body['authors']),
+      baidu: body['baidu'],
+      favored: body['favored'],
+      glossary: Map<String, String>.from(body['glossary']),
+      gpt: body['gpt'],
+      introductionJp: body['introductionJp'],
+      introductionZh: body['introductionZh'],
+      lastReadChapterId: body['lastReadChapterId'],
+      jp: body['jp'],
+      keywords: body['keywords'].cast<String>(),
+      points: body['points'],
+      sakura: body['sakura'],
+      syncAt: body['syncAt'],
+      titleZh: body['titleZh'],
+      toc: parseTocList(body['toc']),
+      totalCharacters: body['totalCharacters'],
+      type: body['type'],
+      visited: body['visited'],
+      youdao: body['youdao'],
+    );
+    onRequestFinished?.call();
+    return webNovelDto;
+  } catch (e) {
+    talker.error(e);
+    onRequestFinished?.call();
+    return null;
+  }
+}
+
+Future<ChapterDto?> loadNovelChapter(
+  String providerId,
+  String novelId,
+  String? chapterId, {
+  Function? onRequest,
+  Function? onRequestFinished,
+}) async {
+  if (chapterId == null) return null;
+  final chapterKey = providerId + novelId + chapterId;
+
+  // 检查是否有缓存
+  final existDto = webHomeBloc.state.chapterDtoMap[chapterKey];
+  if (existDto != null) {
+    return existDto;
+  }
+
+  onRequest?.call();
+  // 没有缓存，则请求
+  final chapterDto = await _requestNovelChapter(
+    providerId,
+    novelId,
+    chapterId,
+  );
+  onRequestFinished?.call();
+  return chapterDto;
+}
+
+Future<ChapterDto?> _requestNovelChapter(
   String providerId,
   String novelId,
   String chapterId,

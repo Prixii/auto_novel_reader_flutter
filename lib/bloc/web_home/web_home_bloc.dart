@@ -78,69 +78,25 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   }
 
   _onToNovelDetail(_ToNovelDetail event, Emitter<WebHomeState> emit) async {
-    // 检查是否有缓存
-    final existDto =
-        state.webNovelDtoMap['${event.providerId}${event.novelId}'];
-    if (existDto != null) {
-      emit(state.copyWith(
-        currentNovelId: event.novelId,
-        currentNovelProviderId: event.providerId,
-        currentWebNovelDto: existDto,
-      ));
-      return;
-    }
-    // 没有缓存，则请求
     emit(state.copyWith(
-      loadingNovelDetail: true,
-      currentNovelId: event.novelId,
       currentNovelProviderId: event.providerId,
+      currentNovelId: event.novelId,
     ));
-    final response = await apiClient.webNovelService
-        .getNovelId(event.providerId, event.novelId);
-    if (response.statusCode == 502) {
-      emit(state.copyWith(
-        loadingNovelDetail: false,
-      ));
-      Fluttertoast.showToast(msg: '服务器维护中');
-      return [];
-    }
-    final body = response.body;
-    try {
-      final key = event.providerId + event.novelId;
-
-      final webNovelDto = WebNovelDto(
-        body['titleJp'],
-        attentions: body['attentions'].cast<String>(),
-        authors: parseToAuthorList(body['authors']),
-        baidu: body['baidu'],
-        favored: body['favored'],
-        glossary: Map<String, String>.from(body['glossary']),
-        gpt: body['gpt'],
-        introductionJp: body['introductionJp'],
-        introductionZh: body['introductionZh'],
-        lastReadChapterId: body['lastReadChapterId'],
-        jp: body['jp'],
-        keywords: body['keywords'].cast<String>(),
-        points: body['points'],
-        sakura: body['sakura'],
-        syncAt: body['syncAt'],
-        titleZh: body['titleZh'],
-        toc: parseTocList(body['toc']),
-        totalCharacters: body['totalCharacters'],
-        type: body['type'],
-        visited: body['visited'],
-        youdao: body['youdao'],
-      );
-
-      emit(state.copyWith(
-        loadingNovelDetail: false,
-        webNovelDtoMap: {...state.webNovelDtoMap, key: webNovelDto},
-        currentWebNovelDto: webNovelDto,
-      ));
-      _updateLastReadChapterId(webNovelDto.lastReadChapterId);
-    } catch (e) {
-      talker.error(e);
-    }
+    final dto = await loadWebNovelDto(
+      event.providerId,
+      event.novelId,
+      onRequest: () => emit(state.copyWith(loadingNovelDetail: true)),
+      onRequestFinished: () => emit(state.copyWith(loadingNovelDetail: false)),
+    );
+    if (dto == null) return;
+    emit(state.copyWith(
+      currentWebNovelDto: dto,
+      webNovelDtoMap: {
+        ...state.webNovelDtoMap,
+        currentNovelKey: dto,
+      },
+    ));
+    _updateLastReadChapterId(dto.lastReadChapterId);
   }
 
   _onReadChapter(_ReadChapter event, Emitter<WebHomeState> emit) async {
@@ -153,10 +109,12 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     emit(state.copyWith(loadingNovelChapter: true));
     final chapterKey = currentNovelKey + targetChapterId;
 
-    final targetDto = await _loadNovelChapter(
+    final targetDto = await loadNovelChapter(
       currentNovelProviderId ?? '',
       currentNovelId ?? '',
       targetChapterId,
+      onRequest: () => emit(state.copyWith(loadingNovelChapter: true)),
+      onRequestFinished: () => emit(state.copyWith(loadingNovelChapter: false)),
     );
 
     if (targetDto == null) throw Exception('targetDto is null');
@@ -166,7 +124,7 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
       currentChapterDto: targetDto,
     ));
     final nextChapterKey = currentNovelKey + (targetDto.nextId ?? '');
-    final nextDto = await _loadNovelChapter(
+    final nextDto = await loadNovelChapter(
       currentNovelProviderId ?? '',
       currentNovelId ?? '',
       targetDto.nextId,
@@ -260,28 +218,6 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   }
 
   /// 加载章节 (章节 dto, 是否为缓存)
-  Future<ChapterDto?> _loadNovelChapter(
-    String providerId,
-    String novelId,
-    String? chapterId,
-  ) async {
-    if (chapterId == null) return null;
-    final chapterKey = providerId + novelId + chapterId;
-
-    // 检查是否有缓存
-    final existDto = state.chapterDtoMap[chapterKey];
-    if (existDto != null) {
-      return existDto;
-    }
-
-    // 没有缓存，则请求
-    final chapterDto = await requestNovelChapter(
-      providerId,
-      novelId,
-      chapterId,
-    );
-    return chapterDto;
-  }
 
   bool get loadingChapter => state.loadingNovelChapter;
   String? get currentNovelId => state.currentNovelId;
