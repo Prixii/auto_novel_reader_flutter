@@ -1,3 +1,4 @@
+import 'package:auto_novel_reader_flutter/bloc/web_cache/web_cache_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
@@ -21,6 +22,8 @@ class WebNovelDetailContainer extends StatelessWidget {
       return state.webNovelDtoMap[
           '${state.currentNovelProviderId}${state.currentNovelId}'];
     }, builder: (context, novelDto) {
+      final state = readWebHomeBloc(context).state;
+      final bookKey = '${state.currentNovelProviderId}${state.currentNovelId}';
       return Scaffold(
           appBar: AppBar(
             shadowColor: styleManager.colorScheme.shadow,
@@ -29,10 +32,14 @@ class WebNovelDetailContainer extends StatelessWidget {
             actions: _buildActions,
           ),
           drawer: Drawer(
-            child: ChapterList(tocList: novelDto?.toc ?? []),
+            child: ChapterList(
+              tocList: novelDto?.toc ?? [],
+              bookKey: bookKey,
+            ),
           ),
           body: WebNovelDetail(
             novelDto: novelDto,
+            bookKey: bookKey,
           ));
     });
   }
@@ -58,9 +65,11 @@ class WebNovelDetailContainer extends StatelessWidget {
 }
 
 class WebNovelDetail extends StatelessWidget {
-  const WebNovelDetail({super.key, required this.novelDto});
+  const WebNovelDetail(
+      {super.key, required this.novelDto, required this.bookKey});
 
   final WebNovelDto? novelDto;
+  final String bookKey;
 
   @override
   Widget build(BuildContext context) {
@@ -259,17 +268,25 @@ class WebNovelDetail extends StatelessWidget {
   Widget _buildButtonGroup(WebNovelDto novelDto, BuildContext context) {
     return Row(children: [
       Expanded(
-        child: LineButton(
-            onPressed: () {
-              final state = readWebHomeBloc(context).state;
-              readWebHomeBloc(context).add(const WebHomeEvent.readChapter());
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const PlainTextNovelReaderContainer(),
-                  ));
-            },
-            text: (novelDto.lastReadChapterId == null) ? '开始阅读' : '继续阅读'),
+        child: BlocSelector<WebCacheCubit, WebCacheState, String?>(
+          selector: (state) {
+            return readWebCacheCubit(context).state.lastReadChapterMap[bookKey];
+          },
+          builder: (context, lastReadChapterId) {
+            return LineButton(
+                onPressed: () {
+                  readWebHomeBloc(context)
+                      .add(WebHomeEvent.readChapter(lastReadChapterId));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            const PlainTextNovelReaderContainer(),
+                      ));
+                },
+                text: (lastReadChapterId == null) ? '开始阅读' : '继续阅读');
+          },
+        ),
       ),
       const SizedBox(width: 8),
       Expanded(

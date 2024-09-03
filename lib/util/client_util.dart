@@ -5,6 +5,7 @@ import 'package:auto_novel_reader_flutter/bloc/epub_viewer/epub_viewer_bloc.dart
 import 'package:auto_novel_reader_flutter/bloc/global/global_bloc.dart';
 import 'package:auto_novel_reader_flutter/bloc/local_file/local_file_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/user/user_cubit.dart';
+import 'package:auto_novel_reader_flutter/bloc/web_cache/web_cache_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,7 @@ final epubViewerBloc = EpubViewerBloc();
 final configCubit = ConfigCubit();
 final userCubit = UserCubit();
 final webHomeBloc = WebHomeBloc();
+final webCacheCubit = WebCacheCubit();
 
 void initScreenSize(BuildContext context) {
   screenSize = MediaQuery.sizeOf(context);
@@ -47,6 +49,8 @@ ConfigCubit readConfigCubit(BuildContext context) =>
 UserCubit readUserCubit(BuildContext context) => context.read<UserCubit>();
 WebHomeBloc readWebHomeBloc(BuildContext context) =>
     context.read<WebHomeBloc>();
+WebCacheCubit readWebCacheCubit(BuildContext context) =>
+    context.read<WebCacheCubit>();
 
 Color getRandomDarkColor() {
   final random = Random();

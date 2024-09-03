@@ -16,7 +16,6 @@ class WebHomeState with _$WebHomeState {
     // 小说正文
     @Default(false) bool loadingNovelChapter,
     @Default({}) Map<String, ChapterDto> chapterDtoMap,
-    String? currentChapterIndex,
     ChapterDto? currentChapterDto,
   }) = _Initial;
 }

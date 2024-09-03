@@ -22,7 +22,6 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
         readChapter: (event) async => await _onReadChapter(event, emit),
         nextChapter: (event) async => await _onNextChapter(event, emit),
         previousChapter: (event) async => await _onPreviousChapter(event, emit),
-        jumpToChapter: (event) async => await _onJumpToChapter(event, emit),
         closeNovel: (event) async => await _onCloseNovel(event, emit),
         leaveDetail: (event) async => await _onLeaveDetail(event, emit),
       );
@@ -92,6 +91,7 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   }
 
   _onToNovelDetail(_ToNovelDetail event, Emitter<WebHomeState> emit) async {
+    // 检查是否有缓存
     final existDto =
         state.webNovelDtoMap['${event.providerId}${event.novelId}'];
     if (existDto != null) {
@@ -99,11 +99,10 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
         currentNovelId: event.novelId,
         currentNovelProviderId: event.providerId,
         currentWebNovelDto: existDto,
-        currentChapterIndex: existDto.lastReadChapterId,
       ));
       return;
     }
-
+    // 没有缓存，则请求
     emit(state.copyWith(
       loadingNovelDetail: true,
       currentNovelId: event.novelId,
@@ -149,32 +148,37 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
       emit(state.copyWith(
         loadingNovelDetail: false,
         webNovelDtoMap: {...state.webNovelDtoMap, key: webNovelDto},
-        currentChapterIndex: _findChapterId(webNovelDto),
+        currentWebNovelDto: webNovelDto,
       ));
+      _updateLastReadChapterId(webNovelDto.lastReadChapterId);
     } catch (e) {
       talker.error(e);
     }
   }
 
   _onReadChapter(_ReadChapter event, Emitter<WebHomeState> emit) async {
+    var targetChapterId = event.chapterId;
+    targetChapterId ??= _findChapterId(state.currentWebNovelDto!);
+    _updateLastReadChapterId(targetChapterId);
     globalBloc.add(const GlobalEvent.setReadType(ReadType.web));
     emit(state.copyWith(loadingNovelChapter: true));
-    final targetChapterId = state.currentChapterIndex ?? '';
     final providerId = state.currentNovelProviderId ?? '';
     final novelId = state.currentNovelId ?? '';
     final chapterKey = providerId + novelId + targetChapterId;
+
+    // 检查是否有缓存
     final existDto = state.chapterDtoMap[chapterKey];
     if (existDto != null) {
       emit(
         state.copyWith(
           loadingNovelChapter: false,
           currentChapterDto: existDto,
-          currentChapterIndex: targetChapterId,
         ),
       );
       return;
     }
 
+    // 没有缓存，则请求
     final chapterDto = await requestNovelChapter(
       providerId,
       novelId,
@@ -184,7 +188,6 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
       emit(state.copyWith(
         chapterDtoMap: {...state.chapterDtoMap, chapterKey: chapterDto},
         currentChapterDto: chapterDto,
-        currentChapterIndex: targetChapterId,
       ));
     }
     emit(state.copyWith(loadingNovelChapter: false));
@@ -192,9 +195,15 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
 
   String _findChapterId(WebNovelDto webNovelDto) {
     final tocList = webNovelDto.toc;
+    // 未读过
+    if (webNovelDto.lastReadChapterId == null) {
+      return _findFirstChapterInToc(tocList ?? []);
+    }
+
+    // 读过
     String? targetChapterId;
     if (tocList == null) {
-      targetChapterId = '0';
+      throw Exception('webNovelDto.toc is null');
     } else {
       for (final toc in tocList) {
         if (toc.chapterId != null &&
@@ -206,9 +215,18 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     }
     if (targetChapterId == null) {
       Fluttertoast.showToast(msg: '没有找到上次阅读的章节, 将从第一章开始阅读');
-      targetChapterId = '1';
+      targetChapterId = _findFirstChapterInToc(tocList);
     }
     return targetChapterId;
+  }
+
+  String _findFirstChapterInToc(List<WebNovelToc> tocList) {
+    for (final toc in tocList) {
+      if (toc.chapterId != null) {
+        return toc.chapterId!;
+      }
+    }
+    throw Exception('webNovelDto.toc is null');
   }
 
   Future<ChapterDto?> requestNovelChapter(
@@ -243,36 +261,24 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   }
 
   _onNextChapter(_NextChapter event, Emitter<WebHomeState> emit) async {
-    if (state.currentChapterDto?.nextId == null) return;
-    emit(state.copyWith(currentChapterIndex: state.currentChapterDto?.nextId));
-    add(const WebHomeEvent.readChapter());
+    final nextId = state.currentChapterDto?.nextId;
+    if (nextId == null) return;
+    add(WebHomeEvent.readChapter(nextId));
   }
 
   _onPreviousChapter(_PreviousChapter event, Emitter<WebHomeState> emit) async {
-    if (state.currentChapterDto?.previousId == null) return;
-    emit(state.copyWith(
-        currentChapterIndex: state.currentChapterDto?.previousId));
-    add(const WebHomeEvent.readChapter());
-  }
-
-  _onJumpToChapter(_JumpToChapter event, Emitter<WebHomeState> emit) async {
-    emit(state.copyWith(currentChapterIndex: event.index));
-    add(const WebHomeEvent.readChapter());
+    final prevId = state.currentChapterDto?.previousId;
+    if (prevId == null) return;
+    add(WebHomeEvent.readChapter(prevId));
   }
 
   _onCloseNovel(_CloseNovel event, Emitter<WebHomeState> emit) {
     globalBloc.add(const GlobalEvent.setReadType(ReadType.none));
   }
 
-  _onLeaveDetail(_LeaveDetail event, Emitter<WebHomeState> emit) {
-    final novelDtoMapSnapshot = {...state.webNovelDtoMap};
-    final updatedCurrentNovelDto = state.currentWebNovelDto?.copyWith(
-      lastReadChapterId: state.currentChapterIndex,
-    );
-    if (updatedCurrentNovelDto != null) {
-      novelDtoMapSnapshot[(state.currentNovelProviderId ?? '') +
-          (state.currentNovelId ?? '')] = updatedCurrentNovelDto;
-      emit(state.copyWith(webNovelDtoMap: novelDtoMapSnapshot));
-    }
-  }
+  _onLeaveDetail(_LeaveDetail event, Emitter<WebHomeState> emit) {}
+
+  void _updateLastReadChapterId(String? chapterId) =>
+      webCacheCubit.updateLastReadChapter(
+          state.currentNovelProviderId!, state.currentNovelId!, chapterId);
 }

@@ -1,3 +1,4 @@
+import 'package:auto_novel_reader_flutter/bloc/web_cache/web_cache_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
@@ -7,10 +8,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 const _chapterTileHeight = 58.0;
 
 class ChapterList extends StatelessWidget {
-  const ChapterList({super.key, required this.tocList, this.readMode = false});
+  const ChapterList(
+      {super.key,
+      required this.bookKey,
+      required this.tocList,
+      this.readMode = false});
 
   final List<WebNovelToc> tocList;
   final bool readMode;
+  final String bookKey;
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -33,21 +39,29 @@ class ChapterList extends StatelessWidget {
   }
 
   Widget _buildListBody() {
-    return ListView.builder(
-      padding: const EdgeInsets.all(0),
-      shrinkWrap: true,
-      prototypeItem: const SizedBox(
-        height: _chapterTileHeight,
-      ),
-      itemBuilder: (context, index) {
-        return ChapterListTile(
-          titleJp: tocList[index].titleJp,
-          titleZh: tocList[index].titleZh,
-          index: tocList[index].chapterId,
-          readMode: readMode,
+    return BlocSelector<WebCacheCubit, WebCacheState, String?>(
+      selector: (state) {
+        return state.lastReadChapterMap[bookKey];
+      },
+      builder: (context, currentChapterId) {
+        return ListView.builder(
+          padding: const EdgeInsets.all(0),
+          shrinkWrap: true,
+          prototypeItem: const SizedBox(
+            height: _chapterTileHeight,
+          ),
+          itemBuilder: (context, index) {
+            return ChapterListTile(
+              titleJp: tocList[index].titleJp,
+              titleZh: tocList[index].titleZh,
+              index: tocList[index].chapterId,
+              readMode: readMode,
+              currentChapterId: currentChapterId,
+            );
+          },
+          itemCount: tocList.length,
         );
       },
-      itemCount: tocList.length,
     );
   }
 }
@@ -57,9 +71,11 @@ class ChapterListTile extends StatelessWidget {
       {super.key,
       required this.titleJp,
       this.titleZh,
+      this.currentChapterId,
       required this.index,
       this.readMode = false});
 
+  final String? currentChapterId;
   final String titleJp;
   final String? titleZh;
   final String? index;
@@ -67,78 +83,71 @@ class ChapterListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocSelector<WebHomeBloc, WebHomeState, String?>(
-      selector: (state) {
-        return state.currentChapterIndex;
+    final isCurrent = (readMode && (currentChapterId == index));
+    return InkWell(
+      borderRadius: const BorderRadius.only(
+        topLeft: Radius.circular(8.0),
+        bottomLeft: Radius.circular(8.0),
+      ),
+      onTap: () {
+        if (!readMode) return;
+        if (index == null) return;
+        context.read<WebHomeBloc>().add(WebHomeEvent.readChapter(index!));
+        Navigator.pop(context);
       },
-      builder: (context, chapterDto) {
-        final isCurrent = (readMode && (chapterDto == index));
-        return InkWell(
+      child: Container(
+        height: _chapterTileHeight,
+        decoration: BoxDecoration(
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(8.0),
             bottomLeft: Radius.circular(8.0),
           ),
-          onTap: () {
-            if (!readMode) return;
-            if (index == null) return;
-            context.read<WebHomeBloc>().add(WebHomeEvent.jumpToChapter(index!));
-            Navigator.pop(context);
-          },
-          child: Container(
-            height: _chapterTileHeight,
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(8.0),
-                bottomLeft: Radius.circular(8.0),
+          color: isCurrent
+              ? styleManager.colorScheme.primaryContainer
+              : Colors.transparent,
+        ),
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(12, 0, 8, 0),
+        alignment: Alignment.centerLeft,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(titleJp,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      style: styleManager.primaryColorTitleSmall?.copyWith(
+                        color: isCurrent
+                            ? styleManager.colorScheme.onPrimaryContainer
+                            : styleManager.colorScheme.primary,
+                      )),
+                  Text(titleZh ?? '',
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      style: styleManager.titleSmall?.copyWith(
+                        color: isCurrent
+                            ? styleManager.colorScheme.onSecondaryContainer
+                            : Colors.black54,
+                      ))
+                ],
               ),
-              color: isCurrent
-                  ? styleManager.colorScheme.primaryContainer
-                  : Colors.transparent,
             ),
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(12, 0, 8, 0),
-            alignment: Alignment.centerLeft,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(titleJp,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                          style: styleManager.primaryColorTitleSmall?.copyWith(
-                            color: isCurrent
-                                ? styleManager.colorScheme.onPrimaryContainer
-                                : styleManager.colorScheme.primary,
-                          )),
-                      Text(titleZh ?? '',
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                          style: styleManager.titleSmall?.copyWith(
-                            color: isCurrent
-                                ? styleManager.colorScheme.onSecondaryContainer
-                                : Colors.black54,
-                          ))
-                    ],
-                  ),
-                ),
-                Text(
-                  index ?? '',
-                  style: styleManager.textTheme.titleLarge?.copyWith(
-                    color: isCurrent
-                        ? styleManager.colorScheme.primary
-                        : Colors.grey[300],
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
+            Text(
+              index ?? '',
+              style: styleManager.textTheme.titleLarge?.copyWith(
+                color: isCurrent
+                    ? styleManager.colorScheme.primary
+                    : Colors.grey[300],
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
 }
