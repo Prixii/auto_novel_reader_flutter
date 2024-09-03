@@ -1,4 +1,5 @@
 import 'package:auto_novel_reader_flutter/bloc/user/user_cubit.dart';
+import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/ui/components/settings/auth_tab.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/icon_option.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
@@ -33,9 +34,17 @@ class UserInfoTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(state.username ?? ''),
+          Text(
+            '@${state.username}',
+            style: styleManager.titleSmall,
+          ),
+          const SizedBox(width: 8.0),
+          Text(
+            parseTimeStamp((state.createAt ?? 0) * 1000),
+            style: styleManager.tipText,
+          ),
+          Expanded(child: Container()),
           IconButton(
               onPressed: () => tryLogout(context),
               icon: const Icon(UniconsLine.signout),

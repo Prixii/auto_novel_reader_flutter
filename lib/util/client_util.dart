@@ -54,6 +54,11 @@ void showSucceedToast(String message) {
   );
 }
 
+String parseTimeStamp(int timeStamp) {
+  final date = DateTime.fromMillisecondsSinceEpoch(timeStamp);
+  return date.toString().substring(0, 10);
+}
+
 GlobalBloc readGlobalBloc(BuildContext context) => context.read<GlobalBloc>();
 EpubViewerBloc readEpubViewerBloc(BuildContext context) =>
     context.read<EpubViewerBloc>();

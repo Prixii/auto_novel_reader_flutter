@@ -146,11 +146,6 @@ class WebNovelDetail extends StatelessWidget {
     );
   }
 
-  String parseTimeStamp(int timeStamp) {
-    final date = DateTime.fromMillisecondsSinceEpoch(timeStamp);
-    return date.toString().substring(0, 10);
-  }
-
   List<Widget> _buildTitle(WebNovelDto novelDto) {
     return [
       Text(
