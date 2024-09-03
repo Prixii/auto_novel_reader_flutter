@@ -51,7 +51,14 @@ enum Language {
   jp,
   zh,
   zhJp,
-  jpZh,
+  jpZh;
+
+  String get kebabName => switch (this) {
+        Language.jp => 'jp',
+        Language.zh => 'zh',
+        Language.zhJp => 'zh-jp',
+        Language.jpZh => 'jp-zh',
+      };
 }
 
 enum TranslationMode {
@@ -83,4 +90,11 @@ enum NovelType {
   web,
   wenku,
   local,
+}
+
+enum DownloadType {
+  downloading,
+  downloaded,
+  failed,
+  none,
 }

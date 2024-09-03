@@ -16,9 +16,9 @@ class ConfigCubit extends HydratedCubit<ConfigState> {
   setVolumeKeyShift(bool value) => emit(state.copyWith(volumeKeyShift: value));
   setPreloadNovel(bool value) => emit(state.copyWith(preloadNovel: value));
 
-  setUrl(String value) {
-    if (value == state.url) return;
-    emit(state.copyWith(url: value));
+  setHost(String value) {
+    if (value == state.host) return;
+    emit(state.copyWith(host: value));
     apiClient.createChopper();
   }
 

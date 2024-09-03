@@ -27,7 +27,7 @@ class _ApiClient {
 
   void createChopper() {
     chopper = ChopperClient(
-      baseUrl: Uri.parse('https://${configCubit.state.url}/api'),
+      baseUrl: Uri.parse('https://${configCubit.state.host}/api'),
       interceptors: [
         _tokenInterceptor,
         _responseInterceptor,

@@ -99,9 +99,9 @@ class SettingsView extends StatelessWidget {
     ];
     final cubit = readConfigCubit(context);
     return TabOption(
-        initValue: urls.indexOf(cubit.state.url),
+        initValue: urls.indexOf(cubit.state.host),
         label: '绿站 host',
-        onTap: (value, index) => cubit.setUrl(value),
+        onTap: (value, index) => cubit.setHost(value),
         icon: UniconsLine.estate,
         tabs: urls);
   }

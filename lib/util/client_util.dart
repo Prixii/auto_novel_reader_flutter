@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:auto_novel_reader_flutter/bloc/config/config_cubit.dart';
+import 'package:auto_novel_reader_flutter/bloc/download_cubit/download_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/epub_viewer/epub_viewer_bloc.dart';
 import 'package:auto_novel_reader_flutter/bloc/global/global_bloc.dart';
 import 'package:auto_novel_reader_flutter/bloc/local_file/local_file_cubit.dart';
@@ -26,6 +27,7 @@ final userCubit = UserCubit();
 final webHomeBloc = WebHomeBloc();
 final wenkuHomeBloc = WenkuHomeBloc();
 final webCacheCubit = WebCacheCubit();
+final downloadCubit = DownloadCubit();
 
 GlobalBloc readGlobalBloc(BuildContext context) => context.read<GlobalBloc>();
 EpubViewerBloc readEpubViewerBloc(BuildContext context) =>
@@ -41,6 +43,8 @@ WebCacheCubit readWebCacheCubit(BuildContext context) =>
     context.read<WebCacheCubit>();
 WenkuHomeBloc readWenkuHomeBloc(BuildContext context) =>
     context.read<WenkuHomeBloc>();
+DownloadCubit readDownloadCubit(BuildContext context) =>
+    context.read<DownloadCubit>();
 
 void initScreenSize(BuildContext context) {
   screenSize = MediaQuery.sizeOf(context);

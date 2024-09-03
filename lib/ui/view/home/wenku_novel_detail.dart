@@ -211,7 +211,9 @@ class WenkuNovelDetail extends StatelessWidget {
     return Row(children: [
       Expanded(
         child: LineButton(
+          enabled: readUserCubit(context).isSignIn,
           onPressed: () => _toDownload(context),
+          onDisabledPressed: () => showWarnToast('请先登录'),
           text: '阅读',
         ),
       ),

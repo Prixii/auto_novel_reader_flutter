@@ -1,7 +1,13 @@
+import 'package:auto_novel_reader_flutter/bloc/download_cubit/download_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/wenku_home/wenku_home_bloc.dart';
+import 'package:auto_novel_reader_flutter/manager/path_manager.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
+import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
+import 'package:auto_novel_reader_flutter/network/file_downloader.dart';
+import 'package:auto_novel_reader_flutter/ui/components/universal/line_button.dart';
 import 'package:auto_novel_reader_flutter/ui/view/download.dart';
+import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:unicons/unicons.dart';
@@ -120,16 +126,70 @@ class JpVolumeListTile extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8.0),
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(UniconsLine.file_download),
-        ),
+        _buildTrail(context),
       ],
     );
   }
 
+  Widget _buildTrail(BuildContext context) {
+    final state = readWenkuHomeBloc(context).state;
+    final (fileName, url) = jpDownloadUrlGenerator(
+        readWenkuHomeBloc(context).state.currentNovelId, dto.volumeId,
+        mode: state.language,
+        translationsMode: state.translationMode,
+        translations: state.translationOrder);
+    return SizedBox(
+      width: 78,
+      child: BlocSelector<DownloadCubit, DownloadState, DownloadType>(
+        selector: (state) {
+          return readDownloadCubit(context).getDownloadType(fileName);
+        },
+        builder: (context, downloadType) {
+          switch (downloadType) {
+            case DownloadType.downloading:
+              return BlocSelector<DownloadCubit, DownloadState, double>(
+                selector: (state) {
+                  return state.progressMap[dto.volumeId] ?? 0.0;
+                },
+                builder: (context, state) {
+                  return Text(
+                    '${(state * 100).toStringAsFixed(2)}%',
+                  );
+                },
+              );
+            case DownloadType.none:
+            case DownloadType.failed:
+              return FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: styleManager.colorScheme.secondaryContainer,
+                ),
+                onPressed: () {
+                  _downloadJpEpub(context, fileName, url);
+                },
+                child: Icon(
+                  UniconsLine.file_download,
+                  color: styleManager.colorScheme.onSecondaryContainer,
+                ),
+              );
+            case DownloadType.downloaded:
+              return LineButton(
+                text: '阅读',
+                onPressed: () => {},
+              );
+          }
+        },
+      ),
+    );
+  }
+
+  void _downloadJpEpub(BuildContext context, String fileName, String url) {
+    talker.debug('fileName: $fileName, url: $url');
+    readDownloadCubit(context)
+        .createDownloadTask(url, pathManager.epubDownloadPath, fileName);
+  }
+
   String get _getTranslationCount =>
-      '总计 ${dto.total} / 百度 ${dto.baidu} / 有道 ${dto.youdao} / GPT ${dto.gpt} / Sakura ${dto.sakura}';
+      '总计 ${dto.total} / 百度 ${dto.baidu} / 有道 ${dto.youdao} /\n GPT ${dto.gpt} / Sakura ${dto.sakura}';
 }
 
 class ZhVolumeListTile extends StatelessWidget {
@@ -157,11 +217,62 @@ class ZhVolumeListTile extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8.0),
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(UniconsLine.file_download),
-        ),
+        _buildTrail(context),
       ],
     );
+  }
+
+  Widget _buildTrail(BuildContext context) {
+    return SizedBox(
+      width: 78,
+      child: BlocSelector<DownloadCubit, DownloadState, DownloadType>(
+        selector: (state) {
+          return readDownloadCubit(context).getDownloadType(title);
+        },
+        builder: (context, downloadType) {
+          switch (downloadType) {
+            case DownloadType.downloading:
+              return BlocSelector<DownloadCubit, DownloadState, double>(
+                selector: (state) {
+                  return state.progressMap[title] ?? 0.0;
+                },
+                builder: (context, state) {
+                  return Text(
+                    '${(state * 100).toStringAsFixed(2)}%',
+                  );
+                },
+              );
+            case DownloadType.none:
+            case DownloadType.failed:
+              return FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: styleManager.colorScheme.secondaryContainer,
+                ),
+                onPressed: () => _downloadZhEpub(
+                    context,
+                    zhDownloadUrlGenerator(
+                      readWenkuHomeBloc(context).state.currentNovelId,
+                      title,
+                    ),
+                    title),
+                child: Icon(
+                  UniconsLine.file_download,
+                  color: styleManager.colorScheme.onSecondaryContainer,
+                ),
+              );
+            case DownloadType.downloaded:
+              return LineButton(
+                text: '阅读',
+                onPressed: () => {},
+              );
+          }
+        },
+      ),
+    );
+  }
+
+  void _downloadZhEpub(BuildContext context, String url, String title) {
+    readDownloadCubit(context)
+        .createDownloadTask(url, pathManager.epubDownloadPath, title);
   }
 }
