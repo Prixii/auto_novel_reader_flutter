@@ -157,6 +157,8 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   }
 
   _onReadChapter(_ReadChapter event, Emitter<WebHomeState> emit) async {
+    if (loadingChapter) return;
+
     var targetChapterId = event.chapterId;
     targetChapterId ??= _findChapterId(state.currentWebNovelDto!);
     _updateLastReadChapterId(targetChapterId);
@@ -281,4 +283,6 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   void _updateLastReadChapterId(String? chapterId) =>
       webCacheCubit.updateLastReadChapter(
           state.currentNovelProviderId!, state.currentNovelId!, chapterId);
+
+  bool get loadingChapter => state.loadingNovelChapter;
 }

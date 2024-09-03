@@ -50,7 +50,7 @@ class WebNovelTile extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
               Expanded(child: Container()),
-              _buildFooter(webOutline),
+              _buildFooter(webOutline, context),
             ],
           ),
         ),
@@ -58,17 +58,37 @@ class WebNovelTile extends StatelessWidget {
     );
   }
 
-  Widget _buildFooter(WebNovelOutline webOutline) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildFooter(WebNovelOutline webOutline, BuildContext context) {
+    final lastReadChapter = readWebCacheCubit(context)
+        .state
+        .lastReadChapterMap[webOutline.providerId + webOutline.novelId];
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        InfoBadge(
-          webOutline.type,
-          padding: const EdgeInsets.all(2),
-        ),
-        Text(
-          '总计 ${webOutline.total} ',
-          style: styleManager.tipText,
+        (lastReadChapter == null)
+            ? Text(
+                '没有阅读记录',
+                style: styleManager.tipText,
+              )
+            : Text(
+                '最后阅读: 第$lastReadChapter章',
+                style: styleManager.tipText,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '总计 ${webOutline.total} ',
+              style: styleManager.tipText,
+            ),
+            InfoBadge(
+              webOutline.type,
+              padding: const EdgeInsets.all(2),
+            ),
+          ],
         ),
       ],
     );

@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
@@ -52,7 +53,7 @@ class PlainTextNovelReaderContainer extends StatelessWidget {
   }
 }
 
-class PlainTextNovelReader extends StatelessWidget {
+class PlainTextNovelReader extends StatefulWidget {
   const PlainTextNovelReader({
     super.key,
     required this.dto,
@@ -61,32 +62,101 @@ class PlainTextNovelReader extends StatelessWidget {
   final ChapterDto dto;
 
   @override
+  State<PlainTextNovelReader> createState() => _PlainTextNovelReaderState();
+}
+
+class _PlainTextNovelReaderState extends State<PlainTextNovelReader>
+    with TickerProviderStateMixin {
+  late AnimationController _maskAnimationController;
+  late Animation<double> _maskAnimation;
+  late ScrollController _scrollController;
+  @override
+  void initState() {
+    super.initState();
+    _maskAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _maskAnimation =
+        Tween(begin: 0.0, end: 1.0).animate(_maskAnimationController);
+    _scrollController = ScrollController();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return PopScope(
       onPopInvoked: (value) {
         if (Scaffold.of(context).isDrawerOpen) return;
         readWebHomeBloc(context).add(const WebHomeEvent.closeNovel());
       },
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-        child: Column(
-          children: [
-            Text(
-              dto.titleJp ?? '',
-              style: styleManager.primaryColorTitleLarge,
-            ),
-            Text(
-              dto.titleZh ?? '',
-              style: styleManager.titleSmall,
-            ),
-            const Divider(),
-            NovelRender(
-              chapterDto: dto,
-            )
-          ],
-        ),
+      child: Stack(
+        children: [
+          _buildNovelRender(),
+          _buildLoadingMask(),
+        ],
       ),
     );
+  }
+
+  Widget _buildNovelRender() {
+    return BlocSelector<WebHomeBloc, WebHomeState, bool>(
+      selector: (state) {
+        return state.loadingNovelChapter;
+      },
+      builder: (context, isLoading) {
+        return AbsorbPointer(
+          absorbing: isLoading,
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            padding:
+                const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+            child: Column(
+              children: [
+                Text(
+                  widget.dto.titleJp ?? '',
+                  style: styleManager.primaryColorTitleLarge,
+                ),
+                Text(
+                  widget.dto.titleZh ?? '',
+                  style: styleManager.titleSmall,
+                ),
+                const Divider(),
+                NovelRender(
+                  chapterDto: widget.dto,
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildLoadingMask() {
+    return BlocListener<WebHomeBloc, WebHomeState>(
+        listener: (context, state) {
+          if (state.loadingNovelChapter) {
+            _maskAnimationController.forward();
+          } else {
+            _scrollController.animateTo(0,
+                duration: const Duration(milliseconds: 100),
+                curve: Curves.easeInOut);
+            _maskAnimationController.reverse();
+          }
+        },
+        listenWhen: (previous, current) {
+          return previous.loadingNovelChapter != current.loadingNovelChapter;
+        },
+        child: FadeTransition(
+          opacity: _maskAnimation,
+          child: BackdropFilter(
+            filter: ImageFilter.blur(
+              sigmaX: 10,
+              sigmaY: 10,
+            ),
+            child: const Center(child: CircularProgressIndicator()),
+          ),
+        ));
   }
 }
 

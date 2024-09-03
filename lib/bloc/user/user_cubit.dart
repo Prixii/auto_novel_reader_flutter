@@ -93,6 +93,8 @@ class UserCubit extends HydratedCubit<UserState> {
     emit(const UserState.initial());
   }
 
+  bool get isSignIn => state.token != null;
+
   @override
   UserState? fromJson(Map<String, dynamic> json) => UserState.fromJson(json);
 
