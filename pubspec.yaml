@@ -24,7 +24,6 @@ dependencies:
   # 权限申请
   permission_handler: ^11.3.1
   # log 打印
-  talker_dio_logger: ^4.2.0
   talker_flutter: ^4.2.0
   # 图标
   unicons: ^2.1.1
@@ -46,6 +45,8 @@ dependencies:
   hydrated_bloc: ^9.1.5
   # 网络图片
   cached_network_image: ^3.4.1
+  # jwt
+  dart_jsonwebtoken: ^2.14.0
 
 dev_dependencies:
   flutter_test:

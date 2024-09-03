@@ -24,6 +24,7 @@ class HomeView extends StatelessWidget {
     var reverse = true;
 
     readWebHomeBloc(context).add(const WebHomeEvent.init());
+    readWebCacheCubit(context).refreshFavored();
 
     return BlocBuilder<GlobalBloc, GlobalState>(
       buildWhen: (prev, state) =>

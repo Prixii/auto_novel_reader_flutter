@@ -1,6 +1,7 @@
 import 'package:auto_novel_reader_flutter/bloc/web_cache/web_cache_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
+import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/ui/components/reader/plain_text_novel_reader.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/info_badge.dart';
@@ -23,7 +24,7 @@ class WebNovelDetailContainer extends StatelessWidget {
           '${state.currentNovelProviderId}${state.currentNovelId}'];
     }, builder: (context, novelDto) {
       final state = readWebHomeBloc(context).state;
-      final bookKey = '${state.currentNovelProviderId}${state.currentNovelId}';
+      final novelKey = '${state.currentNovelProviderId}${state.currentNovelId}';
       return Scaffold(
           appBar: AppBar(
             shadowColor: styleManager.colorScheme.shadow,
@@ -34,12 +35,12 @@ class WebNovelDetailContainer extends StatelessWidget {
           drawer: Drawer(
             child: ChapterList(
               tocList: novelDto?.toc ?? [],
-              bookKey: bookKey,
+              novelKey: novelKey,
             ),
           ),
           body: WebNovelDetail(
             novelDto: novelDto,
-            bookKey: bookKey,
+            novelKey: novelKey,
           ));
     });
   }
@@ -66,10 +67,10 @@ class WebNovelDetailContainer extends StatelessWidget {
 
 class WebNovelDetail extends StatelessWidget {
   const WebNovelDetail(
-      {super.key, required this.novelDto, required this.bookKey});
+      {super.key, required this.novelDto, required this.novelKey});
 
   final WebNovelDto? novelDto;
-  final String bookKey;
+  final String novelKey;
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +103,7 @@ class WebNovelDetail extends StatelessWidget {
         _buildAuthorInfo(novelDto),
         _buildUpdateInfo(novelDto),
         const SizedBox(height: 8.0),
-        _buildButtonGroup(novelDto, context),
+        _buildButtonGroup(context),
         const SizedBox(height: 8.0),
         ..._buildIntroduction(novelDto),
         const SizedBox(height: 8.0),
@@ -265,34 +266,57 @@ class WebNovelDetail extends StatelessWidget {
     return authorName;
   }
 
-  Widget _buildButtonGroup(WebNovelDto novelDto, BuildContext context) {
+  Widget _buildButtonGroup(BuildContext context) {
     return Row(children: [
       Expanded(
         child: BlocSelector<WebCacheCubit, WebCacheState, String?>(
           selector: (state) {
-            return readWebCacheCubit(context).state.lastReadChapterMap[bookKey];
+            return readWebCacheCubit(context)
+                .state
+                .lastReadChapterMap[novelKey];
           },
           builder: (context, lastReadChapterId) {
             return LineButton(
-                onPressed: () {
-                  readWebHomeBloc(context)
-                      .add(WebHomeEvent.readChapter(lastReadChapterId));
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            const PlainTextNovelReaderContainer(),
-                      ));
-                },
-                text: (lastReadChapterId == null) ? '开始阅读' : '继续阅读');
+              onPressed: () => _readNovel(context, lastReadChapterId),
+              text: (lastReadChapterId == null) ? '开始阅读' : '继续阅读',
+            );
           },
         ),
       ),
       const SizedBox(width: 8),
       Expanded(
-        child: LineButton(
-            onPressed: () {}, text: (novelDto.favored == null) ? '收藏' : '已收藏'),
+        child: BlocSelector<WebHomeBloc, WebHomeState, bool>(
+          selector: (state) {
+            return state.favoredWebMap[novelKey] != null;
+          },
+          builder: (context, favored) {
+            return LineButton(
+                onPressed: () {
+                  if (favored) {
+                    readWebHomeBloc(context)
+                        .add(const WebHomeEvent.unFavorNovel(NovelType.web));
+                  } else {
+                    readWebHomeBloc(context).add(
+                      const WebHomeEvent.favorNovel(NovelType.web),
+                    );
+                  }
+                },
+                onDisabledPressed: () => showWarnToast('请先登录'),
+                enabled: readUserCubit(context).isSignIn,
+                text: favored ? '已收藏' : '收藏');
+          },
+        ),
       )
     ]);
+  }
+
+  void _readNovel(BuildContext context, String? lastReadChapterId) {
+    readWebHomeBloc(context).add(WebHomeEvent.readChapter(lastReadChapterId));
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const PlainTextNovelReaderContainer(),
+      ),
+    );
   }
 }

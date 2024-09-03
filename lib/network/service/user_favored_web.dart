@@ -25,12 +25,12 @@ abstract class UserFavoredWebService extends ChopperService {
     @Query() int pageSize,
     @Query() String sort,
   );
-  Future<Response?> getIdList(
-    String favoredId,
-    int page,
-    int pageSize,
-    String sort,
-  ) =>
+  Future<Response?> getIdList({
+    String favoredId = 'default',
+    int page = 0,
+    int pageSize = 8,
+    String sort = 'update',
+  }) =>
       tokenRequest(() => _getIdList(favoredId, page, pageSize, sort));
 
   @Put(path: '/{favoredId}/{providerId}/{novelId}')
@@ -40,10 +40,10 @@ abstract class UserFavoredWebService extends ChopperService {
     @Path() String novelId,
   );
   Future<Response?> putNovelId(
-    String favoredId,
     String providerId,
-    String novelId,
-  ) =>
+    String novelId, {
+    String favoredId = 'default',
+  }) =>
       tokenRequest(() => _putNovelId(favoredId, providerId, novelId));
 
   @Delete(path: '/{favoredId}/{providerId}/{novelId}')
@@ -53,10 +53,10 @@ abstract class UserFavoredWebService extends ChopperService {
     @Path() String novelId,
   );
   Future<Response?> deleteNovelId(
-    String favoredId,
     String providerId,
-    String novelId,
-  ) =>
+    String novelId, {
+    String favoredId = 'default',
+  }) =>
       tokenRequest(() => _deleteNovelId(favoredId, providerId, novelId));
 
   static UserFavoredWebService create([ChopperClient? client]) =>

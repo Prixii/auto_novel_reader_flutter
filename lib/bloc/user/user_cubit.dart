@@ -1,6 +1,7 @@
 import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
+import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -31,13 +32,23 @@ class UserCubit extends HydratedCubit<UserState> {
       showErrorToast('登录失败, 用户名或密码错误');
       return false;
     }
-    emit(state.copyWith(
-      emailOrUsername: emailOrUsername,
-      password: password,
-      autoSignIn: autoSignIn,
-      token: token,
-      signInTime: DateTime.now(),
-    ));
+    try {
+      final jwt = JWT.decode(token).payload;
+      emit(state.copyWith(
+        id: jwt['id'],
+        email: jwt['email'],
+        username: jwt['username'],
+        role: jwt['role'],
+        createAt: jwt['createAt'],
+        emailOrUsername: emailOrUsername,
+        password: password,
+        autoSignIn: autoSignIn,
+        token: token,
+        signInTime: DateTime.now(),
+      ));
+    } catch (e) {
+      talker.info(e.toString());
+    }
     webHomeBloc.add(const WebHomeEvent.refreshFavoredWeb());
     return true;
   }

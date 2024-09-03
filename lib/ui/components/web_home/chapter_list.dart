@@ -10,13 +10,13 @@ const _chapterTileHeight = 58.0;
 class ChapterList extends StatelessWidget {
   const ChapterList(
       {super.key,
-      required this.bookKey,
+      required this.novelKey,
       required this.tocList,
       this.readMode = false});
 
   final List<WebNovelToc> tocList;
   final bool readMode;
-  final String bookKey;
+  final String novelKey;
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -41,7 +41,7 @@ class ChapterList extends StatelessWidget {
   Widget _buildListBody() {
     return BlocSelector<WebCacheCubit, WebCacheState, String?>(
       selector: (state) {
-        return state.lastReadChapterMap[bookKey];
+        return state.lastReadChapterMap[novelKey];
       },
       builder: (context, currentChapterId) {
         return ListView.builder(

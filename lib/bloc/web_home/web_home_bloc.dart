@@ -24,6 +24,8 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
         previousChapter: (event) async => await _onPreviousChapter(event, emit),
         closeNovel: (event) async => await _onCloseNovel(event, emit),
         leaveDetail: (event) async => await _onLeaveDetail(event, emit),
+        favorNovel: (event) async => await _onFavorNovel(event, emit),
+        unFavorNovel: (event) async => await _onUnFavorNovel(event, emit),
       );
     });
   }
@@ -31,49 +33,37 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   _onInit(_Init event, Emitter<WebHomeState> emit) async {
     if (state.inInit) return;
     emit(state.copyWith(inInit: true));
+    Set<WebNovelOutline> newWebOutlines = {};
     await Future.wait([
-      refreshFavoredWeb().then(
-        (webNovelOutlines) => emit(
-          state.copyWith(favoredWeb: webNovelOutlines),
-        ),
-      ),
-      apiClient.webNovelService
-          .getList(
-        0,
-        8,
-        provider: 'kakuyomu,syosetu,novelup,hameln,pixiv,alphapolis',
-        sort: 1,
-        level: 1,
-      )
-          .then((response) {
-        final body = response.body;
-        final webNovelOutlines = parseToWebNovelOutline(body);
+      _refreshFavoredWeb().then((webNovelOutlines) {
+        var favoredWebMapSnapshot = <String, WebNovelOutline>{};
+        for (var webNovelOutline in webNovelOutlines) {
+          favoredWebMapSnapshot[
+                  '${webNovelOutline.providerId}${webNovelOutline.novelId}'] =
+              webNovelOutline;
+        }
+        emit(state.copyWith(favoredWebMap: favoredWebMapSnapshot));
+        newWebOutlines.addAll(webNovelOutlines);
+      }),
+      _refreshMostVisitedWeb().then((webNovelOutlines) {
         emit(state.copyWith(webMostVisited: webNovelOutlines));
+        newWebOutlines.addAll(webNovelOutlines);
       }),
-      apiClient.wenkuNovelService
-          .getList(
-        0,
-        12,
-        level: 1,
-      )
-          .then((response) {
-        final body = response.body;
-        final wenkuNovelOutlines = parseToWenkuNovelOutline(body);
-        emit(state.copyWith(wenkuLatestUpdate: wenkuNovelOutlines));
-      }),
+      _refreshLatestUpdateWenku().then((wenkuNovelOutlines) =>
+          emit(state.copyWith(wenkuLatestUpdate: wenkuNovelOutlines))),
     ]);
-    emit(state.copyWith(inInit: false));
+    var webNovelOutlineMapSnapshot = {...state.webNovelOutlineMap};
+    for (var webNovelOutline in newWebOutlines) {
+      final novelKey =
+          '${webNovelOutline.providerId}${webNovelOutline.novelId}';
+      webNovelOutlineMapSnapshot[novelKey] = webNovelOutline;
+    }
+    emit(state.copyWith(
+        inInit: false, webNovelOutlineMap: webNovelOutlineMapSnapshot));
   }
 
-  Future<List<WebNovelOutline>> refreshFavoredWeb() async {
-    return apiClient.userFavoredWebService
-        .getIdList(
-      'default',
-      0,
-      8,
-      SearchSortType.update.name,
-    )
-        .then((response) {
+  Future<List<WebNovelOutline>> _refreshFavoredWeb() async {
+    return apiClient.userFavoredWebService.getIdList().then((response) {
       if (response?.statusCode == 502) {
         Fluttertoast.showToast(msg: '服务器维护中');
         return [];
@@ -84,10 +74,47 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     });
   }
 
+  Future<List<WebNovelOutline>> _refreshMostVisitedWeb() async {
+    return apiClient.webNovelService
+        .getList(
+      0,
+      8,
+      provider: 'kakuyomu,syosetu,novelup,hameln,pixiv,alphapolis',
+      sort: 1,
+      level: 1,
+    )
+        .then((response) {
+      final body = response.body;
+      final webNovelOutlines = parseToWebNovelOutline(body);
+
+      return webNovelOutlines;
+    });
+  }
+
+  Future<List<WenkuNovelOutline>> _refreshLatestUpdateWenku() async {
+    return apiClient.wenkuNovelService
+        .getList(
+      0,
+      12,
+      level: 1,
+    )
+        .then((response) {
+      final body = response.body;
+      final wenkuNovelOutlines = parseToWenkuNovelOutline(body);
+      return wenkuNovelOutlines;
+    });
+  }
+
   _onRefreshFavoredWeb(
       _RefreshFavoredWeb event, Emitter<WebHomeState> emit) async {
-    final webNovelOutlines = await refreshFavoredWeb();
-    emit(state.copyWith(favoredWeb: webNovelOutlines));
+    final webNovelOutlines = await _refreshFavoredWeb();
+    var favoredWebMapSnapshot = <String, WebNovelOutline>{};
+    for (var webNovelOutline in webNovelOutlines) {
+      favoredWebMapSnapshot[
+              '${webNovelOutline.providerId}${webNovelOutline.novelId}'] =
+          webNovelOutline;
+    }
+    emit(state.copyWith(favoredWebMap: favoredWebMapSnapshot));
   }
 
   _onToNovelDetail(_ToNovelDetail event, Emitter<WebHomeState> emit) async {
@@ -285,4 +312,64 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
           state.currentNovelProviderId!, state.currentNovelId!, chapterId);
 
   bool get loadingChapter => state.loadingNovelChapter;
+
+  _onFavorNovel(_FavorNovel event, Emitter<WebHomeState> emit) async {
+    switch (event.type) {
+      case NovelType.web:
+        emit(await _favorWeb());
+        break;
+      default:
+    }
+  }
+
+  Future<WebHomeState> _favorWeb() async {
+    if (currentNovelId == null || currentNovelProviderId == null) return state;
+    final response = await apiClient.userFavoredWebService
+        .putNovelId(currentNovelProviderId!, currentNovelId!);
+
+    if (response!.statusCode == 200) {
+      var favoredWebSnapshot = {...state.favoredWebMap};
+      final outlineCache = state.webNovelOutlineMap[currentNovelKey];
+      if (outlineCache == null) return state;
+      favoredWebSnapshot[currentNovelKey] = outlineCache;
+      showSucceedToast('收藏成功');
+      return state.copyWith(favoredWebMap: favoredWebSnapshot);
+    }
+    if (response.statusCode == 502) {
+      Fluttertoast.showToast(msg: '服务器维护中');
+      return state;
+    }
+    return state;
+  }
+
+  _onUnFavorNovel(_UnFavorNovel event, Emitter<WebHomeState> emit) async {
+    switch (event.type) {
+      case NovelType.web:
+        emit(await _unFavorWeb());
+        break;
+      default:
+    }
+  }
+
+  Future<WebHomeState> _unFavorWeb() async {
+    if (currentNovelId == null || currentNovelProviderId == null) return state;
+    final response = await apiClient.userFavoredWebService
+        .deleteNovelId(currentNovelProviderId!, currentNovelId!);
+    if (response!.statusCode == 200) {
+      var favoredWebSnapshot = {...state.favoredWebMap};
+      favoredWebSnapshot.remove(currentNovelKey);
+      showSucceedToast('取消收藏成功');
+      return state.copyWith(favoredWebMap: favoredWebSnapshot);
+    }
+    if (response.statusCode == 502) {
+      Fluttertoast.showToast(msg: '服务器维护中');
+      return state;
+    }
+    return state;
+  }
+
+  String? get currentNovelId => state.currentNovelId;
+  String? get currentNovelProviderId => state.currentNovelProviderId;
+  String get currentNovelKey =>
+      (state.currentNovelProviderId ?? '') + (state.currentNovelId ?? '');
 }

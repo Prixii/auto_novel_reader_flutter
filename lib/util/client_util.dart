@@ -38,6 +38,22 @@ void showErrorToast(String message) {
   );
 }
 
+void showWarnToast(String message) {
+  Fluttertoast.showToast(
+    msg: message,
+    textColor: styleManager.onWarnContainer,
+    backgroundColor: styleManager.warnContainer,
+  );
+}
+
+void showSucceedToast(String message) {
+  Fluttertoast.showToast(
+    msg: message,
+    textColor: styleManager.onSucceedContainer,
+    backgroundColor: styleManager.succeedContainer,
+  );
+}
+
 GlobalBloc readGlobalBloc(BuildContext context) => context.read<GlobalBloc>();
 EpubViewerBloc readEpubViewerBloc(BuildContext context) =>
     context.read<EpubViewerBloc>();

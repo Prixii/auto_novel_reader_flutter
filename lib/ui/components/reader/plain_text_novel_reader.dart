@@ -34,12 +34,12 @@ class PlainTextNovelReaderContainer extends StatelessWidget {
               },
               builder: (context, novelDto) {
                 final state = readWebHomeBloc(context).state;
-                final bookKey =
+                final novelKey =
                     '${state.currentNovelProviderId}${state.currentNovelId}';
                 return ChapterList(
                   tocList: novelDto?.toc ?? [],
                   readMode: true,
-                  bookKey: bookKey,
+                  novelKey: novelKey,
                 );
               },
             ),

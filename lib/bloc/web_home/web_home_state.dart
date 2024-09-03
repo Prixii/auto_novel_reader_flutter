@@ -6,7 +6,10 @@ class WebHomeState with _$WebHomeState {
     @Default(false) bool inInit,
     List<WenkuNovelOutline>? wenkuLatestUpdate,
     List<WebNovelOutline>? webMostVisited,
-    List<WebNovelOutline>? favoredWeb,
+    @Default({}) Map<String, WebNovelOutline> favoredWebMap,
+    // 小说大纲缓存
+    @Default({}) Map<String, WebNovelOutline> webNovelOutlineMap,
+
     // 小说详情
     @Default({}) Map<String, WebNovelDto> webNovelDtoMap,
     WebNovelDto? currentWebNovelDto,

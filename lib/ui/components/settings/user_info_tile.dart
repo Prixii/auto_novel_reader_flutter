@@ -35,7 +35,7 @@ class UserInfoTile extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(state.nickname),
+          Text(state.username ?? ''),
           IconButton(
               onPressed: () => tryLogout(context),
               icon: const Icon(UniconsLine.signout),

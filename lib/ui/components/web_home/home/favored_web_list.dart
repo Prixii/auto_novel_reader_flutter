@@ -50,7 +50,7 @@ class FavoredWebList extends StatelessWidget {
       _buildFavoredWebList() {
     return BlocSelector<WebHomeBloc, WebHomeState, List<WebNovel>>(
       selector: (state) {
-        return state.favoredWeb ?? [];
+        return state.favoredWebMap.values.toList();
       },
       builder: (context, webNovels) {
         return AnimationLimiter(

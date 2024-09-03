@@ -32,4 +32,8 @@ class _StyleManager {
       theme.textTheme.bodySmall?.copyWith(color: Colors.grey);
   ColorScheme get colorScheme => theme.colorScheme;
   TextTheme get textTheme => theme.textTheme;
+  Color get warnContainer => const Color(0xfffdf6ec);
+  Color get onWarnContainer => const Color(0xffe6a23c);
+  Color get succeedContainer => const Color(0xfff0f9eb);
+  Color get onSucceedContainer => const Color(0xff67c23a);
 }

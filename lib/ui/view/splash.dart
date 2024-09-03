@@ -22,6 +22,7 @@ class _SplashViewState extends State<SplashView> {
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       Future.wait([
         _justWait(),

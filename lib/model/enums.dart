@@ -78,3 +78,9 @@ enum ReadType {
   web,
   none,
 }
+
+enum NovelType {
+  web,
+  wenku,
+  local,
+}

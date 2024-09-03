@@ -7,6 +7,7 @@ part 'web_novel.dart';
 part 'wenku_novel.dart';
 part 'chapter_dto.dart';
 part 'web_novel_config.dart';
+part 'favored.dart';
 
 part 'model.freezed.dart';
 part 'model.g.dart';
