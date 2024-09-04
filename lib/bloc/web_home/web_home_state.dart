@@ -19,5 +19,16 @@ class WebHomeState with _$WebHomeState {
     @Default(false) bool loadingNovelChapter,
     @Default({}) Map<String, ChapterDto?> chapterDtoMap,
     ChapterDto? currentChapterDto,
+    // 搜索 web
+    @Default(false) bool searchingWeb,
+    @Default([]) List<WebNovelOutline> webNovelSearchResult,
+    @Default(0) int currentWebSearchPage,
+    @Default(-1) int maxPage,
+    @Default(0) int webType,
+    @Default(1) int webLevel,
+    @Default(0) int webTranslate,
+    @Default(0) int webSort,
+    @Default([]) List<String> webProvider,
+    String? webQuery,
   }) = _Initial;
 }

@@ -27,6 +27,8 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
         leaveDetail: (event) async => await _onLeaveDetail(event, emit),
         favorNovel: (event) async => await _onFavorNovel(event, emit),
         unFavorNovel: (event) async => await _onUnFavorNovel(event, emit),
+        searchWeb: (event) async => await _onSearchWeb(event, emit),
+        loadNextPageWeb: (event) async => await _onLoadNextPageWeb(event, emit),
       );
     });
   }
@@ -172,6 +174,53 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
         break;
       default:
     }
+  }
+
+  _onSearchWeb(_SearchWeb event, Emitter<WebHomeState> emit) async {
+    if (state.searchingWeb) return;
+    emit(state.copyWith(
+      searchingWeb: true,
+      webNovelSearchResult: [],
+      currentWebSearchPage: 0,
+      webProvider: event.provider,
+      webType: event.type,
+      webLevel: event.level,
+      webTranslate: event.translate,
+      webSort: event.sort,
+      webQuery: event.query,
+    ));
+    await _loadPagedWebNovel(emit);
+  }
+
+  _onLoadNextPageWeb(_LoadNextPageWeb event, Emitter<WebHomeState> emit) async {
+    if (state.searchingWeb) return;
+    if (state.currentWebSearchPage == state.maxPage) {
+      showWarnToast('一点都没有啦~');
+      return;
+    }
+    if (state.currentWebSearchPage >= state.webNovelSearchResult.length) return;
+    emit(state.copyWith(
+      currentWebSearchPage: state.currentWebSearchPage + 1,
+      searchingWeb: true,
+    ));
+    await _loadPagedWebNovel(emit);
+  }
+
+  Future<void> _loadPagedWebNovel(Emitter<WebHomeState> emit) async {
+    final newNovelList = await loadPagedWebOutline(
+      page: state.currentWebSearchPage,
+      pageSize: 20,
+      provider: state.webProvider.join(','),
+      type: state.webType,
+      level: state.webLevel,
+      translate: state.webTranslate,
+      sort: state.webSort,
+      query: state.webQuery,
+    );
+    emit(state.copyWith(
+      webNovelSearchResult: [...state.webNovelSearchResult, ...newNovelList],
+      searchingWeb: false,
+    ));
   }
 
   void _updateLastReadChapterId(String? chapterId) =>

@@ -39,6 +39,7 @@ class MainApp extends StatelessWidget {
         theme: ThemeData(
           colorSchemeSeed: const Color(0xFF18A058),
           useMaterial3: true,
+          searchBarTheme: const SearchBarThemeData(),
           dividerColor: Colors.grey[300],
           pageTransitionsTheme: const PageTransitionsTheme(builders: {
             TargetPlatform.android: FadeThroughPageTransitionsBuilder(),

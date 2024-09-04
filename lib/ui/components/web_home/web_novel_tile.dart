@@ -8,6 +8,9 @@ import 'package:flutter/material.dart';
 
 class WebNovelTile extends StatelessWidget {
   const WebNovelTile({super.key, required this.webNovel});
+  const WebNovelTile.empty({
+    super.key,
+  }) : webNovel = const WebNovel.webNovelOutline('', '', '');
 
   final WebNovel webNovel;
 

@@ -14,4 +14,15 @@ class WebHomeEvent with _$WebHomeEvent {
   const factory WebHomeEvent.leaveDetail() = _LeaveDetail;
   const factory WebHomeEvent.favorNovel(NovelType type) = _FavorNovel;
   const factory WebHomeEvent.unFavorNovel(NovelType type) = _UnFavorNovel;
+  const factory WebHomeEvent.searchWeb({
+    @Default(
+        ['kakuyomu', 'syosetu', 'novelup', 'hameln', 'pixiv', 'alphapolis'])
+    List<String> provider,
+    @Default(0) int type,
+    @Default(1) int level,
+    @Default(0) int translate,
+    @Default(0) int sort,
+    String? query,
+  }) = _SearchWeb;
+  const factory WebHomeEvent.loadNextPageWeb() = _LoadNextPageWeb;
 }
