@@ -61,8 +61,8 @@ class UserInfoTile extends StatelessWidget {
       builder: (context) {
         return Container(
           constraints: BoxConstraints(
-              maxHeight: screenSize.height * 0.8,
-              minHeight: screenSize.height * 0.8,
+              maxHeight: screenSize.height * 0.9,
+              minHeight: screenSize.height * 0.9,
               minWidth: screenSize.width),
           child: const AuthTab(),
         );

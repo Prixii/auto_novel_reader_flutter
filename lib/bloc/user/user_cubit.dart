@@ -17,7 +17,7 @@ class UserCubit extends HydratedCubit<UserState> {
   Future<bool> signIn(
     String emailOrUsername,
     String password, {
-    bool autoSignIn = false,
+    bool autoSignIn = true,
   }) async {
     final signInResponse = await apiClient.authService.postSignIn({
       'emailOrUsername': emailOrUsername,
@@ -27,9 +27,49 @@ class UserCubit extends HydratedCubit<UserState> {
       Fluttertoast.showToast(msg: '服务器维护中');
       return false;
     }
+    if (signInResponse.statusCode != 200) {
+      showErrorToast('登录失败, ${signInResponse.statusCode}');
+      return false;
+    }
     final token = signInResponse.body;
+    return afterLogin(
+        token: token, emailOrUsername: emailOrUsername, password: password);
+  }
+
+  Future<bool> signUp({
+    required String email,
+    required String username,
+    required String password,
+    required String emailCode,
+  }) async {
+    final response = await apiClient.authService.postSignUp({
+      'email': email,
+      'username': username,
+      'password': password,
+      'emailCode': emailCode,
+    });
+    if (response.statusCode == 502) {
+      Fluttertoast.showToast(msg: '服务器维护中');
+      return false;
+    }
+    if (response.statusCode != 200) {
+      showErrorToast('注册失败, ${response.statusCode}');
+      return false;
+    }
+    return afterLogin(
+      token: response.body,
+      emailOrUsername: email,
+      password: password,
+    );
+  }
+
+  bool afterLogin({
+    required String? token,
+    required String emailOrUsername,
+    required String password,
+  }) {
     if (token == null || token.isEmpty) {
-      showErrorToast('登录失败, 用户名或密码错误');
+      showErrorToast('登录失败, 令牌为空');
       return false;
     }
     try {
@@ -42,12 +82,13 @@ class UserCubit extends HydratedCubit<UserState> {
         createAt: jwt['createAt'],
         emailOrUsername: emailOrUsername,
         password: password,
-        autoSignIn: autoSignIn,
+        autoSignIn: true,
         token: token,
         signInTime: DateTime.now(),
       ));
     } catch (e) {
       talker.info(e.toString());
+      return false;
     }
     webHomeBloc.add(const WebHomeEvent.refreshFavoredWeb());
     return true;

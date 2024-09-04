@@ -57,7 +57,7 @@ class AuthTab extends StatelessWidget {
   }
 }
 
-const space = SizedBox(height: 30.0);
+const space = SizedBox(height: 20.0);
 const textStyle = TextStyle(
   fontSize: 16.0,
   height: 1,
@@ -80,3 +80,6 @@ Widget buildRoundButton(void Function() onPressed) {
     ),
   );
 }
+
+RegExp get emailRegex =>
+    RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
