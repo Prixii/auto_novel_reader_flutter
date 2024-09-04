@@ -50,9 +50,9 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
       }),
       loadPagedWebOutline(
         provider: 'kakuyomu,syosetu,novelup,hameln,pixiv,alphapolis',
-      ).then((webNovelOutlines) {
-        emit(state.copyWith(webMostVisited: webNovelOutlines));
-        newWebOutlines.addAll(webNovelOutlines);
+      ).then((webNovelOutlinesResult) {
+        emit(state.copyWith(webMostVisited: webNovelOutlinesResult.$1));
+        newWebOutlines.addAll(webNovelOutlinesResult.$1);
       }),
     ]);
     var webNovelOutlineMapSnapshot = {...state.webNovelOutlineMap};
@@ -198,7 +198,7 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
       showWarnToast('一点都没有啦~');
       return;
     }
-    if (state.currentWebSearchPage >= state.webNovelSearchResult.length) return;
+    if (state.currentWebSearchPage >= state.maxPage) return;
     emit(state.copyWith(
       currentWebSearchPage: state.currentWebSearchPage + 1,
       searchingWeb: true,
@@ -207,7 +207,7 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   }
 
   Future<void> _loadPagedWebNovel(Emitter<WebHomeState> emit) async {
-    final newNovelList = await loadPagedWebOutline(
+    final (newNovelList, pageNumber) = await loadPagedWebOutline(
       page: state.currentWebSearchPage,
       pageSize: 20,
       provider: state.webProvider.join(','),
@@ -218,8 +218,12 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
       query: state.webQuery,
     );
     emit(state.copyWith(
-      webNovelSearchResult: [...state.webNovelSearchResult, ...newNovelList],
+      webNovelSearchResult: [
+        ...state.webNovelSearchResult,
+        ...newNovelList,
+      ],
       searchingWeb: false,
+      maxPage: pageNumber,
     ));
   }
 

@@ -27,7 +27,7 @@ Future<List<WebNovelOutline>> loadFavoredWebOutline({
   });
 }
 
-Future<List<WebNovelOutline>> loadPagedWebOutline({
+Future<(List<WebNovelOutline>, int)> loadPagedWebOutline({
   int page = 0,
   int pageSize = 8,
   String provider = '',
@@ -51,11 +51,11 @@ Future<List<WebNovelOutline>> loadPagedWebOutline({
       .then((response) {
     final body = response.body;
     final webNovelOutlines = parseToWebNovelOutline(body);
-    return webNovelOutlines;
+    return (webNovelOutlines, body['pageNumber'] as int);
   });
 }
 
-Future<List<WenkuNovelOutline>> loadPagedWenkuOutline({
+Future<(List<WenkuNovelOutline>, int)> loadPagedWenkuOutline({
   int page = 0,
   int pageSize = 12,
   int level = 0,
@@ -71,7 +71,7 @@ Future<List<WenkuNovelOutline>> loadPagedWenkuOutline({
       .then((response) {
     final body = response.body;
     final wenkuNovelOutlines = parseToWenkuNovelOutline(body);
-    return wenkuNovelOutlines;
+    return (wenkuNovelOutlines, body['pageNumber'] as int);
   });
 }
 

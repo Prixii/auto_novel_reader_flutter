@@ -6,4 +6,9 @@ class WenkuHomeEvent with _$WenkuHomeEvent {
   const factory WenkuHomeEvent.toDetail(String novelId) = _ToDetail;
   const factory WenkuHomeEvent.favorNovel() = _FavorNovel;
   const factory WenkuHomeEvent.unFavorNovel() = _UnFavorNovel;
+  const factory WenkuHomeEvent.searchWenku({
+    @Default(1) int level,
+    String? query,
+  }) = _SearchWenku;
+  const factory WenkuHomeEvent.loadNextPageWenku() = _LoadNextPageWenku;
 }

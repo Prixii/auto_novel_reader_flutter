@@ -1,7 +1,7 @@
 import 'package:auto_novel_reader_flutter/ui/components/web_home/home/home.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_rank/novel_rank.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/web_novel/web_novel_search_page.dart';
-import 'package:auto_novel_reader_flutter/ui/components/web_home/wenku_novel/wenku_novel.dart';
+import 'package:auto_novel_reader_flutter/ui/components/web_home/wenku_novel/wenku_novel_search_page.dart';
 import 'package:flutter/material.dart';
 
 class WebHomeView extends StatelessWidget {
@@ -22,7 +22,7 @@ class WebHomeView extends StatelessWidget {
           children: [
             Home(),
             WebNovelSearchPage(),
-            WenkuNovel(),
+            WenkuNovelSearchPage(),
             NovelRank(),
           ],
         ),

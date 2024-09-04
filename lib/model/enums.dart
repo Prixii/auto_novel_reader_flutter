@@ -182,3 +182,24 @@ enum WebNovelOrder {
     return -1; // 如果没有找到，返回 -1
   }
 }
+
+enum WenkuNovelLevel {
+  general,
+  serious;
+
+  String get zhName => switch (this) {
+        WenkuNovelLevel.general => '一般向',
+        WenkuNovelLevel.serious => '严肃向',
+      };
+  static int indexByZhName(String name) {
+    // for (var i = 0; i < WenkuNovelLevel.values.length; i++) {
+    //   if (WenkuNovelLevel.values[i].zhName == name) {
+    //     return i; // 返回匹配的索引
+    //   }
+    // }
+    // return -1; // 如果没有找到，返回 -1
+    if (name == '一般向') return 1;
+    if (name == '严肃向') return 3;
+    return -1;
+  }
+}

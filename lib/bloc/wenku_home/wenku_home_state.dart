@@ -20,5 +20,13 @@ class WenkuHomeState with _$WenkuHomeState {
     ])
     List<TranslationSource> translationOrder,
     WenkuNovelDto? currentWenkuNovelDto,
+
+    // 搜索
+    @Default(false) bool searchingWenku,
+    @Default(0) int currentWenkuSearchPage,
+    @Default(-1) int maxPage,
+    @Default([]) List<WenkuNovelOutline> wenkuNovelSearchResult,
+    @Default(0) int wenkuLevel,
+    String? wenkuQuery,
   }) = _Initial;
 }
