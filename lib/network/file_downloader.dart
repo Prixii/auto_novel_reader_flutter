@@ -6,20 +6,20 @@ import 'package:dio/dio.dart';
 Future<File?> downloadFile({
   required String url,
   required String path,
-  required String fileName,
+  required String filename,
   bool wenku = false,
 }) async {
-  File file = File('$path/$fileName');
+  File file = File('$path/$filename');
   if (!file.existsSync()) {
     file.createSync();
   }
   if (wenku) {
-    return await _downloadWenkuEpub(url, fileName, file);
+    return await _downloadWenkuEpub(url, filename, file);
   }
-  return await _downloadZhEpub(url, fileName, file);
+  return await _downloadZhEpub(url, filename, file);
 }
 
-Future<File?> _downloadWenkuEpub(String url, String fileName, File file) async {
+Future<File?> _downloadWenkuEpub(String url, String filename, File file) async {
   try {
     var redirectResponse = await Dio().get(
       url,
@@ -31,7 +31,7 @@ Future<File?> _downloadWenkuEpub(String url, String fileName, File file) async {
       redirectUrl,
       onReceiveProgress: (num received, num total) {
         double process = double.parse((received / total).toStringAsFixed(4));
-        downloadCubit.updateProgress(fileName, process);
+        downloadCubit.updateProgress(filename, process);
       },
       options: Options(
         responseType: ResponseType.bytes,
@@ -39,21 +39,22 @@ Future<File?> _downloadWenkuEpub(String url, String fileName, File file) async {
       ),
     );
     file.writeAsBytesSync(response.data);
+    downloadCubit.finishDownload(filename, true, file: file);
     return file;
   } on DioException catch (e) {
-    downloadCubit.downloadFailed(fileName);
+    downloadCubit.downloadFailed(filename);
     showErrorToast('下载失败: ${e.type}');
     return null;
   }
 }
 
-Future<File?> _downloadZhEpub(String url, String fileName, File file) async {
+Future<File?> _downloadZhEpub(String url, String filename, File file) async {
   try {
     var response = await Dio().get(
       url,
       onReceiveProgress: (num received, num total) {
         double process = double.parse((received / total).toStringAsFixed(4));
-        downloadCubit.updateProgress(fileName, process);
+        downloadCubit.updateProgress(filename, process);
       },
       options: Options(
         responseType: ResponseType.bytes,
@@ -63,7 +64,7 @@ Future<File?> _downloadZhEpub(String url, String fileName, File file) async {
     file.writeAsBytesSync(response.data);
     return file;
   } on DioException catch (e) {
-    downloadCubit.downloadFailed(fileName);
+    downloadCubit.downloadFailed(filename);
     showErrorToast('下载失败: ${e.type}');
     return null;
   }
@@ -74,7 +75,7 @@ String zhDownloadUrlGenerator(String novelId, String volumeId) {
   return 'https://${configCubit.state.host}/files-wenku/$novelId/$volumeUri';
 }
 
-(String fileName, String url) jpDownloadUrlGenerator(
+(String filename, String url) jpDownloadUrlGenerator(
   String novelId,
   String volumeId, {
   required Language mode,
@@ -86,7 +87,7 @@ String zhDownloadUrlGenerator(String novelId, String volumeId) {
   final translationCode = (translationsMode.name == 'parallel' ? 'B' : 'Y');
   final translationSource =
       translations.map((source) => source.name[0]).join('');
-  final fileName = [
+  final filename = [
     mode.kebabName,
     '$translationCode$translationSource',
     volumeId
@@ -98,11 +99,11 @@ String zhDownloadUrlGenerator(String novelId, String volumeId) {
   final params = Uri(queryParameters: {
     'mode': mode.kebabName,
     'translationsMode': translationsMode.name,
-    'filename': fileName,
+    'filename': filename,
   }).query;
 
   return (
-    fileName,
+    filename,
     'https://${configCubit.state.host}/api/wenku/$novelId/file/$volumeUri?$params$translationParam'
   );
 }

@@ -18,8 +18,7 @@ class _EpubReaderViewState extends State<EpubReaderView> {
 
   @override
   Widget build(BuildContext context) {
-    final title =
-        readEpubViewerBloc(context).state.epubManageData?.name?.trim();
+    final title = readEpubViewerBloc(context).state.epubManageData?.name.trim();
     return Scaffold(
         appBar: AppBar(
           title: Text(title ?? ''),

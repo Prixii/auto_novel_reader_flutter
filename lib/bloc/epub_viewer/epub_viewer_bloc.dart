@@ -1,10 +1,12 @@
 import 'dart:io';
 
+import 'package:auto_novel_reader_flutter/bloc/global/global_bloc.dart';
+import 'package:auto_novel_reader_flutter/manager/path_manager.dart';
+import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/ui/view/reader/epub_reader.dart';
 import 'package:auto_novel_reader_flutter/util/channel/key_down_channel.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
-import 'package:auto_novel_reader_flutter/util/epub_util.dart';
 import 'package:auto_novel_reader_flutter/util/html_util.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
@@ -35,16 +37,17 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
     final data = event.epubManageData;
     emit(state.copyWith(
       epubManageData: data,
-      chapterResourceMap: data.chapterResourceMap ?? {},
+      chapterResourceMap: data.chapterResourceMap,
     ));
     if (event.context.mounted) {
       Navigator.of(event.context).push(
           MaterialPageRoute(builder: (context) => const EpubReaderView()));
     }
+    globalBloc.add(const GlobalEvent.setReadType(ReadType.epub));
     subscribeVolumeKeyEvent();
     add(EpubViewerEvent.switchChapter(
-      data.chapter ?? 0,
-      data.progress ?? 0,
+      data.chapter,
+      data.progress,
     ));
   }
 
@@ -77,6 +80,7 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
     emit(const EpubViewerState.initial());
     localFileCubit.updateEpubManageData(newEpubManageData);
     unsubscribeVolumeKeyEvent();
+    globalBloc.add(const GlobalEvent.setReadType(ReadType.none));
   }
 
   _onOpenSettings(_OpenSettings event, Emitter<EpubViewerState> emit) {}
@@ -86,7 +90,7 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
     emit(state.copyWith(scrollController: event.controller));
     state.scrollController!.jumpTo(
         state.scrollController!.position.maxScrollExtent *
-            (state.epubManageData!.progress ?? 0));
+            (state.epubManageData!.progress));
   }
 
   _onSwitchChapter(_SwitchChapter event, Emitter<EpubViewerState> emit) async {
@@ -105,17 +109,13 @@ class EpubViewerBloc extends Bloc<EpubViewerEvent, EpubViewerState> {
 
   Stream<List<String>> _loadHTMLFile(int chapterIndex) async* {
     final chapterResourceEntries =
-        state.epubManageData!.chapterResourceMap!.entries.toList();
+        state.epubManageData!.chapterResourceMap.entries.toList();
     if (chapterResourceEntries.length < chapterIndex) return;
 
     final resourceList = chapterResourceEntries[chapterIndex].value;
 
     final uid = state.epubManageData!.uid;
-    if (uid == null) {
-      talker.error('bad epubManageData: ${state.epubManageData}');
-      throw Exception('bad epubManageData');
-    }
-    final path = epubUtil.getPathByUid(uid);
+    final path = pathManager.getPathByUid(uid);
     for (var htmlFileName in resourceList) {
       final rawHtml = await File('$path/$htmlFileName').readAsString();
 

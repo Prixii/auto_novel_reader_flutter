@@ -1,4 +1,5 @@
 import 'package:auto_novel_reader_flutter/bloc/download_cubit/download_cubit.dart';
+import 'package:auto_novel_reader_flutter/bloc/epub_viewer/epub_viewer_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/line_button.dart';
@@ -46,12 +47,24 @@ class DownloadStateMonitor extends StatelessWidget {
               onPressed: () => {},
             );
           case DownloadType.downloaded:
-            return LineButton(
-              text: '阅读',
-              onPressed: () => {},
-            );
+            return _buildReadButton(context);
         }
       }),
+    );
+  }
+
+  LineButton _buildReadButton(BuildContext context) {
+    return LineButton(
+      text: '阅读',
+      onPressed: () {
+        final epubManageData =
+            readLocalFileCubit(context).getEpubManageData(filename);
+        if (epubManageData == null) {
+          throw Exception('epubManageData is null');
+        }
+        readEpubViewerBloc(context)
+            .add(EpubViewerEvent.open(epubManageData, context));
+      },
     );
   }
 

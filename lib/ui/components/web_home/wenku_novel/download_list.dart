@@ -131,21 +131,21 @@ class JpVolumeListTile extends StatelessWidget {
 
   Widget _buildTrail(BuildContext context) {
     final state = readWenkuHomeBloc(context).state;
-    final (fileName, url) = jpDownloadUrlGenerator(
+    final (filename, url) = jpDownloadUrlGenerator(
         readWenkuHomeBloc(context).state.currentNovelId, dto.volumeId,
         mode: state.language,
         translationsMode: state.translationMode,
         translations: state.translationOrder);
     return DownloadStateMonitor(
-      filename: fileName,
-      onPressed: () => _downloadJpEpub(context, fileName, url),
+      filename: filename,
+      onPressed: () => _downloadJpEpub(context, filename, url),
     );
   }
 
-  void _downloadJpEpub(BuildContext context, String fileName, String url) {
-    talker.debug('fileName: $fileName, url: $url');
+  void _downloadJpEpub(BuildContext context, String filename, String url) {
+    talker.debug('filename: $filename, url: $url');
     readDownloadCubit(context)
-        .createDownloadTask(url, pathManager.epubDownloadPath, fileName);
+        .createDownloadTask(url, pathManager.epubDownloadPath, filename);
   }
 
   String get _getTranslationCount =>
@@ -181,12 +181,13 @@ class ZhVolumeListTile extends StatelessWidget {
             filename: title,
             onPressed: () => {
                   _downloadZhEpub(
-                      context,
-                      zhDownloadUrlGenerator(
-                        readWenkuHomeBloc(context).state.currentNovelId,
-                        title,
-                      ),
-                      title)
+                    context,
+                    zhDownloadUrlGenerator(
+                      readWenkuHomeBloc(context).state.currentNovelId,
+                      title,
+                    ),
+                    title,
+                  )
                 }),
       ],
     );

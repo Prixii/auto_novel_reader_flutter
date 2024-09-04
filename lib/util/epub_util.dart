@@ -12,59 +12,71 @@ import 'package:image/image.dart';
 final epubUtil = _EpubUtil();
 
 class _EpubUtil {
-  final basePath = pathManager.parseDirPath;
-
-  epubx.EpubBook? epubBook;
-  String title = '';
-  List<String?> authorList = [];
-  epubx.Image? coverImage;
-  List<epubx.EpubTextContentFile> htmlContent = [];
-  List<epubx.EpubNavigationPoint> pointList = [];
-  String? currentPath;
-  List<epubx.EpubChapter> chapterList = [];
-  Map<String, List<String>> chapterResourceMap = {};
-
-  late String uid;
-
   _EpubUtil();
 
-  Future<EpubManageData?> parseEpub(File epub) async {
+  Future<EpubManageData> parseEpub(
+    File epub, {
+    required NovelType novelType,
+    String? filename,
+  }) async {
+    // String title = '';
+    // List<String?> authorList = [];
+    epubx.EpubBook? epubBook;
+    epubx.Image? coverImage;
+    List<epubx.EpubTextContentFile> htmlContent = [];
+    List<epubx.EpubNavigationPoint> pointList = [];
+    List<epubx.EpubChapter> chapterList = [];
+    Map<String, List<String>> chapterResourceMap = {};
+
+    late String uid;
     try {
-      globalBloc.add(const GlobalEvent.startProgress(
-        ProgressType.parsingEpub,
-        '读取 epub 文件...',
-      ));
+      updateProgress(novelType, message: '读取 epub 文件...');
       final bytes = await epub.readAsBytes();
       epubBook = await epubx.EpubReader.readBook(bytes);
-      if (epubBook == null) return null;
-      uid = epubBook.hashCode.toString();
+      uid = filename ?? epubBook.hashCode.toString();
+      updateProgress(novelType, progress: 10, message: '解析 epub 结构...');
 
-      globalBloc.add(const GlobalEvent.updateProgress(
-          ProgressType.parsingEpub, 10, '解析 epub 结构...'));
-      _parseBaseInfo();
-      _parseNcx();
-
-      globalBloc.add(const GlobalEvent.updateProgress(
-          ProgressType.parsingEpub, 20, '提取内容...'));
-      await _extractContent(uid);
-      globalBloc.add(const GlobalEvent.updateProgress(
-          ProgressType.parsingEpub, 50, '章节划分...'));
-      chapterResourceMap = await _sortChapters();
-      globalBloc.add(const GlobalEvent.updateProgress(
-          ProgressType.parsingEpub, 70, '提取封面...'));
-      await _extractCover(uid);
-      globalBloc.add(const GlobalEvent.updateProgress(
-          ProgressType.parsingEpub, 80, '备份源文件...'));
-      await _extractEpubBackup(epub, uid);
+      // --------- parse baseInfo ---------
+      // title = epubBook.Title ?? '';
+      // authorList = epubBook.AuthorList ?? [];
+      coverImage = epubBook.CoverImage;
+      chapterList = epubBook.Chapters ?? [];
+      // --------- parse ncx ---------
+      final ncx = epubBook.Schema?.Navigation;
+      if (ncx == null) throw Exception('no ncx');
+      pointList = ncx.NavMap?.Points ?? [];
+      // --------- extract content ---------
+      updateProgress(novelType, progress: 20, message: '提取内容...');
+      final content = epubBook.Content;
+      htmlContent = content?.Html?.values.toList() ?? [];
+      await _extractContent(uid, htmlContent, epubBook);
+      updateProgress(novelType, progress: 50, message: '章节划分...');
+      chapterResourceMap = await _sortChapters(
+        htmlContent,
+        pointList,
+        chapterList,
+      );
+      updateProgress(novelType, progress: 70, message: '提取封面...');
+      await _extractCover(
+        uid,
+        coverImage,
+        epubBook.Content?.Images?.values.toList(),
+      );
+      // 如果是本地书籍则备份
+      if (novelType == NovelType.local) {
+        updateProgress(novelType, progress: 80, message: '备份源文件...');
+        await _extractEpubBackup(epub, uid);
+      }
       final epubData = EpubManageData(
         path: epub.path,
-        name: epubBook!.Title ?? uid,
+        name: epubBook.Title ?? uid,
         uid: uid,
         chapterResourceMap: chapterResourceMap,
+        novelType: novelType,
+        filename: filename,
       );
 
-      globalBloc.add(const GlobalEvent.updateProgress(
-          ProgressType.parsingEpub, 100, '解析完成'));
+      updateProgress(novelType, progress: 100, message: '解析完成');
       await Future.delayed(const Duration(milliseconds: 200), () {
         globalBloc.add(const GlobalEvent.endProgress(ProgressType.parsingEpub));
       });
@@ -74,22 +86,10 @@ class _EpubUtil {
     }
   }
 
-  void _parseBaseInfo() {
-    if (epubBook == null) return;
-    title = epubBook!.Title ?? '';
-    coverImage = epubBook!.CoverImage;
-    authorList = epubBook!.AuthorList ?? [];
-    chapterList = epubBook!.Chapters ?? [];
-  }
-
-  void _parseNcx() {
-    final ncx = epubBook?.Schema?.Navigation;
-    if (ncx == null) return;
-
-    pointList = ncx.NavMap?.Points ?? [];
-  }
-
-  Future<Map<String, List<String>>> _sortChapters() async {
+  Future<Map<String, List<String>>> _sortChapters(
+      List<epubx.EpubTextContentFile> htmlContent,
+      List<epubx.EpubNavigationPoint> pointList,
+      List<epubx.EpubChapter> chapterList) async {
     var htmlNameList = <String>[];
     var currentChapterName = '';
     var chapterMap = <String, List<String>>{};
@@ -139,20 +139,21 @@ class _EpubUtil {
     return chapterMap;
   }
 
-  Future<void> _extractContent(String uid) async {
-    final content = epubBook?.Content;
+  Future<void> _extractContent(
+    String uid,
+    List<epubx.EpubTextContentFile> htmlContent,
+    epubx.EpubBook epubBook,
+  ) async {
+    final content = epubBook.Content;
     if (content == null) return;
 
-    htmlContent = content.Html?.values.toList() ?? [];
-
-    final path = getPathByUid(uid);
-    currentPath = path;
+    final path = pathManager.getPathByUid(uid);
     final parseDir = Directory(path);
-    if (parseDir.existsSync()) return;
+    if (parseDir.existsSync()) [];
     parseDir.createSync(recursive: true);
     await Future.wait([
       extractCss(content, path),
-      extractHtml(content, path),
+      extractHtml(content, path, htmlContent),
       extractImage(content, path),
     ]);
   }
@@ -165,14 +166,21 @@ class _EpubUtil {
     }
   }
 
-  Future<void> extractHtml(epubx.EpubContent content, String folder) async {
+  Future<void> extractHtml(
+    epubx.EpubContent content,
+    String folder,
+    List<epubx.EpubTextContentFile> htmlContent,
+  ) async {
     for (final htmlFile in htmlContent) {
       String htmlContent = htmlFile.Content ?? '';
       await writeStringToFile(htmlFile.FileName ?? '', htmlContent, folder);
     }
   }
 
-  Future<void> extractCss(epubx.EpubContent content, String folder) async {
+  Future<void> extractCss(
+    epubx.EpubContent content,
+    String folder,
+  ) async {
     List<epubx.EpubTextContentFile> cssFiles =
         content.Css?.values.toList() ?? [];
     for (var cssFile in cssFiles) {
@@ -181,21 +189,31 @@ class _EpubUtil {
     }
   }
 
-  String getChapterNameByIndex(int index) {
+  String getChapterNameByIndex(
+    int index,
+    List<epubx.EpubChapter> chapterList,
+  ) {
     if (chapterList.length <= index) throw 'chapter index out of range';
     return chapterList[index].Title ?? '';
   }
 
-  List<String> getChapterContentNameByIndex(int index) {
+  List<String> getChapterContentNameByIndex(
+    int index,
+    List<epubx.EpubNavigationPoint> pointList,
+    Map<String, List<String>> chapterResourceMap,
+  ) {
     if (chapterResourceMap.length <= index) throw 'chapter index out of range';
     return chapterResourceMap[pointList[index].hashCode.toString()] ?? [];
   }
 
-  Future<void> _extractCover(String uid) async {
-    final path = '$basePath/cover/$uid';
+  Future<void> _extractCover(
+    String uid,
+    epubx.Image? coverImage,
+    List<epubx.EpubByteContentFile>? imageList,
+  ) async {
+    final path = '${pathManager.epubCoverPath}/$uid';
     final file = File(path);
     if (coverImage == null) {
-      final imageList = epubBook?.Content?.Images?.values.toList();
       if (imageList == null || imageList.isEmpty) return;
       final firstImageFile = imageList.first;
       file.createSync(recursive: true);
@@ -204,7 +222,7 @@ class _EpubUtil {
     } else {
       try {
         file.createSync(recursive: true);
-        await file.writeAsBytes(encodePng(coverImage!));
+        await file.writeAsBytes(encodePng(coverImage));
       } catch (e) {
         talker.error('Error writing to file: $e');
       }
@@ -212,7 +230,7 @@ class _EpubUtil {
   }
 
   Future<void> _extractEpubBackup(File epub, String uid) async {
-    final path = '$basePath/backup/$uid';
+    final path = '${pathManager.backupPath}$uid';
     final backup = File(path);
     backup.createSync(recursive: true);
     await backup.writeAsBytes(epub.readAsBytesSync());
@@ -220,24 +238,35 @@ class _EpubUtil {
   }
 
   Future<void> deleteEpubBook(EpubManageData epubData) async {
-    final coverFile = '$basePath/cover/${epubData.uid}';
+    final coverFile = '${pathManager.epubCoverPath}${epubData.uid}';
     final cover = File(coverFile);
     if (cover.existsSync()) {
       cover.deleteSync();
     }
-    final backupFile = '$basePath/backup/${epubData.uid}';
+    final backupFile = '${pathManager.backupPath}/${epubData.uid}';
     final backup = File(backupFile);
     if (backup.existsSync()) {
       backup.deleteSync();
     }
-    final path3 = '$basePath/${epubData.uid}';
+    final path3 = '${pathManager.parseDirPath}/${epubData.uid}';
     final parseDir = Directory(path3);
     if (parseDir.existsSync()) {
       parseDir.deleteSync(recursive: true);
     }
   }
 
-  String getPathByUid(String uid) => '$basePath/$uid';
+  void updateProgress(NovelType type, {int? progress, String? message}) {
+    if (type != NovelType.local) return;
+    if (progress == 0) {
+      globalBloc
+          .add(GlobalEvent.startProgress(ProgressType.parsingEpub, message!));
+    } else if (progress == 100) {
+      globalBloc.add(const GlobalEvent.endProgress(ProgressType.parsingEpub));
+    } else {
+      globalBloc.add(GlobalEvent.updateProgress(
+          ProgressType.parsingEpub, progress!, message!));
+    }
+  }
 }
 
 extension EpubNavigationPointExt on epubx.EpubNavigationPoint {

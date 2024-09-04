@@ -22,12 +22,12 @@ class _PathManager {
     externalStorageDirectory = directory.path;
   }
 
-  String? getEpubFilePath(String fileName) {
-    return '$epubDownloadPath/$fileName';
+  String? getEpubFilePath(String filename) {
+    return '$epubDownloadPath/$filename';
   }
 
-  String? getCoverFilePath(String fileName) {
-    return '$epubCoverPath/$fileName';
+  String? getCoverFilePath(String filename) {
+    return '$epubCoverPath/$filename';
   }
 
   /// externalStorageDirectory/parse/epub/cover
@@ -41,4 +41,6 @@ class _PathManager {
 
   /// externalStorageDirectory/parse/epub/backup
   String get backupPath => externalStorageDirectory + _backupPath;
+
+  String getPathByUid(String uid) => '$parseDirPath/$uid';
 }

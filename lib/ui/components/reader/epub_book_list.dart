@@ -30,7 +30,7 @@ class EpubBookList extends StatelessWidget {
             child: FadeInAnimation(
               child: BookListTile(
                 epubManageData: epubList[index],
-                key: Key(epubList[index].uid ?? '-'),
+                key: Key(epubList[index].uid),
               ),
             ),
           ),
@@ -61,7 +61,7 @@ class _BookListTileState extends State<BookListTile> {
   void initState() {
     super.initState();
     localFileManager
-        .getCover(widget.epubManageData.uid ?? '-')
+        .getCover(widget.epubManageData.uid)
         .then((coverFile) async {
       if (coverFile != null &&
           coverFile.existsSync() &&
@@ -115,7 +115,7 @@ class _BookListTileState extends State<BookListTile> {
       children: [
         const SizedBox(height: 4.0),
         Text(
-          widget.epubManageData.name?.trim() ?? '',
+          widget.epubManageData.name.trim(),
           maxLines: 3,
           overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.titleSmall,
@@ -132,14 +132,14 @@ class _BookListTileState extends State<BookListTile> {
     }
     if (cover == null) {
       return PlainTextBookCover(
-        title: widget.epubManageData.name?.trim(),
+        title: widget.epubManageData.name.trim(),
       );
     }
     return Image.file(
       cover!,
       fit: BoxFit.fitHeight,
       key: Key(
-        widget.epubManageData.uid ?? widget.epubManageData.hashCode.toString(),
+        widget.epubManageData.uid,
       ),
     );
   }
@@ -178,8 +178,8 @@ class _BookListTileState extends State<BookListTile> {
 
   Widget _buildReadProgressInfo() {
     final progress =
-        '${((widget.epubManageData.progress ?? 0) * 100).toStringAsFixed(2)} %';
-    final chapterTitle = '第${(widget.epubManageData.chapter ?? 0) + 1}章';
+        '${((widget.epubManageData.progress) * 100).toStringAsFixed(2)} %';
+    final chapterTitle = '第${(widget.epubManageData.chapter) + 1}章';
     return Text(
       '$chapterTitle ($progress)',
       textAlign: TextAlign.left,
@@ -256,7 +256,7 @@ class _BookListTileState extends State<BookListTile> {
               ),
               const SizedBox(height: 12.0),
               Text(
-                widget.epubManageData.name?.trim() ?? '',
+                widget.epubManageData.name.trim(),
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               ..._buildEditOption(),

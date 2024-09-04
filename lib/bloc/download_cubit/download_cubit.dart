@@ -1,6 +1,10 @@
+import 'dart:io';
+
+import 'package:auto_novel_reader_flutter/manager/path_manager.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/network/file_downloader.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
+import 'package:auto_novel_reader_flutter/util/epub_util.dart';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -10,8 +14,8 @@ part 'download_cubit.freezed.dart';
 class DownloadCubit extends Cubit<DownloadState> {
   DownloadCubit() : super(const DownloadState.initial());
 
-  createDownloadTask(String url, String path, String fileName) async {
-    final downloadType = getDownloadType(fileName);
+  createDownloadTask(String url, String path, String filename) async {
+    final downloadType = getDownloadType(filename);
     switch (downloadType) {
       case DownloadType.downloading:
         showWarnToast('文件正在下载');
@@ -28,88 +32,101 @@ class DownloadCubit extends Cubit<DownloadState> {
         showSucceedToast('已创建下载任务');
         emit(state.copyWith(progressMap: {
           ...state.progressMap,
-          fileName: 0.0,
+          filename: 0.0,
         }));
-        downloadFile(url: url, path: path, fileName: fileName, wenku: true);
+        downloadFile(url: url, path: path, filename: filename, wenku: true);
     }
   }
 
-  updateProgress(String fileName, double progress) {
-    if (progress == 1) {
-      _finishDownload(fileName, true);
-    } else {
-      emit(state.copyWith(
-        progressMap: {
-          ...state.progressMap,
-          fileName: progress,
-        },
-      ));
-    }
+  updateProgress(String filename, double progress) {
+    emit(state.copyWith(
+      progressMap: {
+        ...state.progressMap,
+        filename: progress,
+      },
+    ));
   }
 
-  downloadFailed(String fileName) {
-    _finishDownload(fileName, false);
+  downloadFailed(String filename) {
+    finishDownload(filename, false);
   }
 
-  _finishDownload(String fileName, bool succeed) {
+  finishDownload(String filename, bool succeed, {File? file}) {
     var progressMapSnapshot = {...state.progressMap};
-    progressMapSnapshot.remove(fileName);
-
+    progressMapSnapshot.remove(filename);
     if (succeed) {
+      if (file == null) throw Exception('file is null');
       var parseMapSnapshot = {...state.parseMap};
       emit(state.copyWith(
         parseMap: parseMapSnapshot,
         progressMap: progressMapSnapshot,
       ));
+      _parseEpub(file, filename);
     } else {
       emit(state.copyWith(
         progressMap: progressMapSnapshot,
         downloadHistory: [
-          (fileName, ''),
+          (filename, ''),
           ...state.downloadHistory,
         ],
       ));
     }
   }
 
-  finishParse(String fileName) {
+  finishParse(String filename) {
     var parseMapSnapshot = {...state.parseMap};
-    parseMapSnapshot.remove(fileName);
+    parseMapSnapshot.remove(filename);
     emit(state.copyWith(
       parseMap: parseMapSnapshot,
       downloadHistory: [
-        (fileName, ''),
+        (filename, ''),
         ...state.downloadHistory,
       ],
     ));
   }
 
-  parseFailed(String fileName, Exception e) {
-    var parseMapSnapshot = {...state.parseMap, fileName};
+  parseFailed(String filename, Exception e) {
+    var parseMapSnapshot = {...state.parseMap, filename};
     emit(state.copyWith(
       parseMap: parseMapSnapshot,
       downloadHistory: [
-        (fileName, e.toString()),
+        (filename, e.toString()),
         ...state.downloadHistory,
       ],
     ));
   }
 
-  DownloadType getDownloadType(String fileName) {
+  Future<void> _parseEpub(File epub, String filename) async {
+    try {
+      final epubManageData = await epubUtil.parseEpub(
+        epub,
+        novelType: NovelType.wenku,
+        filename: filename,
+      );
+      localFileCubit.addEpubManageData(epubManageData);
+      finishParse(filename);
+    } catch (e) {
+      parseFailed(filename, Exception(e));
+    }
+  }
+
+  DownloadType getDownloadType(String filename) {
     DownloadType? result;
-    if (state.progressMap[fileName] != null) {
+    if (state.progressMap[filename] != null) {
       result = DownloadType.downloading;
-    } else if (state.parseMap.contains(fileName)) {
+    } else if (state.parseMap.contains(filename)) {
       result = DownloadType.parsing;
     } else {
       var targetIndex = -1;
       for (var i = 0; i < state.downloadHistory.length; i++) {
         final history = state.downloadHistory[i];
-        if (history.$1 == fileName) {
+        if (history.$1 == filename) {
           if (history.$2 == '') {
-            result = DownloadType.downloaded;
-            // TODO 校验文件存在性
-            break;
+            final file = File('${pathManager.epubDownloadPath}/$filename');
+            if (file.existsSync()) {
+              result = DownloadType.downloaded;
+              break;
+            }
           }
           result = DownloadType.failed;
           break;

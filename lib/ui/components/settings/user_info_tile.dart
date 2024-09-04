@@ -82,7 +82,7 @@ class UserInfoTile extends StatelessWidget {
               child: const Text('取消')),
           TextButton(
               onPressed: () {
-                // TODO 登出
+                readUserCubit(context).signOut();
                 Navigator.of(context).pop(true);
               },
               child: const Text('确定')),
