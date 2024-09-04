@@ -5,7 +5,6 @@ import 'package:auto_novel_reader_flutter/ui/components/web_home/web_novel_tile.
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
 class WebNovelSearchPage extends StatelessWidget {
   const WebNovelSearchPage({super.key});
@@ -67,30 +66,8 @@ class _WebNovelDtoListState extends State<WebNovelDtoList> {
               return state.webNovelSearchResult;
             },
             builder: (context, webNovels) {
-              return AnimationLimiter(
-                child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 4,
-                    crossAxisSpacing: 4,
-                    childAspectRatio: 1.1,
-                  ),
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemBuilder: (context, index) =>
-                      AnimationConfiguration.staggeredGrid(
-                    duration: const Duration(milliseconds: 375),
-                    position: index,
-                    columnCount: 2,
-                    child: SlideAnimation(
-                      verticalOffset: 50.0,
-                      child: FadeInAnimation(
-                        child: WebNovelTile(webNovel: webNovels[index]),
-                      ),
-                    ),
-                  ),
-                  itemCount: webNovels.length,
-                ),
+              return WebNovelList(
+                webNovels: webNovels,
               );
             },
           ),

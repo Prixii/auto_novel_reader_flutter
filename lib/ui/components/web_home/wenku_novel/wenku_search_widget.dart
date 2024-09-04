@@ -134,6 +134,7 @@ class _WenkuSearchWidgetState extends State<WenkuSearchWidget>
         child: RadioFilter(
             title: '分级',
             controller: _levelController,
+            values: WenkuNovelLevel.values,
             options: WenkuNovelLevel.values.map((e) => e.zhName).toList()),
       ),
     ]);

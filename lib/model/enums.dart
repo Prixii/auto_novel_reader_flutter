@@ -120,28 +120,6 @@ enum NovelProvider {
   String get defaultProviders => NovelProvider.values.join(',');
 }
 
-enum NovelCategory {
-  all,
-  serial,
-  finished,
-  short;
-
-  String get zhName => switch (this) {
-        NovelCategory.all => '全部',
-        NovelCategory.serial => '连载中',
-        NovelCategory.finished => '已完结',
-        NovelCategory.short => '短篇',
-      };
-  static int indexByZhName(String name) {
-    for (var i = 0; i < NovelCategory.values.length; i++) {
-      if (NovelCategory.values[i].zhName == name) {
-        return i;
-      }
-    }
-    return -1;
-  }
-}
-
 enum WebTranslationSource {
   all,
   gpt,
@@ -201,5 +179,221 @@ enum WenkuNovelLevel {
     if (name == '一般向') return 1;
     if (name == '严肃向') return 3;
     return -1;
+  }
+}
+
+enum NovelCategory {
+  all,
+  serial,
+  finished,
+  short;
+
+  String get zhName => switch (this) {
+        NovelCategory.all => '全部',
+        NovelCategory.short => '短篇',
+        NovelCategory.serial => '连载',
+        NovelCategory.finished => '完结',
+      };
+  static int indexByZhName(String name) {
+    for (var i = 0; i < NovelCategory.values.length; i++) {
+      if (NovelCategory.values[i].zhName == name) {
+        return i;
+      }
+    }
+    return -1;
+  }
+}
+
+enum SyosetuGenre {
+  romanceFantasy, // 恋爱：异世界
+  romanceRealWorld, // 恋爱：现实世界
+  highFantasy, // 幻想：高幻想
+  lowFantasy, // 幻想：低幻想
+  pureLiterature, // 文学：纯文学
+  humanDrama, // 文学：人性剧
+  historyLiterature, // 文学：历史
+  mysteryLiterature, // 文学：推理
+  horrorLiterature, // 文学：恐怖
+  actionLiterature, // 文学：动作
+  comedyLiterature, // 文学：喜剧
+  vrGameSciFi, // 科幻：VR游戏
+  cosmicSciFi, // 科幻：宇宙
+  speculativeSciFi, // 科幻：空想科学
+  thrillerSciFi, // 科幻：惊悚
+  fairyTale, // 其他：童话
+  poetry, // 其他：诗
+  prose, // 其他：散文
+  others; // 其他：其他
+
+  String get zhName => switch (this) {
+        SyosetuGenre.romanceFantasy => '恋爱：异世界',
+        SyosetuGenre.romanceRealWorld => '恋爱：现实世界',
+        SyosetuGenre.highFantasy => '幻想：高幻想',
+        SyosetuGenre.lowFantasy => '幻想：低幻想',
+        SyosetuGenre.pureLiterature => '文学：纯文学',
+        SyosetuGenre.humanDrama => '文学：人性剧',
+        SyosetuGenre.historyLiterature => '文学：历史',
+        SyosetuGenre.mysteryLiterature => '文学：推理',
+        SyosetuGenre.horrorLiterature => '文学：恐怖',
+        SyosetuGenre.actionLiterature => '文学：动作',
+        SyosetuGenre.comedyLiterature => '文学：喜剧',
+        SyosetuGenre.vrGameSciFi => '科幻：VR游戏',
+        SyosetuGenre.cosmicSciFi => '科幻：宇宙',
+        SyosetuGenre.speculativeSciFi => '科幻：空想科学',
+        SyosetuGenre.thrillerSciFi => '科幻：惊悚',
+        SyosetuGenre.fairyTale => '其他：童话',
+        SyosetuGenre.poetry => '其他：诗',
+        SyosetuGenre.prose => '其他：散文',
+        SyosetuGenre.others => '其他：其他',
+      };
+
+  static int? indexFromZhName(String name) {
+    for (var i = 0; i < values.length; i++) {
+      if (values[i].zhName == name) {
+        return i; // 返回匹配的索引
+      }
+    }
+    return null; // 如果没有找到，返回 null
+  }
+}
+
+enum KakuyomuGenre {
+  comprehensive, // 综合
+  fantasy, // 异世界幻想
+  modernFantasy, // 现代幻想
+  sciFi, // 科幻
+  romance, // 恋爱
+  romanticComedy, // 浪漫喜剧
+  modernDrama, // 现代戏剧
+  horror, // 恐怖
+  mystery, // 推理
+  prose, // 散文·纪实
+  history, // 历史·时代·传奇
+  critique, // 创作论·评论
+  poetry; // 诗·童话·其他
+
+  // 方法: 获取中文名称
+  String get zhName => switch (this) {
+        KakuyomuGenre.comprehensive => '综合',
+        KakuyomuGenre.fantasy => '异世界幻想',
+        KakuyomuGenre.modernFantasy => '现代幻想',
+        KakuyomuGenre.sciFi => '科幻',
+        KakuyomuGenre.romance => '恋爱',
+        KakuyomuGenre.romanticComedy => '浪漫喜剧',
+        KakuyomuGenre.modernDrama => '现代戏剧',
+        KakuyomuGenre.horror => '恐怖',
+        KakuyomuGenre.mystery => '推理',
+        KakuyomuGenre.prose => '散文·纪实',
+        KakuyomuGenre.history => '历史·时代·传奇',
+        KakuyomuGenre.critique => '创作论·评论',
+        KakuyomuGenre.poetry => '诗·童话·其他',
+      };
+
+  // 方法: 根据中文名称获取索引
+  static int? indexFromZhName(String name) {
+    for (var i = 0; i < values.length; i++) {
+      if (values[i].zhName == name) {
+        return i; // 返回匹配的索引
+      }
+    }
+    return null; // 如果没有找到，返回 null
+  }
+}
+
+enum SyosetuIsekaiGenre {
+  romance, // 恋爱
+  fantasy, // 幻想
+  literatureSciFiOthers; // 文学/科幻/其他
+
+  String get zhName => switch (this) {
+        SyosetuIsekaiGenre.romance => '恋爱',
+        SyosetuIsekaiGenre.fantasy => '幻想',
+        SyosetuIsekaiGenre.literatureSciFiOthers => '文学/科幻/其他',
+      };
+
+  static int? indexFromZhName(String name) {
+    for (var i = 0; i < values.length; i++) {
+      if (values[i].zhName == name) {
+        return i; // 返回匹配的索引
+      }
+    }
+    return null; // 如果没有找到，返回 null
+  }
+}
+
+enum SyosetuNovelPeriod {
+  total, // 总计
+  yearly, // 每年
+  quarter, // 每月
+  monthly, // 每月
+  weekly, // 每周
+  daily; // 每日
+
+  String get zhName => switch (this) {
+        SyosetuNovelPeriod.total => '总计',
+        SyosetuNovelPeriod.yearly => '每年',
+        SyosetuNovelPeriod.quarter => '季度',
+        SyosetuNovelPeriod.monthly => '每月',
+        SyosetuNovelPeriod.weekly => '每周',
+        SyosetuNovelPeriod.daily => '每日',
+      };
+
+  static int? indexFromZhName(String name) {
+    for (var i = 0; i < values.length; i++) {
+      if (values[i].zhName == name) {
+        return i; // 返回匹配的索引
+      }
+    }
+    return null; // 如果没有找到，返回 null
+  }
+}
+
+enum NovelPeriod {
+  total, // 总计
+  yearly, // 每年
+  quarter, // 每月
+  monthly, // 每月
+  weekly, // 每周
+  daily; // 每日
+
+  String get zhName => switch (this) {
+        NovelPeriod.total => '总计',
+        NovelPeriod.yearly => '每年',
+        NovelPeriod.quarter => '季度',
+        NovelPeriod.monthly => '每月',
+        NovelPeriod.weekly => '每周',
+        NovelPeriod.daily => '每日',
+      };
+
+  static int? indexFromZhName(String name) {
+    for (var i = 0; i < values.length; i++) {
+      if (values[i].zhName == name) {
+        return i; // 返回匹配的索引
+      }
+    }
+    return null; // 如果没有找到，返回 null
+  }
+}
+
+enum RankCategory {
+  syosetuGenre, // 成为小说家:流派
+  syosetuComprehensive, // 成为小说家：综合
+  syosetuIsekai, // 成为小说家：异世界转移/转生
+  kakuyomuGenre; // Kakuyomu：流派
+
+  String get zhName => switch (this) {
+        RankCategory.syosetuGenre => '成为小说家: 流派',
+        RankCategory.syosetuComprehensive => '成为小说家: 综合',
+        RankCategory.syosetuIsekai => '成为小说家: 异世界转移/转生',
+        RankCategory.kakuyomuGenre => 'Kakuyomu: 流派',
+      };
+
+  static int? indexFromZhName(String name) {
+    for (var i = 0; i < values.length; i++) {
+      if (values[i].zhName == name) {
+        return i; // 返回匹配的索引
+      }
+    }
+    return null; // 如果没有找到，返回 null
   }
 }

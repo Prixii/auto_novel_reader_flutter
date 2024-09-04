@@ -115,8 +115,8 @@ List<WebNovelOutline> parseToWebNovelOutline(dynamic body) {
           item['titleJp'],
           item['providerId'],
           item['novelId'],
-          titleZh: item['titleZh'],
-          type: item['type'],
+          titleZh: item['titleZh'] ?? '',
+          type: item['type'] ?? '未知',
           attentions: item['attentions'].cast<String>(),
           keywords: item['keywords'].cast<String>(),
           total: item['total'],
@@ -126,11 +126,13 @@ List<WebNovelOutline> parseToWebNovelOutline(dynamic body) {
           gpt: item['gpt'],
           sakura: item['sakura'],
           updateAt: item['updateAt'],
+          extra: item['extra'],
         ),
       );
     }
     return webNovelOutlines;
-  } catch (e) {
+  } catch (e, stackTrace) {
+    talker.error(stackTrace);
     return [];
   }
 }

@@ -5,6 +5,46 @@ import 'package:auto_novel_reader_flutter/ui/components/universal/info_badge.dar
 import 'package:auto_novel_reader_flutter/ui/view/home/web_novel_detail.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+
+class WebNovelList extends StatelessWidget {
+  const WebNovelList({
+    super.key,
+    required this.webNovels,
+    this.grid = true,
+  });
+
+  final List<WebNovelOutline> webNovels;
+  final bool grid;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimationLimiter(
+      child: GridView.builder(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 4,
+          crossAxisSpacing: 4,
+          childAspectRatio: 1.1,
+        ),
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemBuilder: (context, index) => AnimationConfiguration.staggeredGrid(
+          duration: const Duration(milliseconds: 375),
+          position: index,
+          columnCount: 2,
+          child: SlideAnimation(
+            verticalOffset: 50.0,
+            child: FadeInAnimation(
+              child: WebNovelTile(webNovel: webNovels[index]),
+            ),
+          ),
+        ),
+        itemCount: webNovels.length,
+      ),
+    );
+  }
+}
 
 class WebNovelTile extends StatelessWidget {
   const WebNovelTile({super.key, required this.webNovel});
@@ -33,6 +73,7 @@ class WebNovelTile extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(webOutline.titleJp,
                   maxLines: 2,
@@ -43,7 +84,7 @@ class WebNovelTile extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              Expanded(child: Container()),
+              // Expanded(child: Container()),
               _buildFooter(webOutline, context),
             ],
           ),

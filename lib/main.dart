@@ -34,6 +34,7 @@ class MainApp extends StatelessWidget {
         BlocProvider(create: (context) => wenkuHomeBloc),
         BlocProvider(create: (context) => webCacheCubit),
         BlocProvider(create: (context) => downloadCubit),
+        BlocProvider(create: (context) => novelRankBloc),
       ],
       child: MaterialApp(
         theme: ThemeData(

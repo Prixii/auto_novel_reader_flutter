@@ -145,16 +145,19 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
       RadioFilter(
           title: '类型',
           controller: _categoryController,
+          values: NovelCategory.values,
           options: NovelCategory.values.map((e) => e.zhName).toList()),
       const SizedBox(height: 16.0),
       RadioFilter(
           title: '翻译',
           controller: _translationController,
+          values: WebTranslationSource.values,
           options: WebTranslationSource.values.map((e) => e.zhName).toList()),
       const SizedBox(height: 16.0),
       RadioFilter(
           title: '排序',
           controller: _sortController,
+          values: WebNovelOrder.values,
           options: WebNovelOrder.values.map((e) => e.zhName).toList()),
     ]);
   }

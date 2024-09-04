@@ -1,29 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:unicons/unicons.dart';
 
-class TabOption extends StatefulWidget {
-  const TabOption(
-      {super.key,
-      required this.initValue,
-      required this.label,
-      required this.onTap,
-      required this.tabs,
-      this.padding = const EdgeInsets.fromLTRB(32, 8, 32, 8),
-      this.icon,
-      this.width});
-  final IconData? icon;
+class RankSelector extends StatefulWidget {
+  const RankSelector({
+    super.key,
+    required this.label,
+    required this.onTap,
+    required this.tabs,
+  });
   final String label;
-  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry padding = const EdgeInsets.fromLTRB(16, 8, 8, 8);
   final Function(String, int) onTap;
-  final int initValue;
   final List<String> tabs;
-  final double? width;
 
   @override
-  State<TabOption> createState() => _TabOptionState();
+  State<RankSelector> createState() => _RankSelectorState();
 }
 
-class _TabOptionState extends State<TabOption> with TickerProviderStateMixin {
+class _RankSelectorState extends State<RankSelector>
+    with TickerProviderStateMixin {
   late final TabController _tabController;
 
   @override
@@ -32,7 +27,7 @@ class _TabOptionState extends State<TabOption> with TickerProviderStateMixin {
     _tabController = TabController(
       length: widget.tabs.length,
       vsync: this,
-      initialIndex: widget.initValue,
+      initialIndex: 0,
     );
   }
 
@@ -47,27 +42,11 @@ class _TabOptionState extends State<TabOption> with TickerProviderStateMixin {
     final theme = Theme.of(context);
     return Padding(
       padding: widget.padding,
-      child: Row(
-        children: [
-          (widget.icon == null)
-              ? const SizedBox.shrink()
-              : Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: Icon(widget.icon),
-                ),
-          Text(
-            widget.label,
-            style: theme.textTheme.bodyLarge,
-            maxLines: 1,
-          ),
-          Expanded(child: Container()),
-          _buildDropDownMenuButton(theme, widget.width),
-        ],
-      ),
+      child: _buildDropDownMenuButton(theme),
     );
   }
 
-  InkWell _buildDropDownMenuButton(ThemeData theme, double? width) {
+  InkWell _buildDropDownMenuButton(ThemeData theme) {
     return InkWell(
       onTap: () {
         final renderBox = context.findRenderObject() as RenderBox;
@@ -88,14 +67,17 @@ class _TabOptionState extends State<TabOption> with TickerProviderStateMixin {
                     ))
                 .toList(),
             context: context,
-            position: RelativeRect.fromLTRB(local.dx + size.width - 110,
-                local.dy, local.dx + size.width - 20, size.height + local.dy));
+            position: RelativeRect.fromLTRB(
+              local.dx + 16,
+              local.dy + renderBox.size.height,
+              local.dx + renderBox.size.width,
+              size.height,
+            ));
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-        width: (width ?? 100),
         decoration: BoxDecoration(
-          color: theme.colorScheme.primaryContainer,
+          color: theme.colorScheme.secondaryContainer,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
@@ -106,6 +88,7 @@ class _TabOptionState extends State<TabOption> with TickerProviderStateMixin {
                 widget.tabs[_tabController.index],
                 style: theme.textTheme.bodyMedium,
                 maxLines: 1,
+                textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
               ),
             ),

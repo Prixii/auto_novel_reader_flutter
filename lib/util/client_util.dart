@@ -5,6 +5,7 @@ import 'package:auto_novel_reader_flutter/bloc/download_cubit/download_cubit.dar
 import 'package:auto_novel_reader_flutter/bloc/epub_viewer/epub_viewer_bloc.dart';
 import 'package:auto_novel_reader_flutter/bloc/global/global_bloc.dart';
 import 'package:auto_novel_reader_flutter/bloc/local_file/local_file_cubit.dart';
+import 'package:auto_novel_reader_flutter/bloc/novel_rank/novel_rank_bloc.dart';
 import 'package:auto_novel_reader_flutter/bloc/user/user_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/web_cache/web_cache_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
@@ -28,6 +29,7 @@ final webHomeBloc = WebHomeBloc();
 final wenkuHomeBloc = WenkuHomeBloc();
 final webCacheCubit = WebCacheCubit();
 final downloadCubit = DownloadCubit();
+final novelRankBloc = NovelRankBloc();
 
 GlobalBloc readGlobalBloc(BuildContext context) => context.read<GlobalBloc>();
 EpubViewerBloc readEpubViewerBloc(BuildContext context) =>
@@ -45,6 +47,8 @@ WenkuHomeBloc readWenkuHomeBloc(BuildContext context) =>
     context.read<WenkuHomeBloc>();
 DownloadCubit readDownloadCubit(BuildContext context) =>
     context.read<DownloadCubit>();
+NovelRankBloc readNovelRankBloc(BuildContext context) =>
+    context.read<NovelRankBloc>();
 
 void initScreenSize(BuildContext context) {
   screenSize = MediaQuery.sizeOf(context);
