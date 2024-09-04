@@ -93,8 +93,9 @@ enum NovelType {
 }
 
 enum DownloadType {
-  downloading,
   downloaded,
+  downloading,
+  parsing,
   failed,
   none,
 }

@@ -1,11 +1,9 @@
-import 'package:auto_novel_reader_flutter/bloc/download_cubit/download_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/wenku_home/wenku_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/path_manager.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
-import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/network/file_downloader.dart';
-import 'package:auto_novel_reader_flutter/ui/components/universal/line_button.dart';
+import 'package:auto_novel_reader_flutter/ui/components/web_home/wenku_novel/download_state_monitor.dart';
 import 'package:auto_novel_reader_flutter/ui/view/download.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
@@ -138,47 +136,9 @@ class JpVolumeListTile extends StatelessWidget {
         mode: state.language,
         translationsMode: state.translationMode,
         translations: state.translationOrder);
-    return SizedBox(
-      width: 78,
-      child: BlocSelector<DownloadCubit, DownloadState, DownloadType>(
-        selector: (state) {
-          return readDownloadCubit(context).getDownloadType(fileName);
-        },
-        builder: (context, downloadType) {
-          switch (downloadType) {
-            case DownloadType.downloading:
-              return BlocSelector<DownloadCubit, DownloadState, double>(
-                selector: (state) {
-                  return state.progressMap[dto.volumeId] ?? 0.0;
-                },
-                builder: (context, state) {
-                  return Text(
-                    '${(state * 100).toStringAsFixed(2)}%',
-                  );
-                },
-              );
-            case DownloadType.none:
-            case DownloadType.failed:
-              return FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: styleManager.colorScheme.secondaryContainer,
-                ),
-                onPressed: () {
-                  _downloadJpEpub(context, fileName, url);
-                },
-                child: Icon(
-                  UniconsLine.file_download,
-                  color: styleManager.colorScheme.onSecondaryContainer,
-                ),
-              );
-            case DownloadType.downloaded:
-              return LineButton(
-                text: '阅读',
-                onPressed: () => {},
-              );
-          }
-        },
-      ),
+    return DownloadStateMonitor(
+      filename: fileName,
+      onPressed: () => _downloadJpEpub(context, fileName, url),
     );
   }
 
@@ -217,57 +177,18 @@ class ZhVolumeListTile extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8.0),
-        _buildTrail(context),
+        DownloadStateMonitor(
+            filename: title,
+            onPressed: () => {
+                  _downloadZhEpub(
+                      context,
+                      zhDownloadUrlGenerator(
+                        readWenkuHomeBloc(context).state.currentNovelId,
+                        title,
+                      ),
+                      title)
+                }),
       ],
-    );
-  }
-
-  Widget _buildTrail(BuildContext context) {
-    return SizedBox(
-      width: 78,
-      child: BlocSelector<DownloadCubit, DownloadState, DownloadType>(
-        selector: (state) {
-          return readDownloadCubit(context).getDownloadType(title);
-        },
-        builder: (context, downloadType) {
-          switch (downloadType) {
-            case DownloadType.downloading:
-              return BlocSelector<DownloadCubit, DownloadState, double>(
-                selector: (state) {
-                  return state.progressMap[title] ?? 0.0;
-                },
-                builder: (context, state) {
-                  return Text(
-                    '${(state * 100).toStringAsFixed(2)}%',
-                  );
-                },
-              );
-            case DownloadType.none:
-            case DownloadType.failed:
-              return FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: styleManager.colorScheme.secondaryContainer,
-                ),
-                onPressed: () => _downloadZhEpub(
-                    context,
-                    zhDownloadUrlGenerator(
-                      readWenkuHomeBloc(context).state.currentNovelId,
-                      title,
-                    ),
-                    title),
-                child: Icon(
-                  UniconsLine.file_download,
-                  color: styleManager.colorScheme.onSecondaryContainer,
-                ),
-              );
-            case DownloadType.downloaded:
-              return LineButton(
-                text: '阅读',
-                onPressed: () => {},
-              );
-          }
-        },
-      ),
     );
   }
 

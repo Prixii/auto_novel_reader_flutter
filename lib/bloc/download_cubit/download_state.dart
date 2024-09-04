@@ -4,6 +4,7 @@ part of 'download_cubit.dart';
 class DownloadState with _$DownloadState {
   const factory DownloadState.initial({
     @Default({}) Map<String, double> progressMap,
-    @Default([]) List<(String, bool)> downloadHistory,
+    @Default({}) Set<String> parseMap,
+    @Default([]) List<(String, String)> downloadHistory,
   }) = _Initial;
 }

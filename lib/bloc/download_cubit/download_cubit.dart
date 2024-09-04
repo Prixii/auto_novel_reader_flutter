@@ -12,20 +12,25 @@ class DownloadCubit extends Cubit<DownloadState> {
 
   createDownloadTask(String url, String path, String fileName) async {
     final downloadType = getDownloadType(fileName);
-    if (downloadType == DownloadType.downloading) {
-      showWarnToast('文件正在下载');
-      return;
-    }
-    if (downloadType == DownloadType.downloaded) {
-      showWarnToast('文件已存在');
-      return;
-    }
-    emit(state.copyWith(progressMap: {...state.progressMap, url: 0.0}));
-    downloadFile(url: url, path: path, fileName: fileName, wenku: true);
-    if (downloadType == DownloadType.failed) {
-      showSucceedToast('已重新创建下载任务');
-    } else {
-      showSucceedToast('已创建下载任务');
+    switch (downloadType) {
+      case DownloadType.downloading:
+        showWarnToast('文件正在下载');
+        break;
+      case DownloadType.downloaded:
+        showWarnToast('文件已存在');
+        break;
+      case DownloadType.parsing:
+        showWarnToast('文件正在解析');
+        break;
+      case DownloadType.failed:
+        showSucceedToast('已重新创建下载任务');
+      case DownloadType.none:
+        showSucceedToast('已创建下载任务');
+        emit(state.copyWith(progressMap: {
+          ...state.progressMap,
+          fileName: 0.0,
+        }));
+        downloadFile(url: url, path: path, fileName: fileName, wenku: true);
     }
   }
 
@@ -49,10 +54,42 @@ class DownloadCubit extends Cubit<DownloadState> {
   _finishDownload(String fileName, bool succeed) {
     var progressMapSnapshot = {...state.progressMap};
     progressMapSnapshot.remove(fileName);
+
+    if (succeed) {
+      var parseMapSnapshot = {...state.parseMap};
+      emit(state.copyWith(
+        parseMap: parseMapSnapshot,
+        progressMap: progressMapSnapshot,
+      ));
+    } else {
+      emit(state.copyWith(
+        progressMap: progressMapSnapshot,
+        downloadHistory: [
+          (fileName, ''),
+          ...state.downloadHistory,
+        ],
+      ));
+    }
+  }
+
+  finishParse(String fileName) {
+    var parseMapSnapshot = {...state.parseMap};
+    parseMapSnapshot.remove(fileName);
     emit(state.copyWith(
-      progressMap: progressMapSnapshot,
+      parseMap: parseMapSnapshot,
       downloadHistory: [
-        (fileName, succeed),
+        (fileName, ''),
+        ...state.downloadHistory,
+      ],
+    ));
+  }
+
+  parseFailed(String fileName, Exception e) {
+    var parseMapSnapshot = {...state.parseMap, fileName};
+    emit(state.copyWith(
+      parseMap: parseMapSnapshot,
+      downloadHistory: [
+        (fileName, e.toString()),
         ...state.downloadHistory,
       ],
     ));
@@ -62,12 +99,14 @@ class DownloadCubit extends Cubit<DownloadState> {
     DownloadType? result;
     if (state.progressMap[fileName] != null) {
       result = DownloadType.downloading;
+    } else if (state.parseMap.contains(fileName)) {
+      result = DownloadType.parsing;
     } else {
       var targetIndex = -1;
       for (var i = 0; i < state.downloadHistory.length; i++) {
         final history = state.downloadHistory[i];
         if (history.$1 == fileName) {
-          if (history.$2 == true) {
+          if (history.$2 == '') {
             result = DownloadType.downloaded;
             // TODO 校验文件存在性
             break;

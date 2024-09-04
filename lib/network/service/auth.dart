@@ -6,7 +6,7 @@ abstract class AuthService extends ChopperService {
   Future<Response> postSignIn(@Body() JsonBody body);
 
   @Post(path: '/sign-up')
-  Future<Response> postSignUp();
+  Future<Response> postSignUp(@Body() JsonBody body);
 
   @Get(path: '/renew')
   Future<Response> _getRenew();

@@ -1,8 +1,8 @@
 import 'package:auto_novel_reader_flutter/ui/components/settings/auth_tab.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/custom_text_field.dart';
+import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class RegisterForm extends StatefulWidget {
   const RegisterForm({super.key});
@@ -70,7 +70,7 @@ class _RegisterFormState extends State<RegisterForm> {
     final isPasswordMatch =
         _passwordController.text == _confirmPasswordController.text;
     (!_formFinished() || isPasswordMatch)
-        ? Fluttertoast.showToast(msg: '请填写完整信息')
-        : Fluttertoast.showToast(msg: '两次密码不一致');
+        ? showWarnToast('请填写完整信息')
+        : showWarnToast('两次密码不一致');
   }
 }
