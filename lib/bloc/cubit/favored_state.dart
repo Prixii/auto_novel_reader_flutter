@@ -23,5 +23,8 @@ class FavoredState with _$FavoredState {
     @Default({}) Map<String, List<WenkuNovelOutline>> favoredWenkuNovelsMap,
     @Default({}) Map<String, bool> isWenkuRequestingMap,
     @Default({}) Map<String, SearchSortType> favoredWenkuSortTypeMap,
+    // 全局
+    /// [wenkuId/bookId] -> favoredId
+    @Default({}) Map<String, String> novelToFavoredIdMap,
   }) = _Initial;
 }

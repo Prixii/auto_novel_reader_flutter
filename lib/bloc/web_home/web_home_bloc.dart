@@ -247,10 +247,11 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
       final outlineCache = state.webNovelOutlineMap[currentNovelKey];
       if (outlineCache == null) return state;
       favoredWebSnapshot[currentNovelKey] = outlineCache;
+      //  TODO
       showSucceedToast('收藏成功');
       favoredCubit.favor(
           type: NovelType.web,
-          favored: favored,
+          favoredId: favored.id,
           webOutline: state.webNovelOutlineMap[currentNovelKey]!);
       return state.copyWith(favoredWebMap: favoredWebSnapshot);
     }
@@ -270,7 +271,7 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
       favoredWebSnapshot.remove(currentNovelKey);
       showSucceedToast('取消收藏成功');
       favoredCubit.unFavor(
-          type: NovelType.web, favored: favored, novelId: currentNovelId!);
+          type: NovelType.web, favoredId: favored.id, novelId: currentNovelId!);
       return state.copyWith(favoredWebMap: favoredWebSnapshot);
     }
     if (response.statusCode == 502) {

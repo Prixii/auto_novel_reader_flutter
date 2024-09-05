@@ -6,6 +6,10 @@ class WenkuHomeState with _$WenkuHomeState {
     List<WenkuNovelOutline>? wenkuLatestUpdate,
     // 缓存
     @Default({}) Map<String, WenkuNovelDto> wenkuNovelDtoMap,
+    // 收藏状态
+    @Default({}) Map<String, bool> favoredWenkuMap,
+    @Default({}) Map<String, WenkuNovelOutline> wenkuNovelOutlineMap,
+    @Default(null) WenkuNovelOutline? currentWenkuNovelOutline,
 
     // 详情
     @Default(false) bool loadingDetail,

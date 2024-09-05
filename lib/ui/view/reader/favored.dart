@@ -15,6 +15,11 @@ class FavoredView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // readFavoredCubit(context).setFavored(
+    //   type: NovelType.web,
+    //   favored: Favored.createDefault(),
+    // );
+    readFavoredCubit(context).init();
     return BlocSelector<UserCubit, UserState, bool>(
       selector: (state) {
         return state.token != null;

@@ -1,5 +1,6 @@
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
+import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/web_home_util.dart';
 import 'package:bloc/bloc.dart';
@@ -25,15 +26,21 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
   }
 
   _onInit(_Init event, Emitter<WenkuHomeState> emit) async {
-    await loadPagedWenkuOutline(level: 1).then(
-      (wenkuNovelOutlinesResult) => emit(
+    await loadPagedWenkuOutline(level: 1).then((wenkuNovelOutlinesResult) {
+      emit(
         state.copyWith(wenkuLatestUpdate: wenkuNovelOutlinesResult.$1),
-      ),
-    );
+      );
+      var favoredMap = <String, WenkuNovelOutline>{};
+      for (var outline in wenkuNovelOutlinesResult.$1) {
+        if (outline.favored != null) {
+          favoredMap[outline.favored!] = outline;
+        }
+      }
+    });
   }
 
   _onToDetail(_ToDetail event, Emitter<WenkuHomeState> emit) async {
-    var novelId = event.novelId;
+    var novelId = event.wenkuNovel.id;
     emit(state.copyWith(currentNovelId: novelId));
     final novelDto = await loadWenkuNovelDto(
       novelId,
@@ -46,16 +53,75 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
         ...state.wenkuNovelDtoMap,
         novelId: novelDto,
       },
+      currentWenkuNovelOutline: event.wenkuNovel,
       currentWenkuNovelDto: novelDto,
     ));
   }
 
   _onFavorNovel(_FavorNovel event, Emitter<WenkuHomeState> emit) async {
-    // TODO
+    if (currentNovelFavored) return state;
+    final response = await apiClient.userFavoredWenkuService.putNovelId(
+      event.favoredId,
+      event.novelId,
+    );
+    if (response == null) return;
+    if (response.statusCode != 200) {
+      showErrorToast('收藏失败');
+    }
+    final wenkuNovelDto = state.wenkuNovelDtoMap[event.novelId]?.copyWith(
+      favored: event.favoredId,
+    );
+    if (wenkuNovelDto == null) throw Exception('wenkuNovelDto is null');
+    emit(state.copyWith(
+      favoredWenkuMap: {
+        ...state.favoredWenkuMap,
+        event.novelId: true,
+      },
+      wenkuNovelDtoMap: {
+        ...state.wenkuNovelDtoMap,
+        event.novelId: wenkuNovelDto,
+      },
+    ));
+    favoredCubit.favor(
+      favoredId: event.favoredId,
+      type: NovelType.wenku,
+      wenkuOutline: state.currentWenkuNovelOutline,
+    );
+    showSucceedToast('收藏成功');
   }
 
   _onUnFavorNovel(_UnFavorNovel event, Emitter<WenkuHomeState> emit) async {
-    // TODO
+    if (!currentNovelFavored) return;
+    final response = await apiClient.userFavoredWenkuService.delNovelId(
+      event.favoredId,
+      event.novelId,
+    );
+    if (response == null) return;
+
+    if (response.statusCode != 200) {
+      showErrorToast('收藏失败');
+    }
+
+    final wenkuNovelDto = state.wenkuNovelDtoMap[event.novelId];
+    if (wenkuNovelDto == null) throw Exception('wenkuNovelDto is null');
+    final unfavoredWenkuNovelDto = wenkuNovelDto.copyWith(
+      favored: '',
+    );
+    favoredCubit.unFavor(
+        type: NovelType.wenku,
+        favoredId: event.favoredId,
+        novelId: event.novelId);
+    emit(state.copyWith(
+      favoredWenkuMap: {
+        ...state.favoredWenkuMap,
+        event.novelId: false,
+      },
+      wenkuNovelDtoMap: {
+        ...state.wenkuNovelDtoMap,
+        event.novelId: unfavoredWenkuNovelDto,
+      },
+    ));
+    showSucceedToast('取消收藏成功');
   }
 
   _onSearchWenku(_SearchWenku event, Emitter<WenkuHomeState> emit) async {
@@ -92,23 +158,23 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
       level: state.wenkuLevel,
       query: state.wenkuQuery,
     );
+    var newWenkuNovelOutlineMap = {...state.wenkuNovelOutlineMap};
+    for (var newNovel in newNovelList) {
+      newWenkuNovelOutlineMap[newNovel.id] = newNovel;
+    }
     emit(state.copyWith(
-      wenkuNovelSearchResult: [
-        ...state.wenkuNovelSearchResult,
-        ...newNovelList
-      ],
-      searchingWenku: false,
-      maxPage: pageNumber,
-    ));
+        wenkuNovelSearchResult: [
+          ...state.wenkuNovelSearchResult,
+          ...newNovelList
+        ],
+        searchingWenku: false,
+        maxPage: pageNumber,
+        wenkuNovelOutlineMap: {
+          ...state.wenkuNovelOutlineMap,
+          ...newWenkuNovelOutlineMap,
+        }));
   }
 
-  Future<WenkuHomeState> _favorWenku(Favored favored) async {
-    // TODO
-    return state;
-  }
-
-  Future<WenkuHomeState> _unFavorWenku(Favored favored) async {
-    // TODO
-    return state;
-  }
+  bool get currentNovelFavored =>
+      state.currentWenkuNovelOutline?.favored?.isNotEmpty ?? false;
 }

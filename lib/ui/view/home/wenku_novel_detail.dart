@@ -1,8 +1,10 @@
-import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
+import 'package:auto_novel_reader_flutter/bloc/cubit/favored_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/wenku_home/wenku_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
+import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/line_button.dart';
+import 'package:auto_novel_reader_flutter/ui/components/web_home/favored_selector.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_detail/flow_tag.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_detail/introduction_card.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_detail/paged_cover.dart';
@@ -219,25 +221,30 @@ class WenkuNovelDetail extends StatelessWidget {
       ),
       const SizedBox(width: 8),
       Expanded(
-        child: BlocSelector<WebHomeBloc, WebHomeState, bool>(
+        child: BlocSelector<FavoredCubit, FavoredState, String?>(
           selector: (state) {
-            return state.favoredWebMap[novelId] != null;
+            return state.novelToFavoredIdMap[novelId];
           },
           builder: (context, favored) {
             return LineButton(
-                onPressed: () {
-                  if (favored) {
+                onPressed: () async {
+                  if (favored != null) {
                     readWenkuHomeBloc(context)
-                        .add(const WenkuHomeEvent.unFavorNovel());
+                        .add(WenkuHomeEvent.unFavorNovel(novelId: novelId));
                   } else {
+                    final favored = await _selectFavored(context);
+                    if (favored == null || !context.mounted) return;
                     readWenkuHomeBloc(context).add(
-                      const WenkuHomeEvent.favorNovel(),
+                      WenkuHomeEvent.favorNovel(
+                        novelId: novelId,
+                        favoredId: favored.id,
+                      ),
                     );
                   }
                 },
                 onDisabledPressed: () => showWarnToast('请先登录'),
                 enabled: readUserCubit(context).isSignIn,
-                text: favored ? '已收藏' : '收藏');
+                text: (favored != null) ? '已收藏' : '收藏');
           },
         ),
       )
@@ -247,5 +254,29 @@ class WenkuNovelDetail extends StatelessWidget {
   _toDownload(BuildContext context) {
     Navigator.push(
         context, MaterialPageRoute(builder: (_) => const DownloadList()));
+  }
+
+  Future<Favored?> _selectFavored(BuildContext context) async {
+    final favoredList =
+        readFavoredCubit(context).state.favoredMap[NovelType.wenku];
+    if (favoredList == null || favoredList.isEmpty || favoredList.length == 1) {
+      return Favored.createDefault();
+    } else {
+      return await showModalBottomSheet(
+          isScrollControlled: true,
+          context: context,
+          constraints: BoxConstraints(
+            minWidth: screenSize.width,
+            maxHeight: screenSize.height * 0.8,
+            minHeight: screenSize.height * 0.8,
+          ),
+          enableDrag: true,
+          builder: (context) => FavoredSelector(
+              favoredList: favoredList,
+              onTap: (favored) {
+                Navigator.of(context).pop(favored);
+                return favored;
+              }));
+    }
   }
 }

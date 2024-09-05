@@ -1,3 +1,4 @@
+import 'package:auto_novel_reader_flutter/bloc/cubit/favored_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/web_cache/web_cache_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
@@ -205,14 +206,15 @@ class WebNovelDetail extends StatelessWidget {
       ),
       const SizedBox(width: 8),
       Expanded(
-        child: BlocSelector<WebHomeBloc, WebHomeState, bool>(
+        child: BlocSelector<FavoredCubit, FavoredState, String?>(
           selector: (state) {
-            return state.favoredWebMap[novelKey] != null;
+            return state.novelToFavoredIdMap[
+                readWebHomeBloc(context).currentNovelId ?? ''];
           },
           builder: (context, favored) {
             return LineButton(
                 onPressed: () {
-                  if (favored) {
+                  if (favored != null) {
                     readWebHomeBloc(context)
                         .add(const WebHomeEvent.unFavorNovel(NovelType.web));
                   } else {
@@ -223,7 +225,7 @@ class WebNovelDetail extends StatelessWidget {
                 },
                 onDisabledPressed: () => showWarnToast('请先登录'),
                 enabled: readUserCubit(context).isSignIn,
-                text: favored ? '已收藏' : '收藏');
+                text: (favored != null) ? '已收藏' : '收藏');
           },
         ),
       )

@@ -70,7 +70,7 @@ class WenkuNovelTile extends StatelessWidget {
       ),
       clipBehavior: Clip.hardEdge,
       child: InkWell(
-        onTap: () => _toDetail(context, novel.id),
+        onTap: () => _toDetail(context, novel),
         radius: 8,
         child: Stack(
           children: [
@@ -112,8 +112,8 @@ class WenkuNovelTile extends StatelessWidget {
     );
   }
 
-  void _toDetail(BuildContext context, String novelId) async {
-    readWenkuHomeBloc(context).add(WenkuHomeEvent.toDetail(novelId));
+  void _toDetail(BuildContext context, WenkuNovelOutline novel) async {
+    readWenkuHomeBloc(context).add(WenkuHomeEvent.toDetail(novel));
     Navigator.push(context,
         MaterialPageRoute(builder: (_) => const WenkuNovelDetailContainer()));
   }

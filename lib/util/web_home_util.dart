@@ -23,6 +23,8 @@ Future<List<WebNovelOutline>> loadFavoredWebOutline({
     }
     final body = response?.body;
     final webNovelOutlines = parseToWebNovelOutline(body);
+    favoredCubit.setNovelToFavoredIdMap(webOutlines: webNovelOutlines.toList());
+
     return webNovelOutlines;
   });
 }
@@ -51,6 +53,8 @@ Future<(List<WebNovelOutline>, int)> loadPagedWebOutline({
       .then((response) {
     final body = response.body;
     final webNovelOutlines = parseToWebNovelOutline(body);
+    favoredCubit.setNovelToFavoredIdMap(webOutlines: webNovelOutlines);
+
     return (webNovelOutlines, body['pageNumber'] as int);
   });
 }
@@ -71,6 +75,8 @@ Future<(List<WenkuNovelOutline>, int)> loadPagedWenkuOutline({
       .then((response) {
     final body = response.body;
     final wenkuNovelOutlines = parseToWenkuNovelOutline(body);
+    favoredCubit.setNovelToFavoredIdMap(wenkuOutlines: wenkuNovelOutlines);
+
     return (wenkuNovelOutlines, body['pageNumber'] as int);
   });
 }
@@ -157,6 +163,8 @@ Future<WebNovelDto?> loadWebNovelDto(
       youdao: body['youdao'],
     );
     onRequestFinished?.call();
+    favoredCubit
+        .setNovelToFavoredIdMap(webNovelDtoData: (novelId, webNovelDto));
     return webNovelDto;
   } catch (e) {
     talker.error(e);
@@ -250,6 +258,7 @@ Future<WenkuNovelDto?> _requestWenkuNovelDto(String novelId) async {
       artists: body['artists'].cast<String>(),
       keywords: body['keywords'].cast<String>(),
       publisher: body['publisher'],
+      favored: body['favored'],
       imprint: body['imprint'],
       latestPublishAt: body['latestPublishAt'],
       level: body['level'],
@@ -261,6 +270,7 @@ Future<WenkuNovelDto?> _requestWenkuNovelDto(String novelId) async {
       volumeZh: body['volumeZh'].cast<String>(),
       volumeJp: _parseVolumeJpDtoList(body['volumeJp']),
     );
+    favoredCubit.setNovelToFavoredIdMap(wenkuNovelDtoData: (novelId, wenkuDto));
     return wenkuDto;
   } catch (e) {
     talker.error(e);
