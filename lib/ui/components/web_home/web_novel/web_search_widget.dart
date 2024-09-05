@@ -113,21 +113,24 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
     );
   }
 
-  ScaleTransition _buildAnimatedFilter() {
-    return ScaleTransition(
-      scale: _scaleAnimation,
-      child: FadeTransition(
-        opacity: _fadeAnimation,
-        child: Container(
-          clipBehavior: Clip.hardEdge,
-          padding: const EdgeInsets.all(12.0),
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16.0),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15))],
-              color: Colors.white.withOpacity(0.6)),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-            child: _buildFilters(),
+  Widget _buildAnimatedFilter() {
+    return Visibility(
+      visible: _isFilterVisible,
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: Container(
+            clipBehavior: Clip.hardEdge,
+            padding: const EdgeInsets.all(12.0),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16.0),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15))],
+                color: Colors.white.withOpacity(0.6)),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+              child: _buildFilters(),
+            ),
           ),
         ),
       ),
@@ -135,31 +138,35 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
   }
 
   Column _buildFilters() {
-    return Column(mainAxisSize: MainAxisSize.min, children: [
-      CheckFilter<NovelProvider>(
-          title: '来源',
-          controller: _checkFilterController,
-          optionsValue: NovelProvider.values,
-          options: NovelProvider.values.map((e) => e.zhName).toList()),
-      const SizedBox(height: 16.0),
-      RadioFilter(
-          title: '类型',
-          controller: _categoryController,
-          values: NovelCategory.values,
-          options: NovelCategory.values.map((e) => e.zhName).toList()),
-      const SizedBox(height: 16.0),
-      RadioFilter(
-          title: '翻译',
-          controller: _translationController,
-          values: WebTranslationSource.values,
-          options: WebTranslationSource.values.map((e) => e.zhName).toList()),
-      const SizedBox(height: 16.0),
-      RadioFilter(
-          title: '排序',
-          controller: _sortController,
-          values: WebNovelOrder.values,
-          options: WebNovelOrder.values.map((e) => e.zhName).toList()),
-    ]);
+    return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CheckFilter<NovelProvider>(
+              title: '来源',
+              controller: _checkFilterController,
+              optionsValue: NovelProvider.values,
+              options: NovelProvider.values.map((e) => e.zhName).toList()),
+          const SizedBox(height: 16.0),
+          RadioFilter(
+              title: '类型',
+              controller: _categoryController,
+              values: NovelStatus.values,
+              options: NovelStatus.values.map((e) => e.zhName).toList()),
+          const SizedBox(height: 16.0),
+          RadioFilter(
+              title: '翻译',
+              controller: _translationController,
+              values: WebTranslationSource.values,
+              options:
+                  WebTranslationSource.values.map((e) => e.zhName).toList()),
+          const SizedBox(height: 16.0),
+          RadioFilter(
+              title: '排序',
+              controller: _sortController,
+              values: WebNovelOrder.values,
+              options: WebNovelOrder.values.map((e) => e.zhName).toList()),
+        ]);
   }
 
   Widget _buildFilterIcon() {
@@ -184,10 +191,10 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
     readWebHomeBloc(context).add(WebHomeEvent.searchWeb(
       query: _searchController.text,
       provider: _checkFilterController.values.map((e) => e.name).toList(),
-      type: NovelCategory.indexByZhName(_categoryController.value),
+      type: NovelStatus.indexByZhName(_categoryController.optionName),
       translate:
-          WebTranslationSource.indexByZhName(_translationController.value),
-      sort: WebNovelOrder.indexByZhName(_sortController.value),
+          WebTranslationSource.indexByZhName(_translationController.optionName),
+      sort: WebNovelOrder.indexByZhName(_sortController.optionName),
       level: 1,
     ));
   }

@@ -11,21 +11,51 @@ class WebNovelList extends StatelessWidget {
   const WebNovelList({
     super.key,
     required this.webNovels,
-    this.grid = true,
+    this.rankMode = false,
+    this.childAspectRatio = 1.1,
+    this.listMode = false,
   });
 
   final List<WebNovelOutline> webNovels;
-  final bool grid;
+  final bool rankMode;
+  final double childAspectRatio;
+  final bool listMode;
 
   @override
   Widget build(BuildContext context) {
+    return listMode ? _buildList() : _buildGrid();
+  }
+
+  Widget _buildList() {
+    return AnimationLimiter(
+        child: ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemBuilder: (context, index) =>
+                AnimationConfiguration.staggeredList(
+                  duration: const Duration(milliseconds: 375),
+                  position: index,
+                  child: SlideAnimation(
+                    verticalOffset: 50.0,
+                    child: FadeInAnimation(
+                      child: WebNovelTile(
+                        novelOutline: webNovels[index],
+                        rankMode: rankMode,
+                      ),
+                    ),
+                  ),
+                ),
+            itemCount: webNovels.length));
+  }
+
+  Widget _buildGrid() {
     return AnimationLimiter(
       child: GridView.builder(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           mainAxisSpacing: 4,
           crossAxisSpacing: 4,
-          childAspectRatio: 1.1,
+          childAspectRatio: childAspectRatio,
         ),
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -36,7 +66,10 @@ class WebNovelList extends StatelessWidget {
           child: SlideAnimation(
             verticalOffset: 50.0,
             child: FadeInAnimation(
-              child: WebNovelTile(novelOutline: webNovels[index]),
+              child: WebNovelTile(
+                novelOutline: webNovels[index],
+                rankMode: rankMode,
+              ),
             ),
           ),
         ),
@@ -47,9 +80,11 @@ class WebNovelList extends StatelessWidget {
 }
 
 class WebNovelTile extends StatelessWidget {
-  const WebNovelTile({super.key, required this.novelOutline});
+  const WebNovelTile(
+      {super.key, required this.novelOutline, this.rankMode = false});
 
   final WebNovelOutline novelOutline;
+  final bool rankMode;
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +107,7 @@ class WebNovelTile extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              Expanded(child: Container()),
+              rankMode ? const SizedBox.shrink() : Expanded(child: Container()),
               _buildFooter(novelOutline, context),
             ],
           ),
@@ -109,20 +144,28 @@ class WebNovelTile extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              '总计 ${webOutline.total} ',
-              style: styleManager.tipText,
-            ),
-            InfoBadge(
-              webOutline.type,
-              padding: const EdgeInsets.all(2),
-            ),
-          ],
+        rankMode ? _buildRankInfo(webOutline) : _buildNormalInfo(webOutline),
+      ],
+    );
+  }
+
+  Row _buildNormalInfo(WebNovelOutline webOutline) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          '总计 ${webOutline.total} ',
+          style: styleManager.tipText,
+        ),
+        InfoBadge(
+          webOutline.type,
+          padding: const EdgeInsets.all(2),
         ),
       ],
     );
+  }
+
+  Widget _buildRankInfo(WebNovelOutline webOutline) {
+    return Text(webOutline.extra ?? '', style: styleManager.tipText);
   }
 }

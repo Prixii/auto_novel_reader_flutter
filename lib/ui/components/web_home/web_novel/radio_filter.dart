@@ -8,6 +8,7 @@ class RadioFilter<T> extends StatefulWidget {
       required this.options,
       required this.values,
       required this.controller,
+      this.initOptionName,
       this.initValue,
       this.onChanged});
 
@@ -15,22 +16,26 @@ class RadioFilter<T> extends StatefulWidget {
   final List<T> values;
   final String title;
   final RadioFilterController controller;
-  final String? initValue;
+  final String? initOptionName;
+  final T? initValue;
   final ValueChanged? onChanged;
 
   @override
-  State<RadioFilter> createState() => _RadioFilterState();
+  State<RadioFilter> createState() => _RadioFilterState<T>();
 }
 
-class _RadioFilterState extends State<RadioFilter> {
+class _RadioFilterState<T> extends State<RadioFilter> {
   late String _selectedOption;
+  late T _selectedValue;
   final activeColor = styleManager.colorScheme.secondary;
   final inactiveColor = Colors.white;
 
   @override
   void initState() {
-    _selectedOption = widget.options.first;
-    widget.controller.setGetOptionsFunc(() => _selectedOption);
+    _selectedOption = widget.initOptionName ?? widget.options.first;
+    _selectedValue = widget.initValue ?? widget.values.first;
+    widget.controller
+        .setGetOptionsFunc(() => _selectedOption, () => _selectedValue);
     super.initState();
   }
 
@@ -56,6 +61,7 @@ class _RadioFilterState extends State<RadioFilter> {
                 });
                 final index = widget.options.indexOf(option);
                 if (index != -1) widget.onChanged?.call(widget.values[index]);
+                _selectedValue = widget.values[index];
               },
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
@@ -82,14 +88,17 @@ class _RadioFilterState extends State<RadioFilter> {
   }
 }
 
-class RadioFilterController {
+class RadioFilterController<T> {
   RadioFilterController();
 
-  String Function()? _getOptionFunc;
+  String Function()? _getOptionNameFunc;
+  T Function()? _getOptionValueFunc;
 
-  void setGetOptionsFunc(String Function() func) {
-    _getOptionFunc = func;
+  void setGetOptionsFunc(String Function() nameFunc, T Function() valueFunc) {
+    _getOptionNameFunc = nameFunc;
+    _getOptionValueFunc = valueFunc;
   }
 
-  String get value => _getOptionFunc!.call();
+  String get optionName => _getOptionNameFunc!.call();
+  T get optionValue => _getOptionValueFunc!.call();
 }

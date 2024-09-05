@@ -16,16 +16,31 @@ class NovelRankBloc extends Bloc<NovelRankEvent, NovelRankState> {
         searchRankNovel: (event) async => await _onSearchRankNovel(event, emit),
         loadNextPageRankNovel: (event) async =>
             await _onLoadNextPageRankNovel(event, emit),
+        updateSyosetuGenreSearchData: (event) async =>
+            await _onUpdateSyosetuGenreSearchData(event, emit),
+        updateSyosetuComprehensiveSearchData: (event) async =>
+            await _onUpdateSyosetuComprehensiveSearchData(event, emit),
+        updateSyosetuIsekaiSearchData: (event) async =>
+            await _onUpdateSyosetuIsekaiSearchData(event, emit),
+        updateKakuyomuGenreSearchData: (event) async =>
+            await _onUpdateKakuyomuGenreSearchData(event, emit),
       );
     });
   }
 
   _onSearchRankNovel(
       _SearchRankNovel event, Emitter<NovelRankState> emit) async {
-    if (state.searchingStatus[event.rankCategory] == true) return;
+    if (state.searchingStatus[event.rankCategory] == true) {
+      showWarnToast('已经在搜了啦!');
+      return;
+    }
 
     emit(state.copyWith(
-      currentPage: {...state.currentPage, event.rankCategory: 0},
+      currentPage: {
+        ...state.currentPage,
+        event.rankCategory: 0,
+      },
+      novels: {...state.novels, event.rankCategory: []},
     ));
     try {
       await _requestByRankCategory(event.rankCategory, emit);
@@ -40,6 +55,7 @@ class NovelRankBloc extends Bloc<NovelRankEvent, NovelRankState> {
   _onLoadNextPageRankNovel(
       _LoadNextPageRankNovel event, Emitter<NovelRankState> emit) async {
     showErrorToast('没有更多数据了啦');
+    // 站长好像没做分页？
     // if (state.searchingStatus[event.rankCategory] == true) return;
     // emit(state.copyWith(
     //   currentPage: {
@@ -48,6 +64,46 @@ class NovelRankBloc extends Bloc<NovelRankEvent, NovelRankState> {
     //   },
     // ));
     // await _requestByRankCategory(event.rankCategory, emit);
+  }
+
+  _onUpdateSyosetuGenreSearchData(
+      _UpdateSyosetuGenreSearchData event, Emitter<NovelRankState> emit) async {
+    emit(state.copyWith(
+      syosetuGenreSearchData: state.syosetuGenreSearchData.copyWith(
+        genre: event.genre,
+        range: event.range,
+        status: event.status,
+      ),
+    ));
+    add(const NovelRankEvent.searchRankNovel(RankCategory.syosetuGenre));
+  }
+
+  _onUpdateSyosetuComprehensiveSearchData(
+      _UpdateSyosetuComprehensiveSearchData event,
+      Emitter<NovelRankState> emit) async {
+    emit(state.copyWith(
+        syosetuComprehensiveSearchData: state.syosetuComprehensiveSearchData
+            .copyWith(range: event.range, status: event.status)));
+    add(const NovelRankEvent.searchRankNovel(
+        RankCategory.syosetuComprehensive));
+  }
+
+  _onUpdateSyosetuIsekaiSearchData(_UpdateSyosetuIsekaiSearchData event,
+      Emitter<NovelRankState> emit) async {
+    emit(state.copyWith(
+        syosetuIsekaiSearchData: state.syosetuIsekaiSearchData.copyWith(
+            genre: event.genre, range: event.range, status: event.status)));
+    add(const NovelRankEvent.searchRankNovel(RankCategory.syosetuIsekai));
+  }
+
+  _onUpdateKakuyomuGenreSearchData(_UpdateKakuyomuGenreSearchData event,
+      Emitter<NovelRankState> emit) async {
+    emit(state.copyWith(
+        kakuyomuGenreSearchData: state.kakuyomuGenreSearchData.copyWith(
+      genre: event.genre,
+      range: event.range,
+    )));
+    add(const NovelRankEvent.searchRankNovel(RankCategory.kakuyomuGenre));
   }
 
   Future<void> _requestByRankCategory(

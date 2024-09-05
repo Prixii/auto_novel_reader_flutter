@@ -106,21 +106,24 @@ class _WenkuSearchWidgetState extends State<WenkuSearchWidget>
     );
   }
 
-  ScaleTransition _buildAnimatedFilter() {
-    return ScaleTransition(
-      scale: _scaleAnimation,
-      child: FadeTransition(
-        opacity: _fadeAnimation,
-        child: Container(
-          clipBehavior: Clip.hardEdge,
-          padding: const EdgeInsets.all(12.0),
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16.0),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15))],
-              color: Colors.white.withOpacity(0.6)),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-            child: _buildFilters(),
+  Widget _buildAnimatedFilter() {
+    return Visibility(
+      visible: _isFilterVisible,
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: Container(
+            clipBehavior: Clip.hardEdge,
+            padding: const EdgeInsets.all(12.0),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16.0),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15))],
+                color: Colors.white.withOpacity(0.6)),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+              child: _buildFilters(),
+            ),
           ),
         ),
       ),
@@ -161,7 +164,7 @@ class _WenkuSearchWidgetState extends State<WenkuSearchWidget>
   void _search() {
     readWenkuHomeBloc(context).add(WenkuHomeEvent.searchWenku(
       query: _searchController.text,
-      level: WenkuNovelLevel.indexByZhName(_levelController.value),
+      level: WenkuNovelLevel.indexByZhName(_levelController.optionName),
     ));
   }
 }

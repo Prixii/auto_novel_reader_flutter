@@ -1,12 +1,12 @@
 import 'dart:ui';
 
+import 'package:auto_novel_reader_flutter/bloc/novel_rank/novel_rank_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
-import 'package:auto_novel_reader_flutter/ui/components/universal/line_button.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_rank/filters.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_rank/rank_selector.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_rank/rank_novel_list.dart';
-import 'package:auto_novel_reader_flutter/ui/components/web_home/web_novel/radio_filter.dart';
+import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
 import 'package:unicons/unicons.dart';
 
@@ -27,6 +27,7 @@ class _NovelRankState extends State<NovelRank>
   late CurvedAnimation _curvedScaleAnimation;
   late CurvedAnimation _curvedFadeAnimation;
   late AnimationController _animationController;
+  var currentIndex = 0;
 
   @override
   void initState() {
@@ -34,6 +35,12 @@ class _NovelRankState extends State<NovelRank>
     _initAnimation();
     _novelListPageController = PageController();
     _novelFilterPageController = PageController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final rankBloc = readNovelRankBloc(context);
+      if ((rankBloc.state.novels[RankCategory.values.first] ?? []).isEmpty) {
+        rankBloc.add(NovelRankEvent.searchRankNovel(RankCategory.values.first));
+      }
+    });
   }
 
   void _initAnimation() {
@@ -106,28 +113,24 @@ class _NovelRankState extends State<NovelRank>
   }
 
   Widget _buildAnimatedFilter() {
+    final filterList = [
+      _buildBlurContainer(const SyosetuGenreFilter()),
+      _buildBlurContainer(const SyosetuComprehensiveFilter()),
+      _buildBlurContainer(const SyosetuIsekaiFilter()),
+      _buildBlurContainer(const KakuyomuGenreFilters()),
+    ];
     return ScaleTransition(
       scale: _scaleAnimation,
       child: FadeTransition(
         opacity: _fadeAnimation,
         child: Container(
-          height: 468,
           clipBehavior: Clip.hardEdge,
           padding: const EdgeInsets.all(12.0),
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16.0),
               boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15))],
               color: Colors.white.withOpacity(0.6)),
-          child: PageView(
-            controller: _novelFilterPageController,
-            physics: const NeverScrollableScrollPhysics(), // 禁止滑动
-            children: [
-              _buildBlurContainer(const SyosetuGenreFilter()),
-              _buildBlurContainer(const SyosetuComprehensiveFilter()),
-              _buildBlurContainer(const SyosetuIsekaiFilter()),
-              _buildBlurContainer(const KakuyomuGenreFilters()),
-            ],
-          ),
+          child: filterList[currentIndex],
         ),
       ),
     );
@@ -153,12 +156,16 @@ class _NovelRankState extends State<NovelRank>
 
   void _toPage(int index) {
     if (index >= RankCategory.values.length) return; // 确保不超出页面范围
+    setState(() {
+      currentIndex = index;
+    });
+    final webNovels =
+        readNovelRankBloc(context).state.novels[RankCategory.values[index]];
+    if (webNovels == null || webNovels.isEmpty) {
+      readNovelRankBloc(context)
+          .add(NovelRankEvent.searchRankNovel(RankCategory.values[index]));
+    }
     _novelListPageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-    _novelFilterPageController.animateToPage(
       index,
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,

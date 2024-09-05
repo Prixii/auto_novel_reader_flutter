@@ -182,21 +182,21 @@ enum WenkuNovelLevel {
   }
 }
 
-enum NovelCategory {
+enum NovelStatus {
   all,
   serial,
   finished,
   short;
 
   String get zhName => switch (this) {
-        NovelCategory.all => '全部',
-        NovelCategory.short => '短篇',
-        NovelCategory.serial => '连载',
-        NovelCategory.finished => '完结',
+        NovelStatus.all => '全部',
+        NovelStatus.short => '短篇',
+        NovelStatus.serial => '连载',
+        NovelStatus.finished => '完结',
       };
   static int indexByZhName(String name) {
-    for (var i = 0; i < NovelCategory.values.length; i++) {
-      if (NovelCategory.values[i].zhName == name) {
+    for (var i = 0; i < NovelStatus.values.length; i++) {
+      if (NovelStatus.values[i].zhName == name) {
         return i;
       }
     }
@@ -321,7 +321,7 @@ enum SyosetuIsekaiGenre {
   }
 }
 
-enum SyosetuNovelPeriod {
+enum SyosetuNovelRange {
   total, // 总计
   yearly, // 每年
   quarter, // 每月
@@ -330,12 +330,12 @@ enum SyosetuNovelPeriod {
   daily; // 每日
 
   String get zhName => switch (this) {
-        SyosetuNovelPeriod.total => '总计',
-        SyosetuNovelPeriod.yearly => '每年',
-        SyosetuNovelPeriod.quarter => '季度',
-        SyosetuNovelPeriod.monthly => '每月',
-        SyosetuNovelPeriod.weekly => '每周',
-        SyosetuNovelPeriod.daily => '每日',
+        SyosetuNovelRange.total => '总计',
+        SyosetuNovelRange.yearly => '每年',
+        SyosetuNovelRange.quarter => '季度',
+        SyosetuNovelRange.monthly => '每月',
+        SyosetuNovelRange.weekly => '每周',
+        SyosetuNovelRange.daily => '每日',
       };
 
   static int? indexFromZhName(String name) {
@@ -348,7 +348,7 @@ enum SyosetuNovelPeriod {
   }
 }
 
-enum NovelPeriod {
+enum NovelRange {
   total, // 总计
   yearly, // 每年
   quarter, // 每月
@@ -357,12 +357,12 @@ enum NovelPeriod {
   daily; // 每日
 
   String get zhName => switch (this) {
-        NovelPeriod.total => '总计',
-        NovelPeriod.yearly => '每年',
-        NovelPeriod.quarter => '季度',
-        NovelPeriod.monthly => '每月',
-        NovelPeriod.weekly => '每周',
-        NovelPeriod.daily => '每日',
+        NovelRange.total => '总计',
+        NovelRange.yearly => '每年',
+        NovelRange.quarter => '季度',
+        NovelRange.monthly => '每月',
+        NovelRange.weekly => '每周',
+        NovelRange.daily => '每日',
       };
 
   static int? indexFromZhName(String name) {
