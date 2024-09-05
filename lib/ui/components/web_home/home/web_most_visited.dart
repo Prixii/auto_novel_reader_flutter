@@ -37,7 +37,7 @@ class WebMostVisited extends StatelessWidget {
       jumpTo: () => {});
 
   Widget _buildWebMostVisited() {
-    return BlocSelector<WebHomeBloc, WebHomeState, List<WebNovel>>(
+    return BlocSelector<WebHomeBloc, WebHomeState, List<WebNovelOutline>>(
       selector: (state) {
         return state.webMostVisited ?? [];
       },
@@ -60,7 +60,7 @@ class WebMostVisited extends StatelessWidget {
               child: SlideAnimation(
                 verticalOffset: 50.0,
                 child: FadeInAnimation(
-                  child: WebNovelTile(webNovel: webNovels[index]),
+                  child: WebNovelTile(novelOutline: webNovels[index]),
                 ),
               ),
             ),

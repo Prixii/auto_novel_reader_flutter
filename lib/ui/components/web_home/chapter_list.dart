@@ -2,6 +2,7 @@ import 'package:auto_novel_reader_flutter/bloc/web_cache/web_cache_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
+import 'package:auto_novel_reader_flutter/ui/components/reader/plain_text_novel_reader.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -139,10 +140,17 @@ class ChapterListTile extends StatelessWidget {
         bottomLeft: Radius.circular(8.0),
       ),
       onTap: () {
-        if (!readMode) return;
         if (index == null) return;
         context.read<WebHomeBloc>().add(WebHomeEvent.readChapter(index!));
         Navigator.pop(context);
+        if (!readMode) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const PlainTextNovelReaderContainer(),
+            ),
+          );
+        }
       },
       child: Container(
         height: _chapterTileHeight,

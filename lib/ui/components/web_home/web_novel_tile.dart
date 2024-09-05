@@ -36,7 +36,7 @@ class WebNovelList extends StatelessWidget {
           child: SlideAnimation(
             verticalOffset: 50.0,
             child: FadeInAnimation(
-              child: WebNovelTile(webNovel: webNovels[index]),
+              child: WebNovelTile(novelOutline: webNovels[index]),
             ),
           ),
         ),
@@ -47,45 +47,33 @@ class WebNovelList extends StatelessWidget {
 }
 
 class WebNovelTile extends StatelessWidget {
-  const WebNovelTile({super.key, required this.webNovel});
-  const WebNovelTile.empty({
-    super.key,
-  }) : webNovel = const WebNovel.webNovelOutline('', '', '');
+  const WebNovelTile({super.key, required this.novelOutline});
 
-  final WebNovel webNovel;
+  final WebNovelOutline novelOutline;
 
   @override
   Widget build(BuildContext context) {
-    return webNovel.map(
-      webNovelChapter: (novel) => const SizedBox.shrink(),
-      webNovelDto: (novel) => const SizedBox.shrink(),
-      webNovelOutline: (novel) => _buildForWebOutline(novel, context),
-      webNovelToc: (novel) => const SizedBox.shrink(),
-    );
-  }
-
-  Widget _buildForWebOutline(WebNovelOutline webOutline, BuildContext context) {
     return Card(
       clipBehavior: Clip.hardEdge,
       child: InkWell(
-        onTap: () => _toDetail(context, webOutline),
+        onTap: () => _toDetail(context, novelOutline),
         child: Container(
           padding: const EdgeInsets.all(8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(webOutline.titleJp,
+              Text(novelOutline.titleJp,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: styleManager.primaryColorTitleSmall),
               Text(
-                webOutline.titleZh ?? '',
+                novelOutline.titleZh ?? '',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              // Expanded(child: Container()),
-              _buildFooter(webOutline, context),
+              Expanded(child: Container()),
+              _buildFooter(novelOutline, context),
             ],
           ),
         ),

@@ -47,7 +47,7 @@ class FavoredWebList extends StatelessWidget {
   }
 
   Widget _buildFavoredWebList() {
-    return BlocSelector<WebHomeBloc, WebHomeState, List<WebNovel>>(
+    return BlocSelector<WebHomeBloc, WebHomeState, List<WebNovelOutline>>(
       selector: (state) {
         return state.favoredWebMap.values.toList();
       },
@@ -70,7 +70,7 @@ class FavoredWebList extends StatelessWidget {
                     child: SlideAnimation(
                       verticalOffset: 50.0,
                       child: FadeInAnimation(
-                          child: WebNovelTile(webNovel: webNovels[index])),
+                          child: WebNovelTile(novelOutline: webNovels[index])),
                     )),
             itemCount: webNovels.length,
           ),

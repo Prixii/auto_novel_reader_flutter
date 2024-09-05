@@ -1,6 +1,6 @@
 part of 'service.dart';
 
-@ChopperApi(baseUrl: '/user/read-history-web')
+@ChopperApi(baseUrl: '/user/read-history')
 abstract class UserReadHistoryWebService extends ChopperService {
   @Get(path: '')
   Future<Response> _getList();
@@ -24,9 +24,14 @@ abstract class UserReadHistoryWebService extends ChopperService {
 
   @Put(path: '/{providerId}/{novelId}')
   Future<Response> _putNovelId(
-      @Path() String providerId, @Path() String novelId);
-  Future<Response?> putNovelId(String providerId, String novelId) =>
-      tokenRequest(() => _putNovelId(providerId, novelId));
+      @Path() String providerId, @Path() String novelId, @Body() body);
+  Future<Response?> putNovelId(
+          String providerId, String novelId, String chapterId) =>
+      tokenRequest(() => _putNovelId(
+            providerId,
+            novelId,
+            chapterId,
+          ));
 
   @Delete(path: '/{providerId}/{novelId}')
   Future<Response> _delNovelId(

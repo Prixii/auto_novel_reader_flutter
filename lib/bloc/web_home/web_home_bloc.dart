@@ -123,6 +123,10 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
       loadingNovelChapter: false,
       currentChapterDto: targetDto,
     ));
+    _requestUpdateReadHistory(
+        currentNovelProviderId!, currentNovelId!, targetChapterId);
+
+    // 预加载下一章节
     final nextChapterKey = currentNovelKey + (targetDto.nextId ?? '');
     final nextDto = await loadNovelChapter(
       currentNovelProviderId ?? '',
@@ -268,7 +272,11 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     return state;
   }
 
-  /// 加载章节 (章节 dto, 是否为缓存)
+  Future<void> _requestUpdateReadHistory(
+      String providerId, String novelId, String chapterId) async {
+    apiClient.userReadHistoryWebService
+        .putNovelId(providerId, novelId, chapterId);
+  }
 
   bool get loadingChapter => state.loadingNovelChapter;
   String? get currentNovelId => state.currentNovelId;

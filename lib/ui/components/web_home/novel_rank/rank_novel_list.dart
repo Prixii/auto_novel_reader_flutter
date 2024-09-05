@@ -32,19 +32,9 @@ class RankNovelList extends StatelessWidget {
           children: [
             SingleChildScrollView(
               padding: const EdgeInsets.only(top: 48),
-              // child: WebNovelList(
-              //   webNovels: webNovels,
-              // ),
-              child: ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: webNovels.length,
-                  itemBuilder: (context, index) {
-                    final webNovel = webNovels[index];
-                    return WebNovelTile(
-                      webNovel: webNovel,
-                    );
-                  }),
+              child: WebNovelList(
+                webNovels: webNovels,
+              ),
             ),
             BlocSelector<NovelRankBloc, NovelRankState, bool>(
               selector: (state) {
