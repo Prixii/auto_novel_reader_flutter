@@ -4,6 +4,7 @@ import 'package:auto_novel_reader_flutter/ui/components/web_home/web_novel/web_s
 import 'package:auto_novel_reader_flutter/ui/components/web_home/web_novel_tile.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class WebNovelSearchPage extends StatelessWidget {
@@ -39,67 +40,79 @@ class WebNovelDtoList extends StatefulWidget {
 }
 
 class _WebNovelDtoListState extends State<WebNovelDtoList> {
-  late ScrollController _scrollController;
+  var scrollDirection = ScrollDirection.forward;
+  var shouldLoadMore = false;
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController();
-    _scrollController.addListener(_scrollListener);
   }
 
   @override
   void dispose() {
-    _scrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      controller: _scrollController,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 68),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          BlocSelector<WebHomeBloc, WebHomeState, List<WebNovelOutline>>(
-            selector: (state) {
-              return state.webNovelSearchResult;
-            },
-            builder: (context, webNovels) {
-              return WebNovelList(
-                webNovels: webNovels,
-              );
-            },
+    return NotificationListener(
+        onNotification: (notification) {
+          if (notification is ScrollNotification) {
+            final metrics = notification.metrics;
+            if (metrics.pixels > metrics.maxScrollExtent - 60) {
+              if (shouldLoadMore &&
+                  scrollDirection == ScrollDirection.forward) {
+                shouldLoadMore = false;
+                talker.debug('load next page!');
+                readWebHomeBloc(context)
+                    .add(const WebHomeEvent.loadNextPageWeb());
+              }
+            } else {
+              shouldLoadMore = true;
+            }
+          }
+          if (notification is ScrollUpdateNotification) {
+            final delta = notification.dragDetails;
+            if (delta != null) {
+              scrollDirection = delta.delta.dy > 0
+                  ? ScrollDirection.reverse
+                  : ScrollDirection.forward;
+            }
+          }
+          return false;
+        },
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 68),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              BlocSelector<WebHomeBloc, WebHomeState, List<WebNovelOutline>>(
+                selector: (state) {
+                  return state.webNovelSearchResult;
+                },
+                builder: (context, webNovels) {
+                  return WebNovelList(
+                    webNovels: webNovels,
+                  );
+                },
+              ),
+              BlocSelector<WebHomeBloc, WebHomeState, bool>(
+                selector: (state) {
+                  return state.searchingWeb;
+                },
+                builder: (context, state) {
+                  return SizedBox(
+                    height: 64,
+                    child: Center(
+                      child: Visibility(
+                        visible: state,
+                        child: const CircularProgressIndicator(),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
-          BlocSelector<WebHomeBloc, WebHomeState, bool>(
-            selector: (state) {
-              return state.searchingWeb;
-            },
-            builder: (context, state) {
-              return SizedBox(
-                height: 64,
-                child: Center(
-                  child: Visibility(
-                    visible: state,
-                    child: const CircularProgressIndicator(),
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _scrollListener() {
-    if (_scrollController.position.pixels + 128 >=
-        _scrollController.position.maxScrollExtent) {
-      _onScrollToBottom();
-    }
-  }
-
-  void _onScrollToBottom() {
-    readWebHomeBloc(context).add(const WebHomeEvent.loadNextPageWeb());
+        ));
   }
 }

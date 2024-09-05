@@ -4,6 +4,7 @@ import 'package:auto_novel_reader_flutter/ui/components/web_home/wenku_novel/wen
 import 'package:auto_novel_reader_flutter/ui/components/web_home/wenku_novel_tile.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class WenkuNovelSearchPage extends StatelessWidget {
@@ -39,65 +40,69 @@ class WebNovelDtoList extends StatefulWidget {
 }
 
 class _WebNovelDtoListState extends State<WebNovelDtoList> {
-  late ScrollController _scrollController;
-  @override
-  void initState() {
-    super.initState();
-    _scrollController = ScrollController();
-    _scrollController.addListener(_scrollListener);
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
+  var scrollDirection = ScrollDirection.forward;
+  var shouldLoadMore = false;
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      controller: _scrollController,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 68),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          BlocSelector<WenkuHomeBloc, WenkuHomeState, List<WenkuNovelOutline>>(
-            selector: (state) {
-              return state.wenkuNovelSearchResult;
-            },
-            builder: (context, wenkuNovels) {
-              return WenkuNovelList(wenkuNovels: wenkuNovels);
-            },
-          ),
-          BlocSelector<WenkuHomeBloc, WenkuHomeState, bool>(
-            selector: (state) {
-              return state.searchingWenku;
-            },
-            builder: (context, state) {
-              return SizedBox(
-                height: 64,
-                child: Center(
-                  child: Visibility(
-                    visible: state,
-                    child: const CircularProgressIndicator(),
+    return NotificationListener(
+      onNotification: (notification) {
+        if (notification is ScrollNotification) {
+          final metrics = notification.metrics;
+          if (metrics.pixels > metrics.maxScrollExtent - 60) {
+            if (shouldLoadMore && scrollDirection == ScrollDirection.forward) {
+              shouldLoadMore = false;
+              talker.debug('load next page!');
+              readWenkuHomeBloc(context)
+                  .add(const WenkuHomeEvent.loadNextPageWenku());
+            }
+          } else {
+            shouldLoadMore = true;
+          }
+        }
+        if (notification is ScrollUpdateNotification) {
+          final delta = notification.dragDetails;
+          if (delta != null) {
+            scrollDirection = delta.delta.dy > 0
+                ? ScrollDirection.reverse
+                : ScrollDirection.forward;
+          }
+        }
+        return false;
+      },
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 68),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            BlocSelector<WenkuHomeBloc, WenkuHomeState,
+                List<WenkuNovelOutline>>(
+              selector: (state) {
+                return state.wenkuNovelSearchResult;
+              },
+              builder: (context, wenkuNovels) {
+                return WenkuNovelList(wenkuNovels: wenkuNovels);
+              },
+            ),
+            BlocSelector<WenkuHomeBloc, WenkuHomeState, bool>(
+              selector: (state) {
+                return state.searchingWenku;
+              },
+              builder: (context, state) {
+                return SizedBox(
+                  height: 64,
+                  child: Center(
+                    child: Visibility(
+                      visible: state,
+                      child: const CircularProgressIndicator(),
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-        ],
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
-  }
-
-  void _scrollListener() {
-    if (_scrollController.position.pixels + 128 >=
-        _scrollController.position.maxScrollExtent) {
-      _onScrollToBottom();
-    }
-  }
-
-  void _onScrollToBottom() {
-    readWenkuHomeBloc(context).add(const WenkuHomeEvent.loadNextPageWenku());
   }
 }

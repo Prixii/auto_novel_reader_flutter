@@ -22,7 +22,7 @@ class HistoryCubit extends Cubit<HistoryState> {
     if (state.isRequesting) return;
     if (state.currentPage + 1 >= state.maxPage) return;
     emit(state.copyWith(currentPage: state.currentPage + 1));
-    _requestHistory();
+    await _requestHistory();
   }
 
   Future<void> _requestHistory() async {
@@ -32,7 +32,10 @@ class HistoryCubit extends Cubit<HistoryState> {
       final response = await apiClient.userReadHistoryWebService.getList(
         page: state.currentPage,
       );
-      if (response == null) return;
+      if (response == null) {
+        emit(state.copyWith(isRequesting: true));
+        return;
+      }
       if (response.statusCode == 502) {
         emit(state.copyWith(isRequesting: false));
         showErrorToast('服务器繁忙, 请稍后再试');
@@ -52,6 +55,9 @@ class HistoryCubit extends Cubit<HistoryState> {
         isRequesting: false,
       ));
     } catch (e, stacktrace) {
+      emit(state.copyWith(
+        isRequesting: false,
+      ));
       talker.error('', e, stacktrace);
     }
   }
