@@ -3,8 +3,12 @@ part of 'service.dart';
 @ChopperApi(baseUrl: '/user/read-history')
 abstract class UserReadHistoryWebService extends ChopperService {
   @Get(path: '')
-  Future<Response> _getList();
-  Future<Response?> getList() => tokenRequest(() => _getList());
+  Future<Response> _getList(@Query() int page, @Query() int pageSize);
+  Future<Response?> getList({
+    int page = 0,
+    int pageSize = 16,
+  }) =>
+      tokenRequest(() => _getList(page, pageSize));
 
   @Delete(path: '')
   Future<Response> _delHistory();

@@ -243,17 +243,12 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
         .putNovelId(currentNovelProviderId!, currentNovelId!);
 
     if (response!.statusCode == 200) {
-      var favoredWebSnapshot = {...state.favoredWebMap};
-      final outlineCache = state.webNovelOutlineMap[currentNovelKey];
-      if (outlineCache == null) return state;
-      favoredWebSnapshot[currentNovelKey] = outlineCache;
-      //  TODO
+      favoredCubit
+          .setNovelToFavoredIdMap(simpleFavored: (currentNovelId!, favored.id));
       showSucceedToast('收藏成功');
-      favoredCubit.favor(
-          type: NovelType.web,
-          favoredId: favored.id,
-          webOutline: state.webNovelOutlineMap[currentNovelKey]!);
-      return state.copyWith(favoredWebMap: favoredWebSnapshot);
+
+      favoredCubit
+          .setNovelToFavoredIdMap(simpleFavored: (currentNovelId!, favored.id));
     }
     if (response.statusCode == 502) {
       Fluttertoast.showToast(msg: '服务器维护中');

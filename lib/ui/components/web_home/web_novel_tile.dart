@@ -41,6 +41,7 @@ class WebNovelList extends StatelessWidget {
                       child: WebNovelTile(
                         novelOutline: webNovels[index],
                         rankMode: rankMode,
+                        listMode: listMode,
                       ),
                     ),
                   ),
@@ -69,6 +70,7 @@ class WebNovelList extends StatelessWidget {
               child: WebNovelTile(
                 novelOutline: webNovels[index],
                 rankMode: rankMode,
+                listMode: listMode,
               ),
             ),
           ),
@@ -81,10 +83,14 @@ class WebNovelList extends StatelessWidget {
 
 class WebNovelTile extends StatelessWidget {
   const WebNovelTile(
-      {super.key, required this.novelOutline, this.rankMode = false});
+      {super.key,
+      required this.novelOutline,
+      this.rankMode = false,
+      this.listMode = false});
 
   final WebNovelOutline novelOutline;
   final bool rankMode;
+  final bool listMode;
 
   @override
   Widget build(BuildContext context) {
@@ -107,7 +113,9 @@ class WebNovelTile extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              rankMode ? const SizedBox.shrink() : Expanded(child: Container()),
+              (rankMode || listMode)
+                  ? const SizedBox.shrink()
+                  : Expanded(child: Container()),
               _buildFooter(novelOutline, context),
             ],
           ),

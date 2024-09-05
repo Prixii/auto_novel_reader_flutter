@@ -285,22 +285,7 @@ class FavoredCubit extends Cubit<FavoredState> {
     WebNovelOutline? webOutline,
     WenkuNovelOutline? wenkuOutline,
   }) async {
-    if (type == NovelType.web) {
-      if (webOutline == null) throw Exception('webOutline is null');
-      emit(state.copyWith(
-        favoredWebNovelsMap: {
-          ...state.favoredWebNovelsMap,
-          favoredId: [
-            ...state.favoredWebNovelsMap[favoredId]!,
-            webOutline,
-          ],
-        },
-        novelToFavoredIdMap: {
-          ...state.novelToFavoredIdMap,
-          webOutline.novelId: favoredId,
-        },
-      ));
-    } else if (type == NovelType.wenku) {
+    if (type == NovelType.wenku) {
       if (wenkuOutline == null) throw Exception('wenkuOutline is null');
       emit(state.copyWith(
         favoredWenkuNovelsMap: {
@@ -353,6 +338,7 @@ class FavoredCubit extends Cubit<FavoredState> {
     List<WenkuNovelOutline>? wenkuOutlines,
     (String, WebNovelDto)? webNovelDtoData,
     (String, WenkuNovelDto)? wenkuNovelDtoData,
+    (String, String)? simpleFavored,
   }) {
     var newFavoredMap = <String, String>{};
     if (webOutlines != null) {
@@ -378,6 +364,9 @@ class FavoredCubit extends Cubit<FavoredState> {
       if (wenkuNovelDtoData.$2.favored != null) {
         newFavoredMap[wenkuNovelDtoData.$1] = wenkuNovelDtoData.$2.favored!;
       }
+    }
+    if (simpleFavored != null) {
+      newFavoredMap[simpleFavored.$1] = simpleFavored.$2;
     }
     emit(state.copyWith(
         novelToFavoredIdMap: {...state.novelToFavoredIdMap, ...newFavoredMap}));

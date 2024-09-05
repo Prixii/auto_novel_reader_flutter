@@ -1,10 +1,11 @@
 import 'dart:math';
 
 import 'package:auto_novel_reader_flutter/bloc/config/config_cubit.dart';
-import 'package:auto_novel_reader_flutter/bloc/cubit/favored_cubit.dart';
+import 'package:auto_novel_reader_flutter/bloc/favored_cubit/favored_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/download_cubit/download_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/epub_viewer/epub_viewer_bloc.dart';
 import 'package:auto_novel_reader_flutter/bloc/global/global_bloc.dart';
+import 'package:auto_novel_reader_flutter/bloc/history/history_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/local_file/local_file_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/novel_rank/novel_rank_bloc.dart';
 import 'package:auto_novel_reader_flutter/bloc/user/user_cubit.dart';
@@ -53,6 +54,8 @@ NovelRankBloc readNovelRankBloc(BuildContext context) =>
     context.read<NovelRankBloc>();
 FavoredCubit readFavoredCubit(BuildContext context) =>
     context.read<FavoredCubit>();
+HistoryCubit readHistoryCubit(BuildContext context) =>
+    context.read<HistoryCubit>();
 
 void initScreenSize(BuildContext context) {
   screenSize = MediaQuery.sizeOf(context);

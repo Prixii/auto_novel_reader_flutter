@@ -1,4 +1,4 @@
-import 'package:auto_novel_reader_flutter/bloc/cubit/favored_cubit.dart';
+import 'package:auto_novel_reader_flutter/bloc/favored_cubit/favored_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/user/user_cubit.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';

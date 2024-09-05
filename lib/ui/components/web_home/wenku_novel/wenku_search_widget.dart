@@ -6,7 +6,6 @@ import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/web_novel/radio_filter.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
-import 'package:unicons/unicons.dart';
 
 class WenkuSearchWidget extends StatefulWidget {
   const WenkuSearchWidget({super.key});
@@ -96,10 +95,13 @@ class _WenkuSearchWidgetState extends State<WenkuSearchWidget>
               color: styleManager.colorScheme.secondaryFixedDim), // 搜索图标
           contentPadding:
               const EdgeInsets.symmetric(vertical: 12, horizontal: 20), // 内边距
-          suffixIcon: _buildFilterIcon(),
         ),
+        onTap: () => _toggleVisibility(true),
         maxLines: 1,
-        onSubmitted: (_) => _search(),
+        onSubmitted: (_) {
+          _search();
+          _toggleVisibility(false);
+        },
         style: TextStyle(
             color: styleManager.colorScheme.onSecondaryContainer), // 输入文本颜色
       ),
@@ -143,16 +145,9 @@ class _WenkuSearchWidgetState extends State<WenkuSearchWidget>
     ]);
   }
 
-  Widget _buildFilterIcon() {
-    return IconButton(
-        onPressed: _toggleVisibility,
-        icon: Icon(UniconsLine.sort_amount_down,
-            color: styleManager.colorScheme.onSecondaryContainer));
-  }
-
-  void _toggleVisibility() {
+  void _toggleVisibility(bool value) {
     setState(() {
-      _isFilterVisible = !_isFilterVisible;
+      _isFilterVisible = value;
       if (_isFilterVisible) {
         _animationController.forward();
       } else {
