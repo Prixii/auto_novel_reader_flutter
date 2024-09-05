@@ -11,8 +11,8 @@ import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_detail/pa
 import 'package:auto_novel_reader_flutter/ui/components/web_home/wenku_novel/download_list.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:unicons/unicons.dart';
 
 class WenkuNovelDetailContainer extends StatelessWidget {
@@ -29,7 +29,7 @@ class WenkuNovelDetailContainer extends StatelessWidget {
             shadowColor: styleManager.colorScheme.shadow,
             backgroundColor: styleManager.colorScheme.secondaryContainer,
             title: const Text('小说详情'),
-            // actions: _buildActions,
+            actions: _buildActions(context),
           ),
           body: WenkuNovelDetail(
             novelDto: novelDto,
@@ -38,19 +38,23 @@ class WenkuNovelDetailContainer extends StatelessWidget {
     });
   }
 
-  List<Widget> get _buildActions {
+  List<Widget> _buildActions(BuildContext context) {
     return [
+      // IconButton(
+      //   onPressed: () {
+      //     // TODO 编辑
+      //     Fluttertoast.showToast(msg: '这个功能还没有做呢');
+      //   },
+      //   icon: const Icon(UniconsLine.edit),
+      // ),
       IconButton(
         onPressed: () {
-          // TODO 编辑
-          Fluttertoast.showToast(msg: '这个功能还没有做呢');
-        },
-        icon: const Icon(UniconsLine.edit),
-      ),
-      IconButton(
-        onPressed: () {
-          // TODO 复制链接到剪贴板
-          Fluttertoast.showToast(msg: '这个功能还没有做呢');
+          final host = readConfigCubit(context).state.host;
+          final novelId = readWenkuHomeBloc(context).state.currentNovelId;
+          final url = 'https://$host/wenku/$novelId';
+          Clipboard.setData(ClipboardData(text: url)).then((value) {
+            showSucceedToast('小说链接已复制到剪切板');
+          });
         },
         icon: const Icon(UniconsLine.link),
       ),

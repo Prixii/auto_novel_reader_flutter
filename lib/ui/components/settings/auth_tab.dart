@@ -9,7 +9,11 @@ class AuthTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const tabs = [Tab(text: '登录'), Tab(text: '注册'), Tab(text: '重置')];
+    const tabs = [
+      Tab(text: '登录'),
+      Tab(text: '注册'),
+      // Tab(text: '重置'),
+    ];
     return DefaultTabController(
       length: tabs.length,
       child: Column(children: [
@@ -43,12 +47,12 @@ class AuthTab extends StatelessWidget {
                   child: RegisterForm(),
                 ),
               ),
-              SingleChildScrollView(
-                child: Padding(
-                  padding: EdgeInsets.all(36.0),
-                  child: ResetPasswordForm(),
-                ),
-              ),
+              // SingleChildScrollView(
+              //   child: Padding(
+              //     padding: EdgeInsets.all(36.0),
+              //     child: ResetPasswordForm(),
+              //   ),
+              // ),
             ],
           ),
         ),
