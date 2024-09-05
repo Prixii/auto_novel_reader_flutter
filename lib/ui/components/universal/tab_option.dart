@@ -8,7 +8,7 @@ class TabOption extends StatefulWidget {
       required this.label,
       required this.onTap,
       required this.tabs,
-      this.padding = const EdgeInsets.fromLTRB(32, 8, 32, 8),
+      this.padding = const EdgeInsets.fromLTRB(20, 8, 32, 8),
       this.icon,
       this.width});
   final IconData? icon;

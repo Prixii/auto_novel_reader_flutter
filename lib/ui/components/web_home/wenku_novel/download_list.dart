@@ -4,7 +4,7 @@ import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/network/file_downloader.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/wenku_novel/download_state_monitor.dart';
-import 'package:auto_novel_reader_flutter/ui/view/download.dart';
+import 'package:auto_novel_reader_flutter/ui/view/settings/download.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

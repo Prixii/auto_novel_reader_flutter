@@ -27,7 +27,7 @@ class WenkuNovelDetailContainer extends StatelessWidget {
             shadowColor: styleManager.colorScheme.shadow,
             backgroundColor: styleManager.colorScheme.secondaryContainer,
             title: const Text('小说详情'),
-            actions: _buildActions,
+            // actions: _buildActions,
           ),
           body: WenkuNovelDetail(
             novelDto: novelDto,

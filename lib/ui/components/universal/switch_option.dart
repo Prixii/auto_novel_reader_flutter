@@ -27,7 +27,7 @@ class _SwitchOptionState extends State<SwitchOption> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32.0),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Row(
         children: [
           (widget.icon == null)

@@ -10,7 +10,7 @@ class DownloadPage extends StatelessWidget {
       appBar: AppBar(
         shadowColor: styleManager.colorScheme.shadow,
         backgroundColor: styleManager.colorScheme.secondaryContainer,
-        title: const Text('小说详情'),
+        title: const Text('下载管理'),
       ),
       body: const Center(child: Text('下载中')),
     );
