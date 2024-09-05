@@ -7,6 +7,46 @@ import 'package:auto_novel_reader_flutter/ui/view/home/wenku_novel_detail.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+
+class WenkuNovelList extends StatelessWidget {
+  const WenkuNovelList({
+    super.key,
+    required this.wenkuNovels,
+    this.childAspectRatio = 1 / 1.5,
+  });
+
+  final List<WenkuNovelOutline> wenkuNovels;
+  final double childAspectRatio;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimationLimiter(
+      child: GridView.builder(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          childAspectRatio: 1 / 1.5,
+        ),
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemBuilder: (context, index) => AnimationConfiguration.staggeredGrid(
+          duration: const Duration(milliseconds: 375),
+          position: index,
+          columnCount: 3,
+          child: SlideAnimation(
+            verticalOffset: 50.0,
+            child: FadeInAnimation(
+              child: WenkuNovelTile(wenkuNovel: wenkuNovels[index]),
+            ),
+          ),
+        ),
+        itemCount: wenkuNovels.length,
+      ),
+    );
+  }
+}
 
 class WenkuNovelTile extends StatelessWidget {
   const WenkuNovelTile({super.key, required this.wenkuNovel});

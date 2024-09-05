@@ -91,6 +91,7 @@ class UserCubit extends HydratedCubit<UserState> {
       return false;
     }
     webHomeBloc.add(const WebHomeEvent.refreshFavoredWeb());
+    favoredCubit.init();
     return true;
   }
 

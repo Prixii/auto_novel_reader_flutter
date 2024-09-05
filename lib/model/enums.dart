@@ -89,7 +89,13 @@ enum ReadType {
 enum NovelType {
   web,
   wenku,
-  local,
+  local;
+
+  String get zhName => switch (this) {
+        NovelType.web => '网络小说',
+        NovelType.wenku => '文库小说',
+        NovelType.local => '本地小说'
+      };
 }
 
 enum DownloadType {

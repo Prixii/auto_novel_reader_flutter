@@ -32,7 +32,7 @@ class UserInfoTile extends StatelessWidget {
   Widget _buildForUser(BuildContext context) {
     final state = readUserCubit(context).state;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32.0),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Row(
         children: [
           Text(

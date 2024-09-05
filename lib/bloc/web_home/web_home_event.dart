@@ -12,8 +12,10 @@ class WebHomeEvent with _$WebHomeEvent {
   const factory WebHomeEvent.previousChapter() = _PreviousChapter;
   const factory WebHomeEvent.closeNovel() = _CloseNovel;
   const factory WebHomeEvent.leaveDetail() = _LeaveDetail;
-  const factory WebHomeEvent.favorNovel(NovelType type) = _FavorNovel;
-  const factory WebHomeEvent.unFavorNovel(NovelType type) = _UnFavorNovel;
+  const factory WebHomeEvent.favorNovel(NovelType type, {Favored? favored}) =
+      _FavorNovel;
+  const factory WebHomeEvent.unFavorNovel(NovelType type, {Favored? favored}) =
+      _UnFavorNovel;
   const factory WebHomeEvent.searchWeb({
     @Default(
         ['kakuyomu', 'syosetu', 'novelup', 'hameln', 'pixiv', 'alphapolis'])

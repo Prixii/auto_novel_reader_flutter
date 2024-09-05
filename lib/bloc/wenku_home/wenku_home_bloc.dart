@@ -101,4 +101,14 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
       maxPage: pageNumber,
     ));
   }
+
+  Future<WenkuHomeState> _favorWenku(Favored favored) async {
+    // TODO
+    return state;
+  }
+
+  Future<WenkuHomeState> _unFavorWenku(Favored favored) async {
+    // TODO
+    return state;
+  }
 }

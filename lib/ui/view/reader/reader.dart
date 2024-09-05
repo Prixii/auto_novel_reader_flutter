@@ -1,5 +1,6 @@
 import 'package:auto_novel_reader_flutter/bloc/global/global_bloc.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
+import 'package:auto_novel_reader_flutter/ui/view/reader/favored.dart';
 import 'package:auto_novel_reader_flutter/ui/view/reader/local_book.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -42,9 +43,9 @@ class _ReaderViewState extends State<ReaderView> {
           },
           child: const TabBarView(
             children: [
-              LocalBookView(),
+              FavoredView(),
               Text('历史'),
-              Text('收藏'),
+              LocalBookView(),
             ],
           ),
         ),
@@ -88,9 +89,9 @@ class _ReaderViewState extends State<ReaderView> {
       tabAlignment: TabAlignment.start,
       isScrollable: true,
       tabs: [
-        Tab(text: '本地'),
-        Tab(text: '历史'),
         Tab(text: '收藏'),
+        Tab(text: '历史'),
+        Tab(text: '本地'),
       ],
     );
   }

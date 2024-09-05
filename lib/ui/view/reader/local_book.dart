@@ -7,6 +7,7 @@ import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:unicons/unicons.dart';
 
 class LocalBookView extends StatelessWidget {
   const LocalBookView({super.key});
@@ -36,7 +37,7 @@ class LocalBookView extends StatelessWidget {
               selectEpubFile(context);
             },
             tooltip: '添加书籍',
-            child: const Icon(Icons.add),
+            child: const Icon(UniconsLine.file_plus),
           ),
         ),
       )

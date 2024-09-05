@@ -5,7 +5,6 @@ import 'package:auto_novel_reader_flutter/ui/components/web_home/wenku_novel_til
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
 class WenkuNovelSearchPage extends StatelessWidget {
   const WenkuNovelSearchPage({super.key});
@@ -67,31 +66,7 @@ class _WebNovelDtoListState extends State<WebNovelDtoList> {
               return state.wenkuNovelSearchResult;
             },
             builder: (context, wenkuNovels) {
-              return AnimationLimiter(
-                child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    childAspectRatio: 1 / 1.5,
-                  ),
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemBuilder: (context, index) =>
-                      AnimationConfiguration.staggeredGrid(
-                    duration: const Duration(milliseconds: 375),
-                    position: index,
-                    columnCount: 3,
-                    child: SlideAnimation(
-                      verticalOffset: 50.0,
-                      child: FadeInAnimation(
-                        child: WenkuNovelTile(wenkuNovel: wenkuNovels[index]),
-                      ),
-                    ),
-                  ),
-                  itemCount: wenkuNovels.length,
-                ),
-              );
+              return WenkuNovelList(wenkuNovels: wenkuNovels);
             },
           ),
           BlocSelector<WenkuHomeBloc, WenkuHomeState, bool>(

@@ -20,10 +20,21 @@ abstract class UserFavoredWenkuService extends ChopperService {
       tokenRequest(() => _delId(favoredId));
 
   @Get(path: '/{favoredId}')
-  Future<Response> _getIdList(@Path() String favoredId);
+  Future<Response> _getIdList(@Path() String favoredId, @Query() int page,
+      @Query() int pageSize, @Query() String sort);
 
-  Future<Response?> getIdList(String favoredId) =>
-      tokenRequest(() => _getIdList(favoredId));
+  Future<Response?> getIdList({
+    String favoredId = 'default',
+    int page = 0,
+    int pageSize = 12,
+    String sort = 'update',
+  }) =>
+      tokenRequest(() => _getIdList(
+            favoredId,
+            page,
+            pageSize,
+            sort,
+          ));
 
   @Put(path: '/{favoredId}/{novelId}')
   Future<Response> _putNovelId(

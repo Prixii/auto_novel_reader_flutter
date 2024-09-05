@@ -16,7 +16,7 @@ class NavTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 8.0),
+      padding: const EdgeInsets.all(8.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -28,10 +28,11 @@ class NavTitle extends StatelessWidget {
                 ?.copyWith(fontWeight: FontWeight.bold),
           ),
           Expanded(child: Container()),
-          IconButton(
-            onPressed: () => jumpTo(),
-            icon: const Icon(Icons.chevron_right),
-          )
+          // TODO 跳转按钮
+          // IconButton(
+          //   onPressed: () => jumpTo(),
+          //   icon: const Icon(Icons.chevron_right),
+          // )
         ],
       ),
     );
