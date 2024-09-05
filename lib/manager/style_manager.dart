@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 
 final styleManager = _StyleManager();
@@ -8,6 +9,30 @@ class _StyleManager {
   setTheme(ThemeData theme) {
     this.theme = theme;
   }
+
+  final lightTheme = ThemeData(
+    brightness: Brightness.light,
+    colorSchemeSeed: const Color(0xFF18A058),
+    useMaterial3: true,
+    searchBarTheme: const SearchBarThemeData(),
+    dividerColor: Colors.grey[300],
+    pageTransitionsTheme: const PageTransitionsTheme(builders: {
+      TargetPlatform.android: FadeThroughPageTransitionsBuilder(),
+      TargetPlatform.iOS: FadeThroughPageTransitionsBuilder(),
+    }),
+  );
+
+  final darkTheme = ThemeData(
+    brightness: Brightness.dark,
+    colorSchemeSeed: const Color(0xFF18A058),
+    useMaterial3: true,
+    searchBarTheme: const SearchBarThemeData(),
+    dividerColor: Colors.grey[300],
+    pageTransitionsTheme: const PageTransitionsTheme(builders: {
+      TargetPlatform.android: FadeThroughPageTransitionsBuilder(),
+      TargetPlatform.iOS: FadeThroughPageTransitionsBuilder(),
+    }),
+  );
 
   TextStyle? get primaryColorTitleSmall => theme.textTheme.titleSmall?.copyWith(
         color: theme.colorScheme.primary,
@@ -26,7 +51,9 @@ class _StyleManager {
         color: colorScheme.onPrimaryContainer,
       );
 
-  TextStyle? get titleSmall => theme.textTheme.titleSmall;
+  TextStyle? get titleSmall => theme.textTheme.titleSmall?.copyWith(
+        color: theme.colorScheme.secondary,
+      );
   TextStyle? get boldMediumTitle =>
       textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold);
 

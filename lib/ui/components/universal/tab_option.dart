@@ -1,3 +1,4 @@
+import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:unicons/unicons.dart';
 
@@ -8,6 +9,7 @@ class TabOption extends StatefulWidget {
       required this.label,
       required this.onTap,
       required this.tabs,
+      this.tip,
       this.padding = const EdgeInsets.fromLTRB(20, 8, 32, 8),
       this.icon,
       this.width});
@@ -18,6 +20,7 @@ class TabOption extends StatefulWidget {
   final int initValue;
   final List<String> tabs;
   final double? width;
+  final String? tip;
 
   @override
   State<TabOption> createState() => _TabOptionState();
@@ -47,21 +50,29 @@ class _TabOptionState extends State<TabOption> with TickerProviderStateMixin {
     final theme = Theme.of(context);
     return Padding(
       padding: widget.padding,
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          (widget.icon == null)
-              ? const SizedBox.shrink()
-              : Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: Icon(widget.icon),
-                ),
-          Text(
-            widget.label,
-            style: theme.textTheme.bodyLarge,
-            maxLines: 1,
+          Row(
+            children: [
+              (widget.icon == null)
+                  ? const SizedBox.shrink()
+                  : Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: Icon(widget.icon),
+                    ),
+              Text(
+                widget.label,
+                style: theme.textTheme.bodyLarge,
+                maxLines: 1,
+              ),
+              Expanded(child: Container()),
+              _buildDropDownMenuButton(theme, widget.width),
+            ],
           ),
-          Expanded(child: Container()),
-          _buildDropDownMenuButton(theme, widget.width),
+          if (widget.tip != null)
+            Text(widget.tip!, style: styleManager.tipText),
         ],
       ),
     );
@@ -88,8 +99,12 @@ class _TabOptionState extends State<TabOption> with TickerProviderStateMixin {
                     ))
                 .toList(),
             context: context,
-            position: RelativeRect.fromLTRB(local.dx + size.width - 110,
-                local.dy, local.dx + size.width - 20, size.height + local.dy));
+            position: RelativeRect.fromLTRB(
+              local.dx + renderBox.size.width - 140,
+              local.dy + 8,
+              local.dx + renderBox.size.width,
+              size.height,
+            ));
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),

@@ -1,5 +1,7 @@
+import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
+import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
@@ -15,6 +17,10 @@ class ConfigCubit extends HydratedCubit<ConfigState> {
   setHelloPage(int value) => emit(state.copyWith(helloPageIndex: value));
   setVolumeKeyShift(bool value) => emit(state.copyWith(volumeKeyShift: value));
   setPreloadNovel(bool value) => emit(state.copyWith(preloadNovel: value));
+  setThemeMode(ThemeMode value) {
+    emit(state.copyWith(themeMode: value));
+    styleManager.setTheme(styleManager.lightTheme);
+  }
 
   setHost(String value) {
     if (value == state.host) return;

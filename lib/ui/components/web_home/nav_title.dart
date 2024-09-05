@@ -24,8 +24,9 @@ class NavTitle extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             title,
-            style: styleManager.textTheme.titleMedium
-                ?.copyWith(fontWeight: FontWeight.bold),
+            style: const TextStyle().copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
           Expanded(child: Container()),
           // TODO 跳转按钮

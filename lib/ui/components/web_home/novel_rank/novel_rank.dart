@@ -129,7 +129,7 @@ class _NovelRankState extends State<NovelRank>
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16.0),
               boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15))],
-              color: Colors.white.withOpacity(0.6)),
+              color: styleManager.colorScheme.surface.withOpacity(0.6)),
           child: filterList[currentIndex],
         ),
       ),

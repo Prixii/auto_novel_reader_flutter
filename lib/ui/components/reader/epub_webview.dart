@@ -1,4 +1,5 @@
 import 'package:auto_novel_reader_flutter/bloc/epub_viewer/epub_viewer_bloc.dart';
+import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/info_badge.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
@@ -210,7 +211,7 @@ class _EpubWebviewState extends State<EpubWebview> {
                   )),
               Container(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
+                  color: styleManager.colorScheme.secondary,
                   borderRadius: BorderRadius.circular(radius),
                 ),
                 height: maxHeight * readProgress,

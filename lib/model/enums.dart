@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 enum HomeViews {
   webHome(0),
   reader(1),
@@ -20,6 +22,14 @@ enum HomeViews {
         return '设置';
     }
   }
+}
+
+extension ThemeModeExt on ThemeMode {
+  String get zhName => switch (this) {
+        ThemeMode.system => '跟随系统',
+        ThemeMode.light => '浅色',
+        ThemeMode.dark => '深色',
+      };
 }
 
 enum ProgressType {

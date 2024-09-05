@@ -25,7 +25,7 @@ class _WenkuSearchWidgetState extends State<WenkuSearchWidget>
   late RadioFilterController _levelController;
 
   bool _isFilterVisible = false;
-  bool _isHistoryVisible = false;
+  // bool _isHistoryVisible = false;
   // TODO 历史搜索
 
   @override
@@ -81,7 +81,7 @@ class _WenkuSearchWidgetState extends State<WenkuSearchWidget>
   Widget _buildSearchBar() {
     return Container(
       decoration: BoxDecoration(
-        color: styleManager.colorScheme.secondaryFixed, // 设置底色
+        color: styleManager.colorScheme.secondaryContainer, // 设置底色
         borderRadius: BorderRadius.circular(24), // 圆角
       ),
       child: TextField(
@@ -121,7 +121,7 @@ class _WenkuSearchWidgetState extends State<WenkuSearchWidget>
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16.0),
                 boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15))],
-                color: Colors.white.withOpacity(0.6)),
+                color: Theme.of(context).colorScheme.surface.withOpacity(0.6)),
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
               child: _buildFilters(),

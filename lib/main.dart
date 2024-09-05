@@ -1,4 +1,5 @@
 import 'package:animations/animations.dart';
+import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/ui/view/splash.dart';
 import 'package:flutter/material.dart';
@@ -38,16 +39,9 @@ class MainApp extends StatelessWidget {
         BlocProvider(create: (context) => favoredCubit),
       ],
       child: MaterialApp(
-        theme: ThemeData(
-          colorSchemeSeed: const Color(0xFF18A058),
-          useMaterial3: true,
-          searchBarTheme: const SearchBarThemeData(),
-          dividerColor: Colors.grey[300],
-          pageTransitionsTheme: const PageTransitionsTheme(builders: {
-            TargetPlatform.android: FadeThroughPageTransitionsBuilder(),
-            TargetPlatform.iOS: FadeThroughPageTransitionsBuilder(),
-          }),
-        ),
+        theme: styleManager.lightTheme,
+        darkTheme: styleManager.darkTheme,
+        themeMode: configCubit.state.themeMode,
         home: const SplashView(),
       ),
     );

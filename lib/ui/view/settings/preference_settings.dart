@@ -1,4 +1,5 @@
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
+import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/tab_option.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ class PreferenceSettings extends StatelessWidget {
           children: [
             _buildHelloPageSetter(context),
             _buildUrlSetter(context),
+            _buildThemeSetter(context),
           ],
         ),
       ),
@@ -33,7 +35,7 @@ class PreferenceSettings extends StatelessWidget {
         initValue: cubit.state.helloPageIndex,
         label: '欢迎页',
         onTap: (value, index) => cubit.setHelloPage(index),
-        icon: UniconsLine.estate,
+        icon: UniconsLine.laughing,
         tabs: const [
           '首页',
           '阅读',
@@ -54,5 +56,17 @@ class PreferenceSettings extends StatelessWidget {
         onTap: (value, index) => cubit.setHost(value),
         icon: UniconsLine.estate,
         tabs: urls);
+  }
+
+  Widget _buildThemeSetter(BuildContext context) {
+    final themeModeZhName = ThemeMode.values.map((e) => e.zhName).toList();
+    final cubit = readConfigCubit(context);
+    return TabOption(
+        initValue: ThemeMode.values.indexOf(cubit.state.themeMode),
+        label: '颜色模式',
+        onTap: (value, index) => cubit.setThemeMode(ThemeMode.values[index]),
+        icon: UniconsLine.paint_tool,
+        tip: '需要重启才能生效',
+        tabs: themeModeZhName);
   }
 }

@@ -10,6 +10,7 @@ class ConfigState with _$ConfigState {
     @Default('books.fishhawk.top') String host, // 网站地址
     @Default(WebNovelConfig()) WebNovelConfig webNovelConfig,
     @Default(true) bool preloadNovel, // 预加载小说
+    @Default(ThemeMode.system) ThemeMode themeMode,
   }) = _Initial;
 
   factory ConfigState.fromJson(Map<String, dynamic> json) =>
