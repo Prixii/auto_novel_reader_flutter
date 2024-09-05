@@ -28,6 +28,7 @@ class HomeView extends StatelessWidget {
     readWebHomeBloc(context).add(const WebHomeEvent.init());
     readFavoredCubit(context).init();
     readWenkuHomeBloc(context).add(const WenkuHomeEvent.init());
+    readDownloadCubit(context).init();
     return BlocBuilder<GlobalBloc, GlobalState>(
       buildWhen: (prev, state) =>
           prev.destinationIndex != state.destinationIndex,

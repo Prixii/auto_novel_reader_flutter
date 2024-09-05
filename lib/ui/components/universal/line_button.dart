@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
 class LineButton extends StatelessWidget {
-  const LineButton({
-    super.key,
-    required this.onPressed,
-    required this.text,
-    this.onDisabledPressed,
-    this.bottomPadding = 0,
-    this.textColor,
-    this.backgroundColor,
-    this.enabled = true,
-  });
+  const LineButton(
+      {super.key,
+      required this.onPressed,
+      required this.text,
+      this.onDisabledPressed,
+      this.bottomPadding = 0,
+      this.textColor,
+      this.backgroundColor,
+      this.enabled = true,
+      this.padding = const EdgeInsets.symmetric(horizontal: 12)});
   final void Function()? onPressed;
   final void Function()? onDisabledPressed;
   final String text;
@@ -18,6 +18,7 @@ class LineButton extends StatelessWidget {
   final Color? textColor;
   final Color? backgroundColor;
   final bool enabled;
+  final EdgeInsets padding;
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +29,7 @@ class LineButton extends StatelessWidget {
         onTap: enabled ? null : onDisabledPressed,
         child: FilledButton(
           style: FilledButton.styleFrom(
+            padding: padding,
             backgroundColor:
                 backgroundColor ?? theme.colorScheme.secondaryContainer,
           ),

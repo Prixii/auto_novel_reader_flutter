@@ -21,9 +21,14 @@ class DataSettings extends StatelessWidget {
           children: [
             IconOption(
               icon: UniconsLine.brush_alt,
-              text: '清空解析缓存',
-              tip: '清除所有 epub',
-              onTap: () => _cleanCache(context),
+              text: '清空 Epub 缓存',
+              tip: '所有的 epub 都需要重新下载和解析哦',
+              onTap: () => {_cleanCache(context)},
+            ),
+            IconOption(
+              icon: UniconsLine.download_alt,
+              text: '清空下载任务记录',
+              onTap: () => readDownloadCubit(context).clearAllTasks(),
             ),
           ],
         ),

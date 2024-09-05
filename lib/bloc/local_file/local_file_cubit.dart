@@ -52,9 +52,7 @@ class LocalFileCubit extends HydratedCubit<LocalFileState> {
     await Future.wait([
       localFileManager.cleanParseDir(),
     ]);
-    Fluttertoast.showToast(
-      msg: '清理完成',
-    );
+    showSucceedToast('清理完成');
   }
 
   deleteEpubBook(EpubManageData epubManageData) {

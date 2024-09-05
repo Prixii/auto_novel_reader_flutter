@@ -324,12 +324,18 @@ class FavoredCubit extends Cubit<FavoredState> {
       ));
     } else if (type == NovelType.wenku) {
       final outlineListSnapshot = state.favoredWenkuNovelsMap[favoredId];
-      emit(state.copyWith(favoredWenkuNovelsMap: {
-        ...state.favoredWenkuNovelsMap,
-        favoredId: [
-          ...outlineListSnapshot!.where((element) => element.id != novelId),
-        ]
-      }));
+      emit(state.copyWith(
+        favoredWenkuNovelsMap: {
+          ...state.favoredWenkuNovelsMap,
+          favoredId: [
+            ...outlineListSnapshot?.where((element) => element.id != novelId) ??
+                [],
+          ],
+        },
+        novelToFavoredIdMap: {...state.novelToFavoredIdMap}..removeWhere(
+            (key, value) => key == novelId,
+          ),
+      ));
     }
   }
 

@@ -19,7 +19,9 @@ class ResponseInterceptor implements Interceptor {
     if (response.statusCode == 502) {
       return response;
     } else {
-      throw Exception([response.statusCode, response.error]);
+      talker.error([response.statusCode, response.error]);
+      return response;
+      // throw Exception([response.statusCode, response.error]);
     }
   }
 }

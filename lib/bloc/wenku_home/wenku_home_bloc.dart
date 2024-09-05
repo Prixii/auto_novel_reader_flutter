@@ -59,7 +59,7 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
   }
 
   _onFavorNovel(_FavorNovel event, Emitter<WenkuHomeState> emit) async {
-    if (currentNovelFavored) return state;
+    if (currentNovelFavored(event.novelId)) return state;
     final response = await apiClient.userFavoredWenkuService.putNovelId(
       event.favoredId,
       event.novelId,
@@ -91,7 +91,7 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
   }
 
   _onUnFavorNovel(_UnFavorNovel event, Emitter<WenkuHomeState> emit) async {
-    if (!currentNovelFavored) return;
+    if (!currentNovelFavored(event.novelId)) return;
     final response = await apiClient.userFavoredWenkuService.delNovelId(
       event.favoredId,
       event.novelId,
@@ -175,6 +175,6 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
         }));
   }
 
-  bool get currentNovelFavored =>
-      state.currentWenkuNovelOutline?.favored?.isNotEmpty ?? false;
+  bool currentNovelFavored(String novelId) =>
+      favoredCubit.state.novelToFavoredIdMap[novelId] != null;
 }

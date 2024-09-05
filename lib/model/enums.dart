@@ -98,11 +98,12 @@ enum NovelType {
       };
 }
 
-enum DownloadType {
-  downloaded,
+enum DownloadStatus {
+  redirecting,
   downloading,
   parsing,
   failed,
+  succeed,
   none,
 }
 

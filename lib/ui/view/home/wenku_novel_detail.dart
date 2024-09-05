@@ -144,14 +144,24 @@ class WenkuNovelDetail extends StatelessWidget {
   Widget _buildPublisherInfo(WenkuNovelDto novelDto) {
     return Row(children: [
       Text('出版: ', style: styleManager.tipText),
-      Text('${novelDto.publisher} ',
+      Expanded(
+        child: Text(
+          '${novelDto.publisher} ',
           style: styleManager.tipText?.copyWith(
             color: styleManager.colorScheme.primary,
-          )),
-      Text(novelDto.imprint ?? '',
+          ),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+      Expanded(
+        child: Text(
+          novelDto.imprint ?? '',
           style: styleManager.tipText?.copyWith(
             color: styleManager.colorScheme.primary,
-          )),
+          ),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
     ]);
   }
 
