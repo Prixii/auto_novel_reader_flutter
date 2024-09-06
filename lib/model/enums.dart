@@ -47,6 +47,11 @@ enum ProgressType {
 enum SearchSortType {
   create,
   update;
+
+  String get zhName => switch (this) {
+        SearchSortType.create => '收藏时间',
+        SearchSortType.update => '更新时间',
+      };
 }
 
 enum UserRole {

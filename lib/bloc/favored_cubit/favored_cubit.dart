@@ -99,18 +99,30 @@ class FavoredCubit extends Cubit<FavoredState> {
   Future<void> setFavored({
     NovelType? type,
     Favored? favored,
+    SearchSortType? sortType,
   }) async {
     final novelType = type ?? state.currentType;
     if (type != null) {
       emit(state.copyWith(
-          currentType: type, currentFavored: Favored.createDefault()));
-    } else {
-      emit(state.copyWith(
-        currentType: novelType,
-        currentFavored: favored ?? state.currentFavored,
+        currentType: type,
+        currentFavored: Favored.createDefault(),
+        searchSortType: sortType ?? state.searchSortType,
       ));
     }
+    if (favored != null) {
+      emit(state.copyWith(
+        currentType: novelType,
+        currentFavored: favored,
+      ));
+    }
+    if (sortType != null) {
+      emit(state.copyWith(searchSortType: sortType));
+    }
     late List? targetNovels;
+    if (sortType != null) {
+      requestFavoredNovels();
+      return;
+    }
     if (novelType == NovelType.web) {
       targetNovels = state.favoredWebNovelsMap[state.currentFavored?.id];
     } else if (novelType == NovelType.wenku) {
@@ -124,9 +136,9 @@ class FavoredCubit extends Cubit<FavoredState> {
   }
 
   Future<void> requestFavoredNovels({
-    SearchSortType sortType = SearchSortType.update,
     bool refresh = true,
   }) async {
+    final sortType = state.searchSortType;
     switch (state.currentType) {
       case NovelType.web:
         refresh

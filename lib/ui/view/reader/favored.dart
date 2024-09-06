@@ -118,6 +118,12 @@ class FavoredView extends StatelessWidget {
             },
           ),
         ),
+        Expanded(
+          child: Selector(
+              onTap: (_, index) => readFavoredCubit(context)
+                  .setFavored(sortType: SearchSortType.values[index]),
+              tabs: SearchSortType.values.map((e) => e.zhName).toList()),
+        ),
       ],
     );
   }
