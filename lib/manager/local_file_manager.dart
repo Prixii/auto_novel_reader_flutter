@@ -31,4 +31,9 @@ class _LocalFileManager {
     final path = pathManager.parseDirPath;
     await deleteDirectory(path);
   }
+
+  Future<void> cleanDownloadDir() async {
+    final path = pathManager.epubDownloadPath;
+    await deleteDirectory(path);
+  }
 }

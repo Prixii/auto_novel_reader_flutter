@@ -53,6 +53,7 @@ class LocalFileCubit extends HydratedCubit<LocalFileState> {
     emit(state.copyWith(epubManageDataList: []));
     await Future.wait([
       localFileManager.cleanParseDir(),
+      localFileManager.cleanDownloadDir(),
     ]);
     showSucceedToast('清理完成');
   }
