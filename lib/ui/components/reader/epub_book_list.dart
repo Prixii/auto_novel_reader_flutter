@@ -237,9 +237,9 @@ class _BookListTileState extends State<BookListTile> {
       builder: (BuildContext context) {
         return Container(
           padding: const EdgeInsets.all(12.0),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(12),
               topRight: Radius.circular(12),
             ),

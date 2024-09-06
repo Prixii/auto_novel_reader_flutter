@@ -2,6 +2,7 @@ import 'package:auto_novel_reader_flutter/bloc/favored_cubit/favored_cubit.dart'
 import 'package:auto_novel_reader_flutter/bloc/user/user_cubit.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
+import 'package:auto_novel_reader_flutter/ui/components/favored/favored_manager.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/selector.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/web_novel_tile.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/wenku_novel_tile.dart';
@@ -31,24 +32,24 @@ class FavoredView extends StatelessWidget {
                 children: [
                   const FavoredBody(),
                   _buildFavoredSelector(context),
-                  _buildAddFavoredButton(),
+                  _buildAddFavoredButton(context),
                 ],
               );
       },
     );
   }
 
-  Widget _buildAddFavoredButton() {
+  Widget _buildAddFavoredButton(BuildContext context) {
     return Align(
       alignment: Alignment.bottomRight,
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: FloatingActionButton(
           onPressed: () async {
-            // selectEpubFile(context);
+            _showFavoredManager(context);
           },
-          tooltip: '添加收藏夹',
-          child: const Icon(UniconsLine.folder_plus),
+          tooltip: '收藏夹管理',
+          child: const Icon(UniconsLine.folder_open),
         ),
       ),
     );
@@ -69,32 +70,48 @@ class FavoredView extends StatelessWidget {
               return state.currentType;
             },
             builder: (context, currentType) {
-              final listWeb =
-                  readFavoredCubit(context).state.favoredMap[NovelType.web];
-              final favoredListWeb = (listWeb == null || listWeb.isEmpty)
-                  ? <Favored>[Favored.createDefault()]
-                  : listWeb;
-              final listWenku =
-                  readFavoredCubit(context).state.favoredMap[NovelType.wenku];
-              final favoredListWenku = (listWenku == null || listWenku.isEmpty)
-                  ? <Favored>[Favored.createDefault()]
-                  : listWenku;
-
               return Stack(
                 children: [
                   Visibility(
                     visible: currentType == NovelType.web,
-                    child: Selector(
-                        onTap: (_, index) => readFavoredCubit(context)
-                            .setFavored(favored: favoredListWeb[index]),
-                        tabs: favoredListWeb.map((e) => e.title).toList()),
+                    child:
+                        BlocSelector<FavoredCubit, FavoredState, List<Favored>>(
+                      selector: (state) {
+                        final listWeb = state.favoredMap[NovelType.web];
+                        final favoredListWeb =
+                            (listWeb == null || listWeb.isEmpty)
+                                ? <Favored>[Favored.createDefault()]
+                                : listWeb;
+                        return favoredListWeb;
+                      },
+                      builder: (context, favoredListWeb) {
+                        return Selector(
+                            onTap: (_, index) => readFavoredCubit(context)
+                                .setFavored(favored: favoredListWeb[index]),
+                            tabs: favoredListWeb.map((e) => e.title).toList());
+                      },
+                    ),
                   ),
                   Visibility(
                     visible: currentType == NovelType.wenku,
-                    child: Selector(
-                        onTap: (_, index) => readFavoredCubit(context)
-                            .setFavored(favored: favoredListWenku[index]),
-                        tabs: favoredListWenku.map((e) => e.title).toList()),
+                    child:
+                        BlocSelector<FavoredCubit, FavoredState, List<Favored>>(
+                      selector: (state) {
+                        final listWenku = state.favoredMap[NovelType.wenku];
+                        final favoredListWenku =
+                            (listWenku == null || listWenku.isEmpty)
+                                ? <Favored>[Favored.createDefault()]
+                                : listWenku;
+                        return favoredListWenku;
+                      },
+                      builder: (context, favoredListWenku) {
+                        return Selector(
+                            onTap: (_, index) => readFavoredCubit(context)
+                                .setFavored(favored: favoredListWenku[index]),
+                            tabs:
+                                favoredListWenku.map((e) => e.title).toList());
+                      },
+                    ),
                   )
                 ],
               );
@@ -102,6 +119,33 @@ class FavoredView extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  void _showFavoredManager(BuildContext widgetContext) {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      context: widgetContext,
+      constraints: BoxConstraints(
+        minWidth: screenSize.width,
+        maxHeight: screenSize.height * 0.8,
+        minHeight: screenSize.height * 0.8,
+      ),
+      enableDrag: true,
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(12.0),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(12),
+              topRight: Radius.circular(12),
+            ),
+          ),
+          clipBehavior: Clip.hardEdge,
+          child: const FavoredManager(),
+        );
+      },
     );
   }
 }

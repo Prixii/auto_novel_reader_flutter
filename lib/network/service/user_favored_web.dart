@@ -3,15 +3,15 @@ part of 'service.dart';
 @ChopperApi(baseUrl: '/user/favored-web')
 abstract class UserFavoredWebService extends ChopperService {
   @Post(path: '')
-  Future<Response> _postWeb();
-  Future<Response?> postWeb() => tokenRequest(() => _postWeb());
+  Future<Response> _postWeb(@Body() body);
+  Future<Response?> postWeb(Map<String, dynamic> body) =>
+      tokenRequest(() => _postWeb(body));
 
   @Put(path: '/{favoredId}')
-  Future<Response> _putId(
-    @Path() String favoredId,
-  );
-  Future<Response?> putId(@Path() String favoredId) =>
-      tokenRequest(() => _putId(favoredId));
+  Future<Response> _putId(@Path() String favoredId, @Body() body);
+  Future<Response?> putId(
+          @Path() String favoredId, Map<String, dynamic> body) =>
+      tokenRequest(() => _putId(favoredId, body));
 
   @Delete(path: '/{favoredId}')
   Future<Response> _delId(@Path() String favoredId);

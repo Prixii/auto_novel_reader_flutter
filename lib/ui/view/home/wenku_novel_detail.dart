@@ -3,8 +3,8 @@ import 'package:auto_novel_reader_flutter/bloc/wenku_home/wenku_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
+import 'package:auto_novel_reader_flutter/ui/components/favored/favored_list.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/line_button.dart';
-import 'package:auto_novel_reader_flutter/ui/components/web_home/favored_selector.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_detail/flow_tag.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_detail/introduction_card.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_detail/paged_cover.dart';
@@ -239,10 +239,10 @@ class WenkuNovelDetail extends StatelessWidget {
           selector: (state) {
             return state.novelToFavoredIdMap[novelId];
           },
-          builder: (context, favored) {
+          builder: (context, favoredStatus) {
             return LineButton(
                 onPressed: () async {
-                  if (favored != null) {
+                  if (favoredStatus != null) {
                     readWenkuHomeBloc(context)
                         .add(WenkuHomeEvent.unFavorNovel(novelId: novelId));
                   } else {
@@ -258,7 +258,7 @@ class WenkuNovelDetail extends StatelessWidget {
                 },
                 onDisabledPressed: () => showWarnToast('请先登录'),
                 enabled: readUserCubit(context).isSignIn,
-                text: (favored != null) ? '已收藏' : '收藏');
+                text: (favoredStatus != null) ? '已收藏' : '收藏');
           },
         ),
       )
@@ -277,20 +277,48 @@ class WenkuNovelDetail extends StatelessWidget {
       return Favored.createDefault();
     } else {
       return await showModalBottomSheet(
-          isScrollControlled: true,
-          context: context,
-          constraints: BoxConstraints(
-            minWidth: screenSize.width,
-            maxHeight: screenSize.height * 0.8,
-            minHeight: screenSize.height * 0.8,
+        isScrollControlled: true,
+        context: context,
+        constraints: BoxConstraints(
+          minWidth: screenSize.width,
+          maxHeight: screenSize.height * 0.8,
+          minHeight: screenSize.height * 0.8,
+        ),
+        enableDrag: true,
+        builder: (context) => SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Text(
+                  '选择收藏夹',
+                  textAlign: TextAlign.center,
+                  style: styleManager.primaryColorTitleLarge,
+                ),
+              ),
+              BlocSelector<FavoredCubit, FavoredState, List<Favored>>(
+                selector: (state) {
+                  return state.favoredMap[NovelType.wenku] ?? [];
+                },
+                builder: (context, state) {
+                  return FavoredList(
+                      favoredList: state,
+                      type: NovelType.wenku,
+                      editable: false,
+                      onSelect: (favored) {
+                        Navigator.pop(
+                          context,
+                          favored,
+                        );
+                      });
+                },
+              ),
+            ],
           ),
-          enableDrag: true,
-          builder: (context) => FavoredSelector(
-              favoredList: favoredList,
-              onTap: (favored) {
-                Navigator.of(context).pop(favored);
-                return favored;
-              }));
+        ),
+      );
     }
   }
 }

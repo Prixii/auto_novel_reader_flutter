@@ -3,6 +3,7 @@ import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:bloc/bloc.dart';
+import 'package:chopper/chopper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -271,18 +272,23 @@ class FavoredCubit extends Cubit<FavoredState> {
       final body = response.body;
       final maxPage = body['pageNumber'];
       final newWenkuNovelList = parseToWenkuNovelOutline(body);
-      emit(state.copyWith(favoredWenkuMaxPageMap: {
-        ...state.favoredWenkuMaxPageMap,
-        favoredId: maxPage,
-      }, favoredWenkuNovelsMap: {
-        ...state.favoredWenkuNovelsMap,
-        favoredId: [
-          ...(refresh ? [] : (state.favoredWenkuNovelsMap[favoredId] ?? [])),
-          ...newWenkuNovelList
-        ],
-      }, isWenkuRequestingMap: {
-        ...state.isWenkuRequestingMap,
-      }));
+      emit(state.copyWith(
+        favoredWenkuMaxPageMap: {
+          ...state.favoredWenkuMaxPageMap,
+          favoredId: maxPage,
+        },
+        favoredWenkuNovelsMap: {
+          ...state.favoredWenkuNovelsMap,
+          favoredId: [
+            ...(refresh ? [] : (state.favoredWenkuNovelsMap[favoredId] ?? [])),
+            ...newWenkuNovelList
+          ],
+        },
+        isWenkuRequestingMap: {
+          ...state.isWenkuRequestingMap,
+          favoredId: false,
+        },
+      ));
       setNovelToFavoredIdMap(wenkuOutlines: newWenkuNovelList);
     }).catchError((e, stacktrace) {
       talker.error('error', e, stacktrace);
@@ -388,5 +394,109 @@ class FavoredCubit extends Cubit<FavoredState> {
     }
     emit(state.copyWith(
         novelToFavoredIdMap: {...state.novelToFavoredIdMap, ...newFavoredMap}));
+  }
+
+  Future<bool> createFavored({
+    required String favoredName,
+    required NovelType type,
+  }) async {
+    late Response<dynamic>? response;
+    if (NovelType.web == type) {
+      response = await apiClient.userFavoredWebService.postWeb(
+        {'title': favoredName},
+      );
+    } else if (NovelType.wenku == type) {
+      response = await apiClient.userFavoredWenkuService.postWenku(
+        {'title': favoredName},
+      );
+    } else {
+      showErrorToast('不支持的类型');
+      throw Exception('不支持的类型');
+    }
+
+    if (response != null && response.isSuccessful) {
+      emit(state.copyWith(favoredMap: {
+        ...state.favoredMap,
+        type: [
+          ...state.favoredMap[type]!,
+          Favored(id: response.body, title: favoredName),
+        ]
+      }));
+      showSucceedToast('创建收藏夹成功');
+      return true;
+    } else {
+      showErrorToast('创建收藏夹失败, ${response?.statusCode}');
+
+      return false;
+    }
+  }
+
+  Future<bool> renameFavored({
+    required String favoredName,
+    required String favoredId,
+    required NovelType type,
+  }) async {
+    late Response<dynamic>? response;
+    if (NovelType.web == type) {
+      response = await apiClient.userFavoredWebService.putId(
+        favoredId,
+        {'title': favoredName},
+      );
+    } else if (NovelType.wenku == type) {
+      response = await apiClient.userFavoredWenkuService.putId(
+        favoredId,
+        {'title': favoredName},
+      );
+    } else {
+      showErrorToast('不支持的类型');
+      throw Exception('不支持的类型');
+    }
+
+    if (response != null && response.isSuccessful) {
+      emit(state.copyWith(favoredMap: {
+        ...state.favoredMap,
+        type: [
+          ...state.favoredMap[type]!
+              .where((element) => element.id != favoredId),
+          Favored(id: favoredId, title: favoredName),
+        ]
+      }));
+      showSucceedToast('重命名收藏夹成功');
+      return true;
+    } else {
+      showErrorToast('重命名收藏夹失败, ${response?.statusCode}');
+
+      return false;
+    }
+  }
+
+  Future<bool> deleteFavored({
+    required String favoredId,
+    required NovelType type,
+  }) async {
+    late Response<dynamic>? response;
+    if (NovelType.web == type) {
+      response = await apiClient.userFavoredWebService.delId(favoredId);
+    } else if (NovelType.wenku == type) {
+      response = await apiClient.userFavoredWenkuService.delId(favoredId);
+    } else {
+      showErrorToast('不支持的类型');
+      throw Exception('不支持的类型');
+    }
+
+    if (response != null && response.isSuccessful) {
+      emit(state.copyWith(favoredMap: {
+        ...state.favoredMap,
+        type: state.favoredMap[type]!
+            .where((element) => element.id != favoredId)
+            .toList(),
+      }));
+      showSucceedToast('删除收藏夹成功');
+      return true;
+    } else {
+      showErrorToast('删除收藏夹失败, ${response?.statusCode}');
+
+      return false;
+    }
   }
 }

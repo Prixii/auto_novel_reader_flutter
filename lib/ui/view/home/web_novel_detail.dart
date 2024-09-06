@@ -4,6 +4,7 @@ import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
+import 'package:auto_novel_reader_flutter/ui/components/favored/favored_list.dart';
 import 'package:auto_novel_reader_flutter/ui/components/reader/plain_text_novel_reader.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/line_button.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/chapter_list.dart';
@@ -217,21 +218,24 @@ class WebNovelDetail extends StatelessWidget {
             final novelId = readWebHomeBloc(context).state.currentNovelId;
             return state.novelToFavoredIdMap[novelId];
           },
-          builder: (context, favored) {
+          builder: (context, favoredStatus) {
             return LineButton(
-                onPressed: () {
-                  if (favored != null) {
+                onPressed: () async {
+                  if (favoredStatus != null) {
                     readWebHomeBloc(context)
                         .add(const WebHomeEvent.unFavorNovel(NovelType.web));
                   } else {
+                    final favored = await _selectFavored(context);
+                    if (favored == null || !context.mounted) return;
                     readWebHomeBloc(context).add(
-                      const WebHomeEvent.favorNovel(NovelType.web),
+                      WebHomeEvent.favorNovel(NovelType.web,
+                          favoredId: favored.id),
                     );
                   }
                 },
                 onDisabledPressed: () => showWarnToast('请先登录'),
                 enabled: readUserCubit(context).isSignIn,
-                text: (favored != null) ? '已收藏' : '收藏');
+                text: (favoredStatus != null) ? '已收藏' : '收藏');
           },
         ),
       )
@@ -246,5 +250,57 @@ class WebNovelDetail extends StatelessWidget {
         builder: (context) => const PlainTextNovelReaderContainer(),
       ),
     );
+  }
+
+  Future<Favored?> _selectFavored(BuildContext context) async {
+    final favoredList =
+        readFavoredCubit(context).state.favoredMap[NovelType.web];
+    if (favoredList == null || favoredList.isEmpty || favoredList.length == 1) {
+      return Favored.createDefault();
+    } else {
+      return await showModalBottomSheet(
+        isScrollControlled: true,
+        context: context,
+        constraints: BoxConstraints(
+          minWidth: screenSize.width,
+          maxHeight: screenSize.height * 0.8,
+          minHeight: screenSize.height * 0.8,
+        ),
+        enableDrag: true,
+        builder: (context) => SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Text(
+                  '选择收藏夹',
+                  textAlign: TextAlign.center,
+                  style: styleManager.primaryColorTitleLarge,
+                ),
+              ),
+              BlocSelector<FavoredCubit, FavoredState, List<Favored>>(
+                selector: (state) {
+                  return state.favoredMap[NovelType.web] ?? [];
+                },
+                builder: (context, state) {
+                  return FavoredList(
+                      favoredList: state,
+                      type: NovelType.web,
+                      editable: false,
+                      onSelect: (favored) {
+                        Navigator.pop(
+                          context,
+                          favored,
+                        );
+                      });
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    }
   }
 }

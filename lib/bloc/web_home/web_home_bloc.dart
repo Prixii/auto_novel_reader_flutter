@@ -163,20 +163,18 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   _onLeaveDetail(_LeaveDetail event, Emitter<WebHomeState> emit) {}
 
   _onFavorNovel(_FavorNovel event, Emitter<WebHomeState> emit) async {
-    final favored = event.favored ?? Favored.createDefault();
     switch (event.type) {
       case NovelType.web:
-        emit(await _favorWeb(favored));
+        emit(await _favorWeb(event.favoredId));
         break;
       default:
     }
   }
 
   _onUnFavorNovel(_UnFavorNovel event, Emitter<WebHomeState> emit) async {
-    final favored = event.favored ?? Favored.createDefault();
     switch (event.type) {
       case NovelType.web:
-        emit(await _unFavorWeb(favored));
+        emit(await _unFavorWeb(event.favoredId));
         break;
       default:
     }
@@ -237,18 +235,19 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
       webCacheCubit.updateLastReadChapter(
           state.currentNovelProviderId!, state.currentNovelId!, chapterId);
 
-  Future<WebHomeState> _favorWeb(Favored favored) async {
+  Future<WebHomeState> _favorWeb(String favoredId) async {
     if (currentNovelId == null || currentNovelProviderId == null) return state;
-    final response = await apiClient.userFavoredWebService
-        .putNovelId(currentNovelProviderId!, currentNovelId!);
+    final response = await apiClient.userFavoredWebService.putNovelId(
+        currentNovelProviderId!, currentNovelId!,
+        favoredId: favoredId);
 
     if (response!.statusCode == 200) {
       favoredCubit
-          .setNovelToFavoredIdMap(simpleFavored: (currentNovelId!, favored.id));
+          .setNovelToFavoredIdMap(simpleFavored: (currentNovelId!, favoredId));
       showSucceedToast('收藏成功');
 
       favoredCubit
-          .setNovelToFavoredIdMap(simpleFavored: (currentNovelId!, favored.id));
+          .setNovelToFavoredIdMap(simpleFavored: (currentNovelId!, favoredId));
     }
     if (response.statusCode == 502) {
       Fluttertoast.showToast(msg: '服务器维护中');
@@ -257,7 +256,7 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     return state;
   }
 
-  Future<WebHomeState> _unFavorWeb(Favored favored) async {
+  Future<WebHomeState> _unFavorWeb(String favoredId) async {
     if (currentNovelId == null || currentNovelProviderId == null) return state;
     final response = await apiClient.userFavoredWebService
         .deleteNovelId(currentNovelProviderId!, currentNovelId!);
@@ -266,7 +265,7 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
       favoredWebSnapshot.remove(currentNovelKey);
       showSucceedToast('取消收藏成功');
       favoredCubit.unFavor(
-          type: NovelType.web, favoredId: favored.id, novelId: currentNovelId!);
+          type: NovelType.web, favoredId: favoredId, novelId: currentNovelId!);
       return state.copyWith(favoredWebMap: favoredWebSnapshot);
     }
     if (response.statusCode == 502) {
