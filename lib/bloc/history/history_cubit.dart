@@ -55,10 +55,14 @@ class HistoryCubit extends Cubit<HistoryState> {
         isRequesting: false,
       ));
     } catch (e, stacktrace) {
-      emit(state.copyWith(
-        isRequesting: false,
-      ));
-      talker.error('', e, stacktrace);
+      try {
+        emit(state.copyWith(
+          isRequesting: false,
+        ));
+        talker.error('', e, stacktrace);
+      } catch (e, stacktrace) {
+        talker.error('', e, stacktrace);
+      }
     }
   }
 }

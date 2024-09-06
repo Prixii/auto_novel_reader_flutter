@@ -27,6 +27,7 @@ Future<File?> _downloadWenkuEpub(String url, String filename, File file) async {
     final rawRedirectUrlPart = redirectResponse.realUri.path;
     final redirectUrlPart = rawRedirectUrlPart.replaceAll('../', '');
     final redirectUrl = 'https://${configCubit.state.host}/$redirectUrlPart';
+    downloadCubit.finishRedirect(filename);
     var response = await Dio().get(
       redirectUrl,
       onReceiveProgress: (num received, num total) {

@@ -214,7 +214,8 @@ class WebNovelDetail extends StatelessWidget {
       Expanded(
         child: BlocSelector<FavoredCubit, FavoredState, String?>(
           selector: (state) {
-            return state.novelToFavoredIdMap[novelKey];
+            final novelId = readWebHomeBloc(context).state.currentNovelId;
+            return state.novelToFavoredIdMap[novelId];
           },
           builder: (context, favored) {
             return LineButton(

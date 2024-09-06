@@ -332,10 +332,9 @@ packages:
   epubx:
     dependency: "direct main"
     description:
-      name: epubx
-      sha256: "0ab9354efa177c4be52c46f857bc15bf83f83a92667fb673465c8f89fca26db3"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
+      path: "plugins/epubx-4.0.0"
+      relative: true
+    source: path
     version: "4.0.0"
   equatable:
     dependency: transitive

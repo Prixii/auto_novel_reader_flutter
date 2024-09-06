@@ -23,51 +23,47 @@ class DownloadStateMonitor extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: 78,
-      child: BlocSelector<DownloadCubit, DownloadState, DownloadStatus>(
-          selector: (state) {
-        return readDownloadCubit(context).getDownloadType(filename);
-      }, builder: (context, downloadType) {
-        switch (downloadType) {
-          case DownloadStatus.redirecting:
-            return LineButton(
-              text: '重定向',
-              onPressed: () => {},
-            );
-          case DownloadStatus.downloading:
-            return _buildDownloadProgress(filename);
-          case DownloadStatus.parsing:
-            return LineButton(
-              text: '解析中',
-              onPressed: () => {},
-            );
-          default:
-            break;
-        }
+      child: Center(
+        child: BlocSelector<DownloadCubit, DownloadState, DownloadStatus>(
+            selector: (state) {
+          return readDownloadCubit(context).getDownloadType(filename);
+        }, builder: (context, downloadType) {
+          switch (downloadType) {
+            case DownloadStatus.redirecting:
+              return const Text('正在重定向');
+            case DownloadStatus.downloading:
+              return _buildDownloadProgress(filename);
+            case DownloadStatus.parsing:
+              return const Text('解析中');
+            default:
+              break;
+          }
 
-        return BlocSelector<LocalFileCubit, LocalFileState, bool>(
-          selector: (state) {
-            final dataList = state.epubManageDataList;
-            final epubManageDataIndex =
-                dataList.indexWhere((element) => element.filename == filename);
-            return epubManageDataIndex != -1;
-          },
-          builder: (context, state) {
-            return state
-                ? _buildReadButton(context)
-                : FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor:
-                          styleManager.colorScheme.secondaryContainer,
-                    ),
-                    onPressed: () => onPressed(),
-                    child: Icon(
-                      UniconsLine.file_download,
-                      color: styleManager.colorScheme.onSecondaryContainer,
-                    ),
-                  );
-          },
-        );
-      }),
+          return BlocSelector<LocalFileCubit, LocalFileState, bool>(
+            selector: (state) {
+              final dataList = state.epubManageDataList;
+              final epubManageDataIndex = dataList
+                  .indexWhere((element) => element.filename == filename);
+              return epubManageDataIndex != -1;
+            },
+            builder: (context, state) {
+              return state
+                  ? _buildReadButton(context)
+                  : FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor:
+                            styleManager.colorScheme.secondaryContainer,
+                      ),
+                      onPressed: () => onPressed(),
+                      child: Icon(
+                        UniconsLine.file_download,
+                        color: styleManager.colorScheme.onSecondaryContainer,
+                      ),
+                    );
+            },
+          );
+        }),
+      ),
     );
   }
 

@@ -1,12 +1,12 @@
 import 'dart:io';
 
+import 'package:auto_novel_reader_flutter/bloc/global/global_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/local_file_manager.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/epub_util.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
@@ -29,8 +29,10 @@ class LocalFileCubit extends HydratedCubit<LocalFileState> {
 
       emit(state.copyWith(
           epubManageDataList: [epubManageData, ...state.epubManageDataList]));
-    } catch (e) {
+    } catch (e, stackTrace) {
       showErrorToast(e.toString());
+      globalBloc.add(const GlobalEvent.endProgress(ProgressType.parsingEpub));
+      talker.error('err', e, stackTrace);
       throw Exception(e);
     }
   }

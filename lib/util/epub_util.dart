@@ -81,7 +81,8 @@ class _EpubUtil {
         globalBloc.add(const GlobalEvent.endProgress(ProgressType.parsingEpub));
       });
       return epubData;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      talker.error('err', e, stackTrace);
       throw Exception(e);
     }
   }
@@ -255,7 +256,7 @@ class _EpubUtil {
     }
   }
 
-  void updateProgress(NovelType type, {int? progress, String? message}) {
+  void updateProgress(NovelType type, {int? progress = 0, String? message}) {
     if (type != NovelType.local) return;
     if (progress == 0) {
       globalBloc

@@ -1,7 +1,7 @@
 name: auto_novel_reader_flutter
 description: "A new Flutter project."
 publish_to: 'none'
-version: 0.0.1
+version: 0.0.2
 
 environment:
   sdk: '>=3.4.3 <4.0.0'
@@ -9,11 +9,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # epub
+  epubx:
+    path: plugins/epubx-4.0.0
   # 网络请求
   chopper: ^8.0.1+1
   dio: ^5.7.0
-  # epub
-  epubx: ^4.0.0
+  
   image: ^3.3.0
   # html
   html: ^0.15.4

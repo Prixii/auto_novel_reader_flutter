@@ -68,6 +68,10 @@ class DownloadCubit extends HydratedCubit<DownloadState> {
     }));
   }
 
+  finishRedirect(String filename) {
+    updateStatus(filename, DownloadStatus.parsing);
+  }
+
   updateProgress(String filename, double progress) {
     emit(state.copyWith(
       taskProgress: {
@@ -109,6 +113,7 @@ class DownloadCubit extends HydratedCubit<DownloadState> {
         filename: DownloadStatus.succeed,
       },
     ));
+    showSucceedToast('$filename 下载成功');
   }
 
   parseFailed(String filename, Exception e) {
