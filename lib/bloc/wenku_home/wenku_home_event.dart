@@ -3,8 +3,7 @@ part of 'wenku_home_bloc.dart';
 @freezed
 class WenkuHomeEvent with _$WenkuHomeEvent {
   const factory WenkuHomeEvent.init() = _Init;
-  const factory WenkuHomeEvent.toDetail(WenkuNovelOutline wenkuNovel) =
-      _ToDetail;
+  const factory WenkuHomeEvent.toWenkuDetail(String wenkuId) = _ToWenkuDetail;
   const factory WenkuHomeEvent.favorNovel({
     required String novelId,
     @Default('default') String favoredId,

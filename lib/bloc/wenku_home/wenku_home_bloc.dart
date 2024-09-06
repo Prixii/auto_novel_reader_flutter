@@ -15,7 +15,7 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
     on<WenkuHomeEvent>((event, emit) async {
       await event.map(
         init: (event) async => await _onInit(event, emit),
-        toDetail: (event) async => await _onToDetail(event, emit),
+        toWenkuDetail: (event) async => await _onToDetail(event, emit),
         favorNovel: (event) async => await _onFavorNovel(event, emit),
         unFavorNovel: (event) async => await _onUnFavorNovel(event, emit),
         searchWenku: (event) async => await _onSearchWenku(event, emit),
@@ -39,8 +39,8 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
     });
   }
 
-  _onToDetail(_ToDetail event, Emitter<WenkuHomeState> emit) async {
-    var novelId = event.wenkuNovel.id;
+  _onToDetail(_ToWenkuDetail event, Emitter<WenkuHomeState> emit) async {
+    var novelId = event.wenkuId;
     emit(state.copyWith(currentNovelId: novelId));
     final novelDto = await loadWenkuNovelDto(
       novelId,
@@ -53,7 +53,6 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
         ...state.wenkuNovelDtoMap,
         novelId: novelDto,
       },
-      currentWenkuNovelOutline: event.wenkuNovel,
       currentWenkuNovelDto: novelDto,
     ));
   }
@@ -82,11 +81,9 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
         event.novelId: wenkuNovelDto,
       },
     ));
-    favoredCubit.favor(
-      favoredId: event.favoredId,
-      type: NovelType.wenku,
-      wenkuOutline: state.currentWenkuNovelOutline,
-    );
+    favoredCubit.setNovelToFavoredIdMap(
+        simpleFavored: (state.currentNovelId, event.favoredId));
+
     showSucceedToast('收藏成功');
   }
 
