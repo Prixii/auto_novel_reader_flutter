@@ -27,6 +27,7 @@ class _IntroductionCardState extends State<IntroductionCard> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
+            const SizedBox(width: double.infinity),
             Text(
               widget.content,
               style: widget.style,

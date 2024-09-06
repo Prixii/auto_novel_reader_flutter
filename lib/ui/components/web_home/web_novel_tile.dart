@@ -100,7 +100,9 @@ class WebNovelTile extends StatelessWidget {
         onTap: () => _toDetail(context, novelOutline),
         child: Container(
           padding: const EdgeInsets.all(8.0),
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          color: (MediaQuery.of(context).platformBrightness == Brightness.dark)
+              ? Theme.of(context).colorScheme.surfaceContainerHighest
+              : Theme.of(context).colorScheme.surface,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
