@@ -69,11 +69,23 @@ enum Language {
         Language.zhJp => 'zh-jp',
         Language.jpZh => 'jp-zh',
       };
+
+  String get zhName => switch (this) {
+        Language.jp => '日文',
+        Language.zh => '中文',
+        Language.zhJp => '中日',
+        Language.jpZh => '日中'
+      };
 }
 
 enum TranslationMode {
   priority,
-  parallel,
+  parallel;
+
+  String get zhName => switch (this) {
+        TranslationMode.priority => '优先',
+        TranslationMode.parallel => '并列',
+      };
 }
 
 enum TranslationSource {

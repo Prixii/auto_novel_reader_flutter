@@ -1,4 +1,5 @@
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
+import 'package:auto_novel_reader_flutter/ui/components/settings/web_novel_content_settings.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/switch_option.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,12 @@ class ReadSettings extends StatelessWidget {
             _buildSlideShiftOption(context),
             _buildShowErrorInfoOption(context),
             _buildVolumeKeyShiftOption(context),
+            Divider(
+              indent: 16,
+              endIndent: 16,
+              color: Theme.of(context).dividerColor,
+            ),
+            const WebNovelContentSettings(),
           ],
         ),
       ),

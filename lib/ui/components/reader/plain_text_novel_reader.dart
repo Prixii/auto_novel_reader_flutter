@@ -175,6 +175,8 @@ class NovelRender extends StatelessWidget {
     final parallel = config.translationMode == TranslationMode.parallel;
     final lang = config.language;
     final order = config.translationSourcesOrder;
+    final enableTrim = config.enableTrim;
+    final showSource = config.showTranslationSource;
     return ListView.builder(
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
@@ -183,21 +185,29 @@ class NovelRender extends StatelessWidget {
         late List<TextSpan> spans;
         switch (config.language) {
           case Language.zh:
-            spans = buildTranslationTextSpans(index, parallel, order, lang);
+            spans = buildTranslationTextSpans(
+                index, parallel, order, lang, showSource,
+                trim: enableTrim);
             break;
           case Language.jp:
-            spans = [buildOriginalTextSpan(index, lang)];
+            spans = [
+              buildOriginalTextSpan(index, lang, enableTrim, showSource)
+            ];
             break;
           case Language.jpZh:
             spans = [
-              buildOriginalTextSpan(index, lang),
-              ...buildTranslationTextSpans(index, parallel, order, lang)
+              buildOriginalTextSpan(index, lang, enableTrim, showSource),
+              ...buildTranslationTextSpans(
+                  index, parallel, order, lang, showSource,
+                  trim: enableTrim)
             ];
 
           case Language.zhJp:
             spans = [
-              ...buildTranslationTextSpans(index, parallel, order, lang),
-              buildOriginalTextSpan(index, lang),
+              ...buildTranslationTextSpans(
+                  index, parallel, order, lang, showSource,
+                  trim: enableTrim),
+              buildOriginalTextSpan(index, lang, config.enableTrim, showSource),
             ];
         }
 
@@ -212,36 +222,52 @@ class NovelRender extends StatelessWidget {
   }
 
   List<TextSpan> buildTranslationTextSpans(
-      int index, bool parallel, List<TranslationSource> order, Language lang) {
-    var paragraphList = <String>[];
+    int index,
+    bool parallel,
+    List<TranslationSource> order,
+    Language lang,
+    bool showSource, {
+    bool trim = false,
+  }) {
+    var paragraphList = <(TranslationSource, String)>[];
     if (parallel) {
       for (final source in order) {
         switch (source) {
           case TranslationSource.youdao:
             if (chapterDto.youdaoParagraphs != null &&
                 index < chapterDto.youdaoParagraphs!.length) {
-              paragraphList.add(chapterDto.youdaoParagraphs![index]);
+              paragraphList.add((
+                TranslationSource.youdao,
+                chapterDto.youdaoParagraphs![index]
+              ));
             }
           case TranslationSource.baidu:
             if (chapterDto.baiduParagraphs != null &&
                 index < chapterDto.baiduParagraphs!.length) {
-              paragraphList.add(chapterDto.baiduParagraphs![index]);
+              paragraphList.add((
+                TranslationSource.baidu,
+                chapterDto.baiduParagraphs![index]
+              ));
             }
           case TranslationSource.gpt:
             if (chapterDto.gptParagraphs != null &&
                 index < chapterDto.gptParagraphs!.length) {
-              paragraphList.add(chapterDto.gptParagraphs![index]);
+              paragraphList.add(
+                  (TranslationSource.gpt, chapterDto.gptParagraphs![index]));
             }
           case TranslationSource.sakura:
             if (chapterDto.sakuraParagraphs != null &&
                 index < chapterDto.sakuraParagraphs!.length) {
-              paragraphList.add(chapterDto.sakuraParagraphs![index]);
+              paragraphList.add((
+                TranslationSource.sakura,
+                chapterDto.sakuraParagraphs![index]
+              ));
             }
         }
       }
       var spans = <TextSpan>[];
       for (int i = 0; i < paragraphList.length; i++) {
-        var text = paragraphList[i];
+        var (source, text) = paragraphList[i];
         var shouldWrap = false;
         if (i != paragraphList.length - 1) {
           // 不是最后一个
@@ -250,32 +276,45 @@ class NovelRender extends StatelessWidget {
           // 先中文再日文
           shouldWrap = true;
         }
-        spans.add(buildTextSpan(text, wrap: shouldWrap));
+        spans.addAll(buildTextSpan(
+          text,
+          trim,
+          lang,
+          showSource,
+          wrap: shouldWrap,
+          source: source,
+        ));
       }
       return spans;
     } else {
+      // 优先模式
       String? text;
+      late TranslationSource targetSource;
       for (final source in order) {
         switch (source) {
           case TranslationSource.youdao:
             if (chapterDto.youdaoParagraphs != null &&
                 index < chapterDto.youdaoParagraphs!.length) {
               text = chapterDto.youdaoParagraphs![index];
+              targetSource = source;
             }
           case TranslationSource.baidu:
             if (chapterDto.baiduParagraphs != null &&
                 index < chapterDto.baiduParagraphs!.length) {
               text = chapterDto.baiduParagraphs![index];
+              targetSource = source;
             }
           case TranslationSource.gpt:
             if (chapterDto.gptParagraphs != null &&
                 index < chapterDto.gptParagraphs!.length) {
               text = chapterDto.gptParagraphs![index];
+              targetSource = source;
             }
           case TranslationSource.sakura:
             if (chapterDto.sakuraParagraphs != null &&
                 index < chapterDto.sakuraParagraphs!.length) {
               text = chapterDto.sakuraParagraphs![index];
+              targetSource = source;
             }
         }
         if (text != null) {
@@ -283,26 +322,58 @@ class NovelRender extends StatelessWidget {
         }
       }
       final shouldWrap = lang == Language.zhJp;
-      return [buildTextSpan(text!, wrap: shouldWrap)];
+      return [
+        ...buildTextSpan(
+          text!,
+          trim,
+          lang,
+          showSource,
+          wrap: shouldWrap,
+          source: targetSource,
+        )
+      ];
     }
   }
 
-  TextSpan buildOriginalTextSpan(int index, Language lang) {
+  TextSpan buildOriginalTextSpan(
+    int index,
+    Language lang,
+    bool trim,
+    bool showSource,
+  ) {
     return buildTextSpan(
       chapterDto.originalParagraphs![index],
+      trim,
+      lang,
+      showSource,
       grey: lang != Language.jp,
       wrap: lang == Language.jpZh,
-    );
+    ).first;
   }
 
-  TextSpan buildTextSpan(
-    String text, {
+  List<TextSpan> buildTextSpan(
+    String text,
+    bool trim,
+    Language lang,
+    bool showTranslationSource, {
     bool grey = false,
     bool wrap = false,
+    TranslationSource? source,
   }) {
+    final trimmedText = trim ? text.trim() : text;
+    return [
+      if (showTranslationSource && source != null) _buildSource(source),
+      TextSpan(
+        text: trimmedText + (wrap ? '\n' : ''),
+        style: grey ? styleManager.originalText : styleManager.zhText,
+      )
+    ];
+  }
+
+  TextSpan _buildSource(TranslationSource source) {
     return TextSpan(
-      text: text + (wrap ? '\n' : ''),
-      style: grey ? styleManager.originalText : styleManager.zhText,
+      text: '${source.name[0].toUpperCase()}  ',
+      style: const TextStyle().copyWith(color: Colors.grey),
     );
   }
 }

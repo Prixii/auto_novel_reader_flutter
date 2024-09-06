@@ -11,7 +11,7 @@ class TabOption extends StatefulWidget {
       required this.tabs,
       this.color,
       this.tip,
-      this.padding = const EdgeInsets.fromLTRB(20, 8, 32, 8),
+      this.padding = const EdgeInsets.fromLTRB(20, 8, 20, 8),
       this.bold = false,
       this.icon,
       this.width});
@@ -111,7 +111,7 @@ class _TabOptionState extends State<TabOption> with TickerProviderStateMixin {
                 .toList(),
             context: context,
             position: RelativeRect.fromLTRB(
-              local.dx + renderBox.size.width - 140,
+              local.dx + renderBox.size.width - 128,
               local.dy + 8,
               local.dx + renderBox.size.width,
               size.height,

@@ -12,6 +12,13 @@ class WebNovelConfig with _$WebNovelConfig {
       TranslationSource.baidu
     ])
     List<TranslationSource> translationSourcesOrder,
+    @Default({
+      TranslationSource.sakura: true,
+      TranslationSource.gpt: true,
+      TranslationSource.youdao: true,
+      TranslationSource.baidu: true
+    })
+    Map<TranslationSource, bool> translationSourcesEnabled,
     @Default(Language.zh) Language readLanguage,
     @Default(false) bool showTranslationSource,
     @Default(false) bool enableTrim,

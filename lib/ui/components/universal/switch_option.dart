@@ -34,7 +34,10 @@ class _SwitchOptionState extends State<SwitchOption> {
               ? const SizedBox.shrink()
               : Padding(
                   padding: const EdgeInsets.only(right: 8.0),
-                  child: Icon(widget.icon),
+                  child: Icon(
+                    widget.icon,
+                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                  ),
                 ),
           Expanded(
               child: Text(

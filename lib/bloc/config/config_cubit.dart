@@ -22,6 +22,9 @@ class ConfigCubit extends HydratedCubit<ConfigState> {
     styleManager.setTheme(styleManager.lightTheme);
   }
 
+  setWebNovelConfig(WebNovelConfig value) =>
+      emit(state.copyWith(webNovelConfig: value));
+
   setHost(String value) {
     if (value == state.host) return;
     emit(state.copyWith(host: value));

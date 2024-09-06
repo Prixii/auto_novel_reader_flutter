@@ -24,7 +24,7 @@ class PreferenceSettings extends StatelessWidget {
             _buildHelloPageSetter(context),
             _buildUrlSetter(context),
             _buildThemeSetter(context),
-            _buildMaskKeyWordSetter(context),
+            // TODO _buildMaskKeyWordSetter(context),
           ],
         ),
       ),
