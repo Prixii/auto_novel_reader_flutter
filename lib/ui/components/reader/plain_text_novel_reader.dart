@@ -186,28 +186,31 @@ class NovelRender extends StatelessWidget {
         switch (config.language) {
           case Language.zh:
             spans = buildTranslationTextSpans(
-                index, parallel, order, lang, showSource,
+                index, parallel, order, lang, showSource, context,
                 trim: enableTrim);
             break;
           case Language.jp:
             spans = [
-              buildOriginalTextSpan(index, lang, enableTrim, showSource)
+              buildOriginalTextSpan(
+                  index, lang, enableTrim, showSource, context)
             ];
             break;
           case Language.jpZh:
             spans = [
-              buildOriginalTextSpan(index, lang, enableTrim, showSource),
+              buildOriginalTextSpan(
+                  index, lang, enableTrim, showSource, context),
               ...buildTranslationTextSpans(
-                  index, parallel, order, lang, showSource,
+                  index, parallel, order, lang, showSource, context,
                   trim: enableTrim)
             ];
 
           case Language.zhJp:
             spans = [
               ...buildTranslationTextSpans(
-                  index, parallel, order, lang, showSource,
+                  index, parallel, order, lang, showSource, context,
                   trim: enableTrim),
-              buildOriginalTextSpan(index, lang, config.enableTrim, showSource),
+              buildOriginalTextSpan(
+                  index, lang, config.enableTrim, showSource, context),
             ];
         }
 
@@ -226,7 +229,8 @@ class NovelRender extends StatelessWidget {
     bool parallel,
     List<TranslationSource> order,
     Language lang,
-    bool showSource, {
+    bool showSource,
+    BuildContext context, {
     bool trim = false,
   }) {
     var paragraphList = <(TranslationSource, String)>[];
@@ -280,6 +284,7 @@ class NovelRender extends StatelessWidget {
           text,
           trim,
           lang,
+          context,
           showSource,
           wrap: shouldWrap,
           source: source,
@@ -327,6 +332,7 @@ class NovelRender extends StatelessWidget {
           text!,
           trim,
           lang,
+          context,
           showSource,
           wrap: shouldWrap,
           source: targetSource,
@@ -335,16 +341,13 @@ class NovelRender extends StatelessWidget {
     }
   }
 
-  TextSpan buildOriginalTextSpan(
-    int index,
-    Language lang,
-    bool trim,
-    bool showSource,
-  ) {
+  TextSpan buildOriginalTextSpan(int index, Language lang, bool trim,
+      bool showSource, BuildContext context) {
     return buildTextSpan(
       chapterDto.originalParagraphs![index],
       trim,
       lang,
+      context,
       showSource,
       grey: lang != Language.jp,
       wrap: lang == Language.jpZh,
@@ -355,25 +358,39 @@ class NovelRender extends StatelessWidget {
     String text,
     bool trim,
     Language lang,
+    BuildContext context,
     bool showTranslationSource, {
     bool grey = false,
     bool wrap = false,
     TranslationSource? source,
   }) {
     final trimmedText = trim ? text.trim() : text;
+    final config = readConfigCubit(context).state.novelAppearanceConfig;
     return [
-      if (showTranslationSource && source != null) _buildSource(source),
+      if (showTranslationSource && source != null)
+        _buildSource(source, context),
       TextSpan(
         text: trimmedText + (wrap ? '\n' : ''),
-        style: grey ? styleManager.originalText : styleManager.zhText,
+        style: TextStyle(
+          color: grey
+              ? Colors.grey
+              : Theme.of(context).colorScheme.onPrimaryContainer,
+          fontSize: config.fontSize.toDouble(),
+          fontWeight: config.boldFont ? FontWeight.bold : FontWeight.normal,
+        ),
       )
     ];
   }
 
-  TextSpan _buildSource(TranslationSource source) {
+  TextSpan _buildSource(TranslationSource source, BuildContext context) {
+    final config = readConfigCubit(context).state.novelAppearanceConfig;
     return TextSpan(
       text: '${source.name[0].toUpperCase()}  ',
-      style: const TextStyle().copyWith(color: Colors.grey),
+      style: TextStyle(
+        color: Colors.grey,
+        fontSize: config.fontSize.toDouble(),
+        fontWeight: config.boldFont ? FontWeight.bold : FontWeight.normal,
+      ),
     );
   }
 }

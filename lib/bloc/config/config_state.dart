@@ -11,6 +11,8 @@ class ConfigState with _$ConfigState {
     @Default(WebNovelConfig()) WebNovelConfig webNovelConfig, // web 阅读内容设置
     @Default(true) bool preloadNovel, // 预加载小说
     @Default(ThemeMode.system) ThemeMode themeMode,
+    @Default(NovelAppearanceConfig())
+    NovelAppearanceConfig novelAppearanceConfig,
   }) = _Initial;
 
   factory ConfigState.fromJson(Map<String, dynamic> json) =>

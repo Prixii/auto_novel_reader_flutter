@@ -25,6 +25,9 @@ class ConfigCubit extends HydratedCubit<ConfigState> {
   setWebNovelConfig(WebNovelConfig value) =>
       emit(state.copyWith(webNovelConfig: value));
 
+  setNovelAppearanceConfig(NovelAppearanceConfig value) =>
+      emit(state.copyWith(novelAppearanceConfig: value));
+
   setHost(String value) {
     if (value == state.host) return;
     emit(state.copyWith(host: value));

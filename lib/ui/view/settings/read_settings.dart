@@ -1,4 +1,5 @@
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
+import 'package:auto_novel_reader_flutter/ui/components/settings/novel_appearance_settings.dart';
 import 'package:auto_novel_reader_flutter/ui/components/settings/web_novel_content_settings.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/switch_option.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
@@ -17,6 +18,7 @@ class ReadSettings extends StatelessWidget {
         title: const Text('阅读设置'),
       ),
       body: SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 68),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -29,6 +31,12 @@ class ReadSettings extends StatelessWidget {
               color: Theme.of(context).dividerColor,
             ),
             const WebNovelContentSettings(),
+            Divider(
+              indent: 16,
+              endIndent: 16,
+              color: Theme.of(context).dividerColor,
+            ),
+            const NovelAppearanceSettings(),
           ],
         ),
       ),
