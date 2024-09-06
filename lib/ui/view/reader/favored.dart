@@ -7,6 +7,7 @@ import 'package:auto_novel_reader_flutter/ui/components/web_home/web_novel_tile.
 import 'package:auto_novel_reader_flutter/ui/components/web_home/wenku_novel_tile.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:unicons/unicons.dart';
 
@@ -19,7 +20,6 @@ class FavoredView extends StatelessWidget {
     //   type: NovelType.web,
     //   favored: Favored.createDefault(),
     // );
-    readFavoredCubit(context).init();
     return BlocSelector<UserCubit, UserState, bool>(
       selector: (state) {
         return state.token != null;
@@ -29,7 +29,7 @@ class FavoredView extends StatelessWidget {
             ? const Center(child: Text('未登录'))
             : Stack(
                 children: [
-                  _buildNovelList(context),
+                  const FavoredBody(),
                   _buildFavoredSelector(context),
                   _buildAddFavoredButton(),
                 ],
@@ -104,42 +104,137 @@ class FavoredView extends StatelessWidget {
       ],
     );
   }
+}
 
-  Widget _buildNovelList(BuildContext context) {
-    return BlocSelector<FavoredCubit, FavoredState, (List, NovelType)>(
-      selector: (state) {
-        final type = state.currentType;
-        final favored = state.currentFavored ?? Favored.createDefault();
-        if (type == NovelType.web) {
-          final list =
-              state.favoredWebNovelsMap[favored.id] ?? <WebNovelOutline>[];
-          return (list, type);
+class FavoredBody extends StatefulWidget {
+  const FavoredBody({
+    super.key,
+  });
+
+  @override
+  State<FavoredBody> createState() => _FavoredBodyState();
+}
+
+class _FavoredBodyState extends State<FavoredBody> {
+  var scrollDirection = ScrollDirection.forward;
+  var shouldLoadMore = false;
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return NotificationListener(
+      onNotification: (notification) {
+        if (notification is ScrollNotification) {
+          final metrics = notification.metrics;
+          if (metrics.pixels > metrics.maxScrollExtent - 60) {
+            if (shouldLoadMore && scrollDirection == ScrollDirection.forward) {
+              shouldLoadMore = false;
+              talker.debug('load next page!');
+              readFavoredCubit(context).loadNextPage();
+            }
+          } else {
+            shouldLoadMore = true;
+          }
         }
-        if (type == NovelType.wenku) {
-          final list =
-              state.favoredWenkuNovelsMap[favored.id] ?? <WenkuNovelOutline>[];
-          return (list, type);
+        if (notification is ScrollUpdateNotification) {
+          final delta = notification.dragDetails;
+          if (delta != null) {
+            scrollDirection = delta.delta.dy > 0
+                ? ScrollDirection.reverse
+                : ScrollDirection.forward;
+          }
         }
-        throw Exception('invalid novel type');
+        return false;
       },
-      builder: (context, listData) {
-        switch (listData.$2) {
-          case NovelType.web:
-            return SingleChildScrollView(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 48.0, horizontal: 8),
-              child:
-                  WebNovelList(webNovels: listData.$1 as List<WebNovelOutline>),
-            );
-          case NovelType.wenku:
-            return SingleChildScrollView(
+      child: BlocSelector<FavoredCubit, FavoredState, (List, NovelType)>(
+        selector: (state) {
+          final type = state.currentType;
+          final favored = state.currentFavored ?? Favored.createDefault();
+          if (type == NovelType.web) {
+            final list =
+                state.favoredWebNovelsMap[favored.id] ?? <WebNovelOutline>[];
+            return (list, type);
+          }
+          if (type == NovelType.wenku) {
+            final list = state.favoredWenkuNovelsMap[favored.id] ??
+                <WenkuNovelOutline>[];
+            return (list, type);
+          }
+          throw Exception('invalid novel type');
+        },
+        builder: (context, listData) {
+          switch (listData.$2) {
+            case NovelType.web:
+              return SingleChildScrollView(
                 padding:
                     const EdgeInsets.symmetric(vertical: 48.0, horizontal: 8),
-                child: WenkuNovelList(
-                    wenkuNovels: listData.$1 as List<WenkuNovelOutline>));
-          default:
-            throw Exception('invalid novel type');
-        }
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    WebNovelList(
+                        webNovels: listData.$1 as List<WebNovelOutline>),
+                    _buildWebProgressIndicator(),
+                  ],
+                ),
+              );
+            case NovelType.wenku:
+              return SingleChildScrollView(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 48.0, horizontal: 8),
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  WenkuNovelList(
+                      wenkuNovels: listData.$1 as List<WenkuNovelOutline>),
+                  _buildWenkuProgressIndicator(),
+                ]),
+              );
+            default:
+              throw Exception('invalid novel type');
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildWebProgressIndicator() {
+    return BlocSelector<FavoredCubit, FavoredState, bool>(
+      selector: (state) {
+        final favored = state.currentFavored ?? Favored.createDefault();
+        return state.isWebRequestingMap[favored.id] ?? false;
+      },
+      builder: (context, isRequesting) {
+        return Visibility(
+          visible: isRequesting,
+          child: const SizedBox(
+            height: 64,
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildWenkuProgressIndicator() {
+    return BlocSelector<FavoredCubit, FavoredState, bool>(
+      selector: (state) {
+        final favored = state.currentFavored ?? Favored.createDefault();
+        return state.isWenkuRequestingMap[favored.id] ?? false;
+      },
+      builder: (context, isRequesting) {
+        return Visibility(
+          visible: isRequesting,
+          child: const SizedBox(
+            height: 64,
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
+        );
       },
     );
   }

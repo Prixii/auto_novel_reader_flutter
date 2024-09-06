@@ -92,7 +92,7 @@ class FavoredCubit extends Cubit<FavoredState> {
         state.currentFavored!.id: oldValue + 1
       }));
     }
-    requestFavoredNovels();
+    requestFavoredNovels(refresh: false);
   }
 
   Future<void> setFavored({
@@ -124,13 +124,18 @@ class FavoredCubit extends Cubit<FavoredState> {
 
   Future<void> requestFavoredNovels({
     SearchSortType sortType = SearchSortType.update,
+    bool refresh = true,
   }) async {
     switch (state.currentType) {
       case NovelType.web:
-        await _requestWebFavored(state.currentFavored!.id, sortType);
+        refresh
+            ? await _requestWebFavored(state.currentFavored!.id, sortType)
+            : await _loadWebFavored(state.currentFavored!.id, sortType);
         break;
       case NovelType.wenku:
-        await _requestWenkuFavored(state.currentFavored!.id, sortType);
+        refresh
+            ? await _requestWenkuFavored(state.currentFavored!.id, sortType)
+            : await _loadWenkuFavored(state.currentFavored!.id, sortType);
         break;
       case NovelType.local:
         showWarnToast('暂不支持');
@@ -148,8 +153,16 @@ class FavoredCubit extends Cubit<FavoredState> {
         ...state.favoredWebPageMap,
         favoredId: 0,
       },
+      favoredWebMaxPageMap: {
+        ...state.favoredWebMaxPageMap,
+        favoredId: 0,
+      },
+      favoredWebNovelsMap: {
+        ...state.favoredWebNovelsMap,
+        favoredId: [],
+      },
     ));
-    _loadWebFavored(favoredId, sortType);
+    _loadWebFavored(favoredId, sortType, refresh: true);
   }
 
   Future<void> _requestWenkuFavored(
@@ -162,14 +175,23 @@ class FavoredCubit extends Cubit<FavoredState> {
         ...state.favoredWenkuPageMap,
         favoredId: 0,
       },
+      favoredWenkuMaxPageMap: {
+        ...state.favoredWenkuMaxPageMap,
+        favoredId: 0,
+      },
+      favoredWenkuNovelsMap: {
+        ...state.favoredWenkuNovelsMap,
+        favoredId: [],
+      },
     ));
-    _loadWenkuFavored(favoredId, sortType);
+    _loadWenkuFavored(favoredId, sortType, refresh: true);
   }
 
   Future<void> _loadWebFavored(
     String favoredId,
-    SearchSortType sortType,
-  ) async {
+    SearchSortType sortType, {
+    bool refresh = false,
+  }) async {
     // 设置请求标志
     emit(state.copyWith(isWebRequestingMap: {
       ...state.isWebRequestingMap,
@@ -200,7 +222,10 @@ class FavoredCubit extends Cubit<FavoredState> {
         },
         favoredWebNovelsMap: {
           ...state.favoredWebNovelsMap,
-          favoredId: newWebNovelList,
+          favoredId: [
+            ...(refresh ? [] : (state.favoredWebNovelsMap[favoredId] ?? [])),
+            ...newWebNovelList
+          ],
         },
         isWebRequestingMap: {
           ...state.isWebRequestingMap,
@@ -217,13 +242,17 @@ class FavoredCubit extends Cubit<FavoredState> {
     }
   }
 
-  void _loadWenkuFavored(String favoredId, SearchSortType sortType) {
+  Future<void> _loadWenkuFavored(
+    String favoredId,
+    SearchSortType sortType, {
+    bool refresh = false,
+  }) async {
     emit(state.copyWith(isWenkuRequestingMap: {
       ...state.isWenkuRequestingMap,
       favoredId: true,
     }));
     // 发送请求
-    apiClient.userFavoredWenkuService
+    await apiClient.userFavoredWenkuService
         .getIdList(
       favoredId: favoredId,
       page: state.favoredWenkuPageMap[favoredId] ?? 0,
@@ -247,7 +276,10 @@ class FavoredCubit extends Cubit<FavoredState> {
         favoredId: maxPage,
       }, favoredWenkuNovelsMap: {
         ...state.favoredWenkuNovelsMap,
-        favoredId: newWenkuNovelList,
+        favoredId: [
+          ...(refresh ? [] : (state.favoredWenkuNovelsMap[favoredId] ?? [])),
+          ...newWenkuNovelList
+        ],
       }, isWenkuRequestingMap: {
         ...state.isWenkuRequestingMap,
       }));

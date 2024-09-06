@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:auto_novel_reader_flutter/network/interceptor/response_interceptor.dart';
 import 'package:auto_novel_reader_flutter/network/interceptor/request_interceptor.dart';
 import 'package:auto_novel_reader_flutter/network/service/service.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:chopper/chopper.dart';
+import 'package:http/io_client.dart' as http;
 
 typedef JsonBody = Map<String, dynamic>;
 
@@ -27,6 +30,9 @@ class _ApiClient {
 
   void createChopper() {
     chopper = ChopperClient(
+      client: http.IOClient(
+        HttpClient()..connectionTimeout = const Duration(seconds: 10),
+      ),
       baseUrl: Uri.parse('https://${configCubit.state.host}/api'),
       interceptors: [
         _tokenInterceptor,

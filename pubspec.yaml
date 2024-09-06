@@ -12,11 +12,11 @@ dependencies:
   # epub
   epubx:
     path: plugins/epubx-4.0.0
+  image: ^3.3.0
   # 网络请求
   chopper: ^8.0.1+1
   dio: ^5.7.0
-  
-  image: ^3.3.0
+  http: ^1.2.2
   # html
   html: ^0.15.4
   flutter_widget_from_html: ^0.15.1
