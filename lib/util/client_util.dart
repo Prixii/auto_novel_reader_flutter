@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:auto_novel_reader_flutter/bloc/comment/comment_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/config/config_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/favored_cubit/favored_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/download_cubit/download_cubit.dart';
@@ -56,6 +57,8 @@ FavoredCubit readFavoredCubit(BuildContext context) =>
     context.read<FavoredCubit>();
 HistoryCubit readHistoryCubit(BuildContext context) =>
     context.read<HistoryCubit>();
+CommentCubit readCommentCubit(BuildContext context) =>
+    context.read<CommentCubit>();
 
 void initScreenSize(BuildContext context) {
   screenSize = MediaQuery.sizeOf(context);
@@ -108,4 +111,21 @@ Color getRandomDarkColor() {
   final g = random.nextInt(maxValue);
   final b = random.nextInt(maxValue);
   return Color.fromARGB(255, r, g, b);
+}
+
+String formatTimestamp(int timestamp) {
+  DateTime inputTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
+  DateTime now = DateTime.now();
+
+  Duration difference = now.difference(inputTime);
+
+  if (difference.inDays < 1) {
+    return '今天 ${inputTime.hour}:${inputTime.minute.toString().padLeft(2, '0')}';
+  } else if (difference.inDays < 30) {
+    return '${difference.inDays}天前';
+  } else if (difference.inDays < 365) {
+    return '${(difference.inDays / 30).floor()}月前';
+  } else {
+    return '${(difference.inDays / 365).floor()}年前';
+  }
 }

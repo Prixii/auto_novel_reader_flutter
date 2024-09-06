@@ -58,7 +58,7 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     var webNovelOutlineMapSnapshot = {...state.webNovelOutlineMap};
     for (var webNovelOutline in newWebOutlines) {
       final novelKey =
-          '${webNovelOutline.providerId}${webNovelOutline.novelId}';
+          '${webNovelOutline.providerId}-${webNovelOutline.novelId}';
       webNovelOutlineMapSnapshot[novelKey] = webNovelOutline;
     }
     emit(state.copyWith(
@@ -285,5 +285,5 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   String? get currentNovelId => state.currentNovelId;
   String? get currentNovelProviderId => state.currentNovelProviderId;
   String get currentNovelKey =>
-      (state.currentNovelProviderId ?? '') + (state.currentNovelId ?? '');
+      '${state.currentNovelProviderId ?? ''}-${state.currentNovelId ?? ''}';
 }

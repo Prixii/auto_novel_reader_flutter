@@ -1,17 +1,25 @@
+import 'package:auto_novel_reader_flutter/bloc/comment/comment_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/favored_cubit/favored_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/web_cache/web_cache_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
+import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:auto_novel_reader_flutter/ui/components/favored/favored_list.dart';
 import 'package:auto_novel_reader_flutter/ui/components/reader/plain_text_novel_reader.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/line_button.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/chapter_list.dart';
+import 'package:auto_novel_reader_flutter/ui/components/web_home/comment/comment_box.dart';
+import 'package:auto_novel_reader_flutter/ui/components/web_home/comment/comment_list.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_detail/flow_tag.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_detail/introduction_card.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
+import 'package:auto_novel_reader_flutter/util/page_loader.dart';
+import 'package:auto_novel_reader_flutter/util/web_home_util.dart';
+import 'package:chopper/chopper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:unicons/unicons.dart';
@@ -21,31 +29,35 @@ class WebNovelDetailContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocSelector<WebHomeBloc, WebHomeState, WebNovelDto?>(
-        selector: (state) {
-      return state.webNovelDtoMap[
-          '${state.currentNovelProviderId}${state.currentNovelId}'];
-    }, builder: (context, novelDto) {
-      final state = readWebHomeBloc(context).state;
-      final novelKey = '${state.currentNovelProviderId}${state.currentNovelId}';
-      return Scaffold(
-          appBar: AppBar(
-            shadowColor: styleManager.colorScheme.shadow,
-            backgroundColor: styleManager.colorScheme.secondaryContainer,
-            title: const Text('小说详情'),
-            actions: _buildActions(context),
-          ),
-          drawer: Drawer(
-            child: ChapterList(
-              tocList: novelDto?.toc ?? [],
-              novelKey: novelKey,
+    return BlocProvider(
+      create: (context) => CommentCubit(),
+      child: BlocSelector<WebHomeBloc, WebHomeState, WebNovelDto?>(
+          selector: (state) {
+        return state.webNovelDtoMap[
+            '${state.currentNovelProviderId}-${state.currentNovelId}'];
+      }, builder: (context, novelDto) {
+        final state = readWebHomeBloc(context).state;
+        final novelKey =
+            '${state.currentNovelProviderId}-${state.currentNovelId}';
+        return Scaffold(
+            appBar: AppBar(
+              shadowColor: styleManager.colorScheme.shadow,
+              backgroundColor: styleManager.colorScheme.secondaryContainer,
+              title: const Text('小说详情'),
+              actions: _buildActions(context),
             ),
-          ),
-          body: WebNovelDetail(
-            novelDto: novelDto,
-            novelKey: novelKey,
-          ));
-    });
+            drawer: Drawer(
+              child: ChapterList(
+                tocList: novelDto?.toc ?? [],
+                novelKey: novelKey,
+              ),
+            ),
+            body: WebNovelDetail(
+              novelDto: novelDto,
+              novelKey: novelKey,
+            ));
+      }),
+    );
   }
 
   List<Widget> _buildActions(BuildContext context) {
@@ -74,7 +86,7 @@ class WebNovelDetailContainer extends StatelessWidget {
   }
 }
 
-class WebNovelDetail extends StatelessWidget {
+class WebNovelDetail extends StatefulWidget {
   const WebNovelDetail(
       {super.key, required this.novelDto, required this.novelKey});
 
@@ -82,21 +94,75 @@ class WebNovelDetail extends StatelessWidget {
   final String novelKey;
 
   @override
+  State<WebNovelDetail> createState() => _WebNovelDetailState();
+}
+
+class _WebNovelDetailState extends State<WebNovelDetail> {
+  var scrollDirection = ScrollDirection.reverse;
+  var shouldLoadMore = false;
+  late PageLoader pageLoader;
+  int currentPage = 0;
+  @override
+  void initState() {
+    final novelId = 'web-${widget.novelKey}';
+    super.initState();
+    pageLoader = PageLoader<Comment, Response<dynamic>>(
+      initPage: 0,
+      pageSetter: (newPage) => currentPage = newPage,
+      loader: () =>
+          apiClient.commentService.getCommentList(novelId, currentPage, 10),
+      dataGetter: (data) => parseCommentList(data.body['items']),
+      onLoadSucceed: (comments) =>
+          readCommentCubit(context).addComments(comments),
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      pageLoader.refresh();
+      readCommentCubit(context).setSite('web-${widget.novelKey}');
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return PopScope(
-      onPopInvoked: (_) {
-        if (Scaffold.of(context).isDrawerOpen) return;
-        readWebHomeBloc(context).add(const WebHomeEvent.leaveDetail());
+    return NotificationListener(
+      onNotification: (notification) {
+        if (notification is ScrollNotification) {
+          final metrics = notification.metrics;
+          if (metrics.pixels > metrics.maxScrollExtent - 60) {
+            if (shouldLoadMore && scrollDirection == ScrollDirection.forward) {
+              shouldLoadMore = false;
+              talker.debug('load next page!');
+              pageLoader.loadMore();
+            }
+          } else {
+            shouldLoadMore = true;
+          }
+        }
+        if (notification is ScrollUpdateNotification) {
+          final delta = notification.dragDetails;
+          if (delta != null) {
+            scrollDirection = delta.delta.dy > 0
+                ? ScrollDirection.reverse
+                : ScrollDirection.forward;
+          }
+        }
+        return false;
       },
-      child: (novelDto == null)
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 8.0,
+      child: PopScope(
+        onPopInvoked: (_) {
+          if (Scaffold.of(context).isDrawerOpen) return;
+          readWebHomeBloc(context).add(const WebHomeEvent.leaveDetail());
+        },
+        child: (widget.novelDto == null)
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8.0,
+                ),
+                child: _buildNovelDetail(widget.novelDto!, context),
               ),
-              child: _buildNovelDetail(novelDto!, context),
-            ),
+      ),
     );
   }
 
@@ -117,6 +183,17 @@ class WebNovelDetail extends StatelessWidget {
         ..._buildIntroduction(novelDto),
         const SizedBox(height: 8.0),
         Text('评论', style: styleManager.boldMediumTitle),
+        const SizedBox(height: 8.0),
+        CommentBox(onSucceedComment: () => pageLoader.refresh()),
+        const SizedBox(height: 12.0),
+        BlocSelector<CommentCubit, CommentState, List<Comment>>(
+          selector: (state) {
+            return state.comments;
+          },
+          builder: (context, comments) {
+            return CommentList(comments: comments, parentCommentIds: const []);
+          },
+        ),
         const SizedBox(height: 64.0),
       ],
     );
@@ -201,7 +278,7 @@ class WebNovelDetail extends StatelessWidget {
           selector: (state) {
             return readWebCacheCubit(context)
                 .state
-                .lastReadChapterMap[novelKey];
+                .lastReadChapterMap[widget.novelKey];
           },
           builder: (context, lastReadChapterId) {
             return LineButton(

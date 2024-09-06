@@ -321,3 +321,26 @@ List<WenkuVolumeDto> _parseWenkuVolumeList(body) {
   }
   return list;
 }
+
+List<Comment> parseCommentList(body) {
+  var list = <Comment>[];
+  try {
+    for (var item in body) {
+      list.add(Comment(
+        createAt: item['createAt'],
+        content: item['content'],
+        hidden: item['hidden'],
+        id: item['id'],
+        numReplies: item['numReplies'],
+        user: User(
+          role: item['user']['role'],
+          username: item['user']['username'],
+        ),
+        replies: parseCommentList(item['replies']),
+      ));
+    }
+  } catch (e, stackTrace) {
+    talker.error('parse comment error', e, stackTrace);
+  }
+  return list;
+}

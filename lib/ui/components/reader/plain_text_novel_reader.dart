@@ -30,12 +30,12 @@ class PlainTextNovelReaderContainer extends StatelessWidget {
             child: BlocSelector<WebHomeBloc, WebHomeState, WebNovelDto?>(
               selector: (state) {
                 return state.webNovelDtoMap[
-                    '${state.currentNovelProviderId}${state.currentNovelId}'];
+                    '${state.currentNovelProviderId}-${state.currentNovelId}'];
               },
               builder: (context, novelDto) {
                 final state = readWebHomeBloc(context).state;
                 final novelKey =
-                    '${state.currentNovelProviderId}${state.currentNovelId}';
+                    '${state.currentNovelProviderId}-${state.currentNovelId}';
                 return ChapterList(
                   tocList: novelDto?.toc ?? [],
                   readMode: true,

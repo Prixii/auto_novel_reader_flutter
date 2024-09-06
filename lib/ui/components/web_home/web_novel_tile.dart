@@ -100,6 +100,7 @@ class WebNovelTile extends StatelessWidget {
         onTap: () => _toDetail(context, novelOutline),
         child: Container(
           padding: const EdgeInsets.all(8.0),
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -134,9 +135,9 @@ class WebNovelTile extends StatelessWidget {
   }
 
   Widget _buildFooter(WebNovelOutline webOutline, BuildContext context) {
-    final lastReadChapter = readWebCacheCubit(context)
-        .state
-        .lastReadChapterMap[webOutline.providerId + webOutline.novelId];
+    // final lastReadChapter = readWebCacheCubit(context)
+    // .state
+    // .lastReadChapterMap[webOutline.providerId + webOutline.novelId];
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
