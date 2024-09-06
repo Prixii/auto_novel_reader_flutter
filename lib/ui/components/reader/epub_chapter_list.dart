@@ -118,7 +118,9 @@ class EpubChapterListTile extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                   style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        color: isCurrent ? colorScheme.primary : Colors.black,
+                        color: isCurrent
+                            ? colorScheme.primary
+                            : Theme.of(context).colorScheme.onSurface,
                       ),
                 ),
                 _buildActiveBar(isCurrent, colorScheme),

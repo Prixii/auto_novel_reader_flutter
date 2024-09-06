@@ -1,5 +1,6 @@
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
+import 'package:auto_novel_reader_flutter/ui/components/universal/icon_option.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/tab_option.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,7 @@ class PreferenceSettings extends StatelessWidget {
             _buildHelloPageSetter(context),
             _buildUrlSetter(context),
             _buildThemeSetter(context),
+            _buildMaskKeyWordSetter(context),
           ],
         ),
       ),
@@ -68,5 +70,15 @@ class PreferenceSettings extends StatelessWidget {
         icon: UniconsLine.paint_tool,
         tip: '需要重启才能生效',
         tabs: themeModeZhName);
+  }
+
+  Widget _buildMaskKeyWordSetter(BuildContext context) {
+    return IconOption(
+        icon: UniconsLine.ban,
+        text: 'Tag 屏蔽',
+        onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => const PreferenceSettings())));
   }
 }

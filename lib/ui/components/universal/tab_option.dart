@@ -9,8 +9,10 @@ class TabOption extends StatefulWidget {
       required this.label,
       required this.onTap,
       required this.tabs,
+      this.color,
       this.tip,
       this.padding = const EdgeInsets.fromLTRB(20, 8, 32, 8),
+      this.bold = false,
       this.icon,
       this.width});
   final IconData? icon;
@@ -21,6 +23,8 @@ class TabOption extends StatefulWidget {
   final List<String> tabs;
   final double? width;
   final String? tip;
+  final Color? color;
+  final bool bold;
 
   @override
   State<TabOption> createState() => _TabOptionState();
@@ -60,11 +64,18 @@ class _TabOptionState extends State<TabOption> with TickerProviderStateMixin {
                   ? const SizedBox.shrink()
                   : Padding(
                       padding: const EdgeInsets.only(right: 8.0),
-                      child: Icon(widget.icon),
+                      child: Icon(
+                        widget.icon,
+                        color: widget.color ??
+                            theme.colorScheme.onSecondaryContainer,
+                      ),
                     ),
               Text(
                 widget.label,
-                style: theme.textTheme.bodyLarge,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: widget.color ?? theme.colorScheme.onSecondaryContainer,
+                  fontWeight: widget.bold ? FontWeight.bold : FontWeight.normal,
+                ),
                 maxLines: 1,
               ),
               Expanded(child: Container()),

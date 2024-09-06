@@ -108,7 +108,9 @@ class _EpubWebviewState extends State<EpubWebview> {
     return HtmlWidget(
       htmlDataList[index],
       customStylesBuilder: (element) {
-        if (element.attributes['style'] == null) return null;
+        if (element.attributes['style'] == null && element.localName != 'p') {
+          return null;
+        }
         return _buildStylesMap(element.attributes['style'] ?? '');
       },
       buildAsync: false,
@@ -125,6 +127,7 @@ class _EpubWebviewState extends State<EpubWebview> {
   }
 
   Map<String, String> _buildStylesMap(String style) {
+    final isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
     final styles = style.split(RegExp(r';|:'));
     var stylesMap = <String, String>{};
     for (int i = 0; i < styles.length; i += 2) {
@@ -134,7 +137,12 @@ class _EpubWebviewState extends State<EpubWebview> {
       stylesMap[key] = value;
     }
     if (stylesMap.containsKey('opacity')) {
-      stylesMap['color'] = 'lightgrey';
+      stylesMap['color'] = isDark ? 'grey' : 'lightgrey';
+    } else {
+      if (isDark) {
+        final color = Theme.of(context).colorScheme.primary;
+        stylesMap['color'] = 'rgb(${color.red},${color.green},${color.blue})';
+      }
     }
     return stylesMap;
   }
