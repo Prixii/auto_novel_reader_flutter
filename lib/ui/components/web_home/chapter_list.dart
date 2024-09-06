@@ -104,7 +104,8 @@ class _ChapterListState extends State<ChapterList> {
             return ChapterListTile(
               titleJp: widget.tocList[index].titleJp,
               titleZh: widget.tocList[index].titleZh,
-              index: widget.tocList[index].chapterId,
+              index: index,
+              chapterId: widget.tocList[index].chapterId,
               readMode: widget.readMode,
               currentChapterId: currentChapterId,
             );
@@ -123,25 +124,27 @@ class ChapterListTile extends StatelessWidget {
       this.titleZh,
       this.currentChapterId,
       required this.index,
+      required this.chapterId,
       this.readMode = false});
 
   final String? currentChapterId;
   final String titleJp;
   final String? titleZh;
-  final String? index;
+  final String? chapterId;
   final bool readMode;
+  final int index;
 
   @override
   Widget build(BuildContext context) {
-    final isCurrent = (currentChapterId == index);
+    final isCurrent = (currentChapterId == chapterId);
     return InkWell(
       borderRadius: const BorderRadius.only(
         topLeft: Radius.circular(8.0),
         bottomLeft: Radius.circular(8.0),
       ),
       onTap: () {
-        if (index == null) return;
-        context.read<WebHomeBloc>().add(WebHomeEvent.readChapter(index!));
+        if (chapterId == null) return;
+        context.read<WebHomeBloc>().add(WebHomeEvent.readChapter(chapterId!));
         Navigator.pop(context);
         if (!readMode) {
           Navigator.push(
@@ -194,11 +197,14 @@ class ChapterListTile extends StatelessWidget {
               ),
             ),
             Text(
-              index ?? '',
+              '$index',
               style: styleManager.textTheme.titleLarge?.copyWith(
                 color: isCurrent
                     ? styleManager.colorScheme.primary
-                    : Colors.grey[300],
+                    : MediaQuery.of(context).platformBrightness ==
+                            Brightness.dark
+                        ? Colors.grey
+                        : Colors.grey[300],
                 fontWeight: FontWeight.bold,
               ),
             ),

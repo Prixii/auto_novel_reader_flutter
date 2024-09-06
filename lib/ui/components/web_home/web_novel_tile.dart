@@ -141,17 +141,18 @@ class WebNovelTile extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        (lastReadChapter == null)
-            ? Text(
-                '没有阅读记录',
-                style: styleManager.tipText,
-              )
-            : Text(
-                '最后阅读: 第$lastReadChapter章',
-                style: styleManager.tipText,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+        // TODO 现有 api 暂不支持阅读记录
+        // (lastReadChapter == null)
+        //     ? Text(
+        //         '没有阅读记录',
+        //         style: styleManager.tipText,
+        //       )
+        //     : Text(
+        //         '最后阅读: 第$lastReadChapter章',
+        //         style: styleManager.tipText,
+        //         maxLines: 1,
+        //         overflow: TextOverflow.ellipsis,
+        //       ),
         rankMode ? _buildRankInfo(webOutline) : _buildNormalInfo(webOutline),
       ],
     );
