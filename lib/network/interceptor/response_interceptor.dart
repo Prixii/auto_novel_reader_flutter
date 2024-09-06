@@ -20,6 +20,7 @@ class ResponseInterceptor implements Interceptor {
       return response;
     } else {
       talker.error([response.statusCode, response.error]);
+      showErrorToast('${response.statusCode}, ${response.error}');
       return response;
       // throw Exception([response.statusCode, response.error]);
     }
