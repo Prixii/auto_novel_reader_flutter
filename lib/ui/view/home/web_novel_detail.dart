@@ -100,17 +100,17 @@ class WebNovelDetail extends StatefulWidget {
 class _WebNovelDetailState extends State<WebNovelDetail> {
   var scrollDirection = ScrollDirection.reverse;
   var shouldLoadMore = false;
-  late PageLoader pageLoader;
+  late PageLoader<Comment, Response<dynamic>> pageLoader;
   int currentPage = 0;
   @override
   void initState() {
-    final novelId = 'web-${widget.novelKey}';
+    final commentKey = 'web-${widget.novelKey}';
     super.initState();
-    pageLoader = PageLoader<Comment, Response<dynamic>>(
+    pageLoader = PageLoader(
       initPage: 0,
       pageSetter: (newPage) => currentPage = newPage,
       loader: () =>
-          apiClient.commentService.getCommentList(novelId, currentPage, 10),
+          apiClient.commentService.getCommentList(commentKey, currentPage, 10),
       dataGetter: (data) => parseCommentList(data.body['items']),
       onLoadSucceed: (comments) =>
           readCommentCubit(context).addComments(comments),
@@ -118,7 +118,7 @@ class _WebNovelDetailState extends State<WebNovelDetail> {
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       pageLoader.refresh();
-      readCommentCubit(context).setSite('web-${widget.novelKey}');
+      readCommentCubit(context).setSite(commentKey);
     });
   }
 
@@ -187,9 +187,7 @@ class _WebNovelDetailState extends State<WebNovelDetail> {
         CommentBox(onSucceedComment: () => pageLoader.refresh()),
         const SizedBox(height: 12.0),
         BlocSelector<CommentCubit, CommentState, List<Comment>>(
-          selector: (state) {
-            return state.comments;
-          },
+          selector: (state) => state.comments,
           builder: (context, comments) {
             return CommentList(comments: comments, parentCommentIds: const []);
           },

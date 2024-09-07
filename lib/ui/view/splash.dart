@@ -57,7 +57,6 @@ class _SplashViewState extends State<SplashView> {
 
   Future<void> _startInit() async {
     styleManager.setTheme(Theme.of(context));
-    initScreenSize(context);
     localFileManager.init();
     initKeyDownChannel();
     globalBloc.add(GlobalEvent.switchNavigationDestination(

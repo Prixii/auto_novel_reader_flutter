@@ -1,15 +1,22 @@
+import 'package:auto_novel_reader_flutter/bloc/comment/comment_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/favored_cubit/favored_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/wenku_home/wenku_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
+import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:auto_novel_reader_flutter/ui/components/favored/favored_list.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/line_button.dart';
+import 'package:auto_novel_reader_flutter/ui/components/web_home/comment/comment_box.dart';
+import 'package:auto_novel_reader_flutter/ui/components/web_home/comment/comment_list.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_detail/flow_tag.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_detail/introduction_card.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_detail/paged_cover.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/wenku_novel/download_list.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
+import 'package:auto_novel_reader_flutter/util/page_loader.dart';
+import 'package:auto_novel_reader_flutter/util/web_home_util.dart';
+import 'package:chopper/chopper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,22 +27,27 @@ class WenkuNovelDetailContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocSelector<WenkuHomeBloc, WenkuHomeState, WenkuNovelDto?>(
+    return BlocProvider(
+      create: (context) => CommentCubit(),
+      child: BlocSelector<WenkuHomeBloc, WenkuHomeState, WenkuNovelDto?>(
         selector: (state) {
-      return state.wenkuNovelDtoMap[state.currentNovelId];
-    }, builder: (context, novelDto) {
-      return Scaffold(
-          appBar: AppBar(
-            shadowColor: styleManager.colorScheme.shadow,
-            backgroundColor: styleManager.colorScheme.secondaryContainer,
-            title: const Text('小说详情'),
-            actions: _buildActions(context),
-          ),
-          body: WenkuNovelDetail(
-            novelDto: novelDto,
-            novelId: readWenkuHomeBloc(context).state.currentNovelId,
-          ));
-    });
+          return state.wenkuNovelDtoMap[state.currentNovelId];
+        },
+        builder: (context, novelDto) {
+          return Scaffold(
+              appBar: AppBar(
+                shadowColor: styleManager.colorScheme.shadow,
+                backgroundColor: styleManager.colorScheme.secondaryContainer,
+                title: const Text('小说详情'),
+                actions: _buildActions(context),
+              ),
+              body: WenkuNovelDetail(
+                novelDto: novelDto,
+                novelId: readWenkuHomeBloc(context).state.currentNovelId,
+              ));
+        },
+      ),
+    );
   }
 
   List<Widget> _buildActions(BuildContext context) {
@@ -62,7 +74,7 @@ class WenkuNovelDetailContainer extends StatelessWidget {
   }
 }
 
-class WenkuNovelDetail extends StatelessWidget {
+class WenkuNovelDetail extends StatefulWidget {
   const WenkuNovelDetail(
       {super.key, required this.novelDto, required this.novelId});
 
@@ -70,15 +82,40 @@ class WenkuNovelDetail extends StatelessWidget {
   final String novelId;
 
   @override
+  State<WenkuNovelDetail> createState() => _WenkuNovelDetailState();
+}
+
+class _WenkuNovelDetailState extends State<WenkuNovelDetail> {
+  late PageLoader<Comment, Response<dynamic>> pageLoader;
+  int currentPage = 0;
+
+  @override
+  void initState() {
+    final commentKey = 'wenku-${widget.novelId}';
+    super.initState();
+    pageLoader = PageLoader(
+        pageSetter: (newPage) => currentPage = newPage,
+        loader: () => apiClient.commentService
+            .getCommentList(commentKey, currentPage, 10),
+        dataGetter: (data) => parseCommentList(data.body['items']),
+        onLoadSucceed: (comments) =>
+            readCommentCubit(context).addComments(comments));
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      pageLoader.refresh();
+      readCommentCubit(context).setSite(commentKey);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return (novelDto == null)
+    return (widget.novelDto == null)
         ? const Center(child: CircularProgressIndicator())
         : SingleChildScrollView(
             padding: const EdgeInsets.symmetric(
               horizontal: 16.0,
               vertical: 8.0,
             ),
-            child: _buildNovelDetail(novelDto!, context),
+            child: _buildNovelDetail(widget.novelDto!, context),
           );
   }
 
@@ -102,10 +139,15 @@ class WenkuNovelDetail extends StatelessWidget {
         const SizedBox(height: 8.0),
         ..._buildIntroduction(novelDto),
         const SizedBox(height: 8.0),
-        Text(
-          '评论',
-          style: styleManager.textTheme.titleMedium
-              ?.copyWith(fontWeight: FontWeight.bold),
+        Text('评论', style: styleManager.boldMediumTitle),
+        const SizedBox(height: 8.0),
+        CommentBox(onSucceedComment: () => pageLoader.refresh()),
+        const SizedBox(height: 12.0),
+        BlocSelector<CommentCubit, CommentState, List<Comment>>(
+          selector: (state) => state.comments,
+          builder: (context, comments) {
+            return CommentList(comments: comments, parentCommentIds: const []);
+          },
         ),
         const SizedBox(height: 64.0),
       ],
@@ -237,20 +279,20 @@ class WenkuNovelDetail extends StatelessWidget {
       Expanded(
         child: BlocSelector<FavoredCubit, FavoredState, String?>(
           selector: (state) {
-            return state.novelToFavoredIdMap[novelId];
+            return state.novelToFavoredIdMap[widget.novelId];
           },
           builder: (context, favoredStatus) {
             return LineButton(
                 onPressed: () async {
                   if (favoredStatus != null) {
-                    readWenkuHomeBloc(context)
-                        .add(WenkuHomeEvent.unFavorNovel(novelId: novelId));
+                    readWenkuHomeBloc(context).add(
+                        WenkuHomeEvent.unFavorNovel(novelId: widget.novelId));
                   } else {
                     final favored = await _selectFavored(context);
                     if (favored == null || !context.mounted) return;
                     readWenkuHomeBloc(context).add(
                       WenkuHomeEvent.favorNovel(
-                        novelId: novelId,
+                        novelId: widget.novelId,
                         favoredId: favored.id,
                       ),
                     );

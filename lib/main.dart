@@ -24,6 +24,7 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    initScreenSize(context);
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => globalBloc),
