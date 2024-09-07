@@ -8,7 +8,9 @@ import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/chapter_list.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:unicons/unicons.dart';
 
 class PlainTextNovelReaderContainer extends StatelessWidget {
   const PlainTextNovelReaderContainer({super.key});
@@ -25,6 +27,7 @@ class PlainTextNovelReaderContainer extends StatelessWidget {
             title: Text(dto?.titleJp ?? dto?.titleZh ?? ''),
             shadowColor: styleManager.colorScheme.shadow,
             backgroundColor: styleManager.colorScheme.secondaryContainer,
+            actions: _buildActions(context),
           ),
           drawer: Drawer(
             child: BlocSelector<WebHomeBloc, WebHomeState, WebNovelDto?>(
@@ -49,6 +52,32 @@ class PlainTextNovelReaderContainer extends StatelessWidget {
         );
       },
     );
+  }
+
+  List<Widget> _buildActions(BuildContext context) {
+    return [
+      // IconButton(
+      //   onPressed: () {
+      //     // TODO 编辑
+      //     Fluttertoast.showToast(msg: '这个功能还没有做呢');
+      //   },
+      //   icon: const Icon(UniconsLine.edit),
+      // ),
+      IconButton(
+        onPressed: () {
+          final host = readConfigCubit(context).state.host;
+          final dto = readWebHomeBloc(context).state.currentWebNovelDto!;
+          final chapterId =
+              readWebCacheCubit(context).state.lastReadChapterMap[dto.novelKey];
+          final url =
+              'https://$host/novel/${dto.providerId}/${dto.novelId}/$chapterId';
+          Clipboard.setData(ClipboardData(text: url)).then((value) {
+            showSucceedToast('章节链接已复制到剪切板');
+          });
+        },
+        icon: const Icon(UniconsLine.link),
+      ),
+    ];
   }
 }
 
