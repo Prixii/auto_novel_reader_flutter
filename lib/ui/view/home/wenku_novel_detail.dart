@@ -31,7 +31,7 @@ class WenkuNovelDetailContainer extends StatelessWidget {
       create: (context) => CommentCubit(),
       child: BlocSelector<WenkuHomeBloc, WenkuHomeState, WenkuNovelDto?>(
         selector: (state) {
-          return state.wenkuNovelDtoMap[state.currentWenkuNovelDto!.id];
+          return state.loadingDetail ? null : state.currentWenkuNovelDto;
         },
         builder: (context, novelDto) {
           return Scaffold(
@@ -41,10 +41,12 @@ class WenkuNovelDetailContainer extends StatelessWidget {
                 title: const Text('小说详情'),
                 actions: _buildActions(context),
               ),
-              body: WenkuNovelDetail(
-                novelDto: novelDto,
-                novelId: readWenkuHomeBloc(context).currentNovelId,
-              ));
+              body: (novelDto == null)
+                  ? const Center(child: CircularProgressIndicator())
+                  : WenkuNovelDetail(
+                      novelDto: novelDto,
+                      novelId: readWenkuHomeBloc(context).currentNovelId,
+                    ));
         },
       ),
     );
@@ -78,7 +80,7 @@ class WenkuNovelDetail extends StatefulWidget {
   const WenkuNovelDetail(
       {super.key, required this.novelDto, required this.novelId});
 
-  final WenkuNovelDto? novelDto;
+  final WenkuNovelDto novelDto;
   final String novelId;
 
   @override
@@ -108,15 +110,13 @@ class _WenkuNovelDetailState extends State<WenkuNovelDetail> {
 
   @override
   Widget build(BuildContext context) {
-    return (widget.novelDto == null)
-        ? const Center(child: CircularProgressIndicator())
-        : SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 8.0,
-            ),
-            child: _buildNovelDetail(widget.novelDto!, context),
-          );
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16.0,
+        vertical: 8.0,
+      ),
+      child: _buildNovelDetail(widget.novelDto, context),
+    );
   }
 
   Widget _buildNovelDetail(WenkuNovelDto novelDto, BuildContext context) {

@@ -13,7 +13,12 @@ class HistoryView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => HistoryCubit(),
-      child: const HistoryBody(),
+      child: readUserCubit(context).isSignIn
+          ? const HistoryBody()
+          : const Center(
+              child: Text(
+              '未登录',
+            )),
     );
   }
 }

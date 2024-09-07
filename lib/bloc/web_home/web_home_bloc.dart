@@ -78,19 +78,21 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   }
 
   _onToNovelDetail(_ToNovelDetail event, Emitter<WebHomeState> emit) async {
+    emit(state.copyWith(loadingNovelDetail: true));
     final dto = await loadWebNovelDto(
       event.providerId,
       event.novelId,
-      onRequest: () => emit(state.copyWith(loadingNovelDetail: true)),
-      onRequestFinished: () => emit(state.copyWith(loadingNovelDetail: false)),
+      onRequest: () => {},
+      onRequestFinished: () => {},
     );
     if (dto == null) return;
     emit(state.copyWith(
       currentWebNovelDto: dto,
       webNovelDtoMap: {
         ...state.webNovelDtoMap,
-        currentNovelKey: dto,
+        dto.novelKey: dto,
       },
+      loadingNovelDetail: false,
     ));
     _updateLastReadChapterId(
       dto.providerId,
@@ -108,7 +110,7 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     _updateLastReadChapterId(dto.providerId, dto.novelId, targetChapterId);
     globalBloc.add(const GlobalEvent.setReadType(ReadType.web));
     emit(state.copyWith(loadingNovelChapter: true));
-    final chapterKey = currentNovelKey + targetChapterId;
+    final chapterKey = currentNovelKey! + targetChapterId;
 
     final targetDto = await loadNovelChapter(
       currentNovelProviderId,
@@ -128,7 +130,7 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
         currentNovelProviderId, currentNovelId, targetChapterId);
 
     // 预加载下一章节
-    final nextChapterKey = currentNovelKey + (targetDto.nextId ?? '');
+    final nextChapterKey = currentNovelKey! + (targetDto.nextId ?? '');
     final nextDto = await loadNovelChapter(
       currentNovelProviderId,
       currentNovelId,
@@ -283,5 +285,5 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   bool get loadingChapter => state.loadingNovelChapter;
   String get currentNovelId => state.currentWebNovelDto!.novelId;
   String get currentNovelProviderId => state.currentWebNovelDto!.providerId;
-  String get currentNovelKey => state.currentWebNovelDto!.novelKey;
+  String? get currentNovelKey => state.currentWebNovelDto?.novelKey;
 }

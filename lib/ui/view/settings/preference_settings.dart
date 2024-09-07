@@ -39,7 +39,7 @@ class PreferenceSettings extends StatelessWidget {
         onTap: (value, index) => cubit.setHelloPage(index),
         icon: UniconsLine.laughing,
         tabs: const [
-          '首页',
+          '绿站',
           '阅读',
           '设置',
         ]);

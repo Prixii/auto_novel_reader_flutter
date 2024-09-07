@@ -9,6 +9,7 @@ part 'history_cubit.freezed.dart';
 
 class HistoryCubit extends Cubit<HistoryState> {
   HistoryCubit() : super(const HistoryState.initial()) {
+    if (!userCubit.isSignIn) return;
     loadHistory();
   }
 

@@ -20,10 +20,7 @@ class WenkuNovelSearchPage extends StatelessWidget {
         WebNovelDtoList(),
         Align(
           alignment: Alignment.topCenter,
-          child: Padding(
-            padding: EdgeInsets.all(12.0),
-            child: WenkuSearchWidget(),
-          ),
+          child: WenkuSearchWidget(),
         ),
       ],
     );

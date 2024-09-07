@@ -17,7 +17,7 @@ class WebCacheCubit extends HydratedCubit<WebCacheState> {
     emit(state.copyWith(
       lastReadChapterMap: {
         ...state.lastReadChapterMap,
-        '$providerId$novelId': chapterId
+        '$providerId-$novelId': chapterId
       },
     ));
   }

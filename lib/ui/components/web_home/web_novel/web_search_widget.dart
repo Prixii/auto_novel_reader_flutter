@@ -77,17 +77,24 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        GestureDetector(
-          onTap: () => _toggleVisibility(false),
-          child: Container(),
+        Visibility(
+          visible: _isFilterVisible,
+          child: GestureDetector(
+            excludeFromSemantics: true,
+            onTap: () => _toggleVisibility(false),
+            child: Container(color: Colors.transparent),
+          ),
         ),
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildSearchBar(),
-            const SizedBox(height: 16.0),
-            _buildAnimatedFilter()
-          ],
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildSearchBar(),
+              const SizedBox(height: 16.0),
+              _buildAnimatedFilter()
+            ],
+          ),
         ),
       ],
     );

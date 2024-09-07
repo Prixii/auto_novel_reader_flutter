@@ -20,10 +20,7 @@ class WebNovelSearchPage extends StatelessWidget {
         WebNovelDtoList(),
         Align(
           alignment: Alignment.topCenter,
-          child: Padding(
-            padding: EdgeInsets.all(12.0),
-            child: WebSearchWidget(),
-          ),
+          child: WebSearchWidget(),
         ),
       ],
     );

@@ -170,22 +170,10 @@ class _FavoredBodyState extends State<FavoredBody>
   var scrollDirection = ScrollDirection.forward;
   var shouldLoadMore = false;
 
-  late TabController _novelTypeTabController,
-      _favoredTabController,
-      _sortTypeTabController;
-
   // FIXME Selector 同步
   @override
   void initState() {
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _novelTypeTabController.dispose();
-    _favoredTabController.dispose();
-    _sortTypeTabController.dispose();
   }
 
   @override

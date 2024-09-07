@@ -40,18 +40,16 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
   }
 
   _onToDetail(_ToWenkuDetail event, Emitter<WenkuHomeState> emit) async {
+    emit(state.copyWith(loadingDetail: true));
     var novelId = event.wenkuId;
-    final novelDto = await loadWenkuNovelDto(
-      novelId,
-      onRequest: () => emit(state.copyWith(loadingDetail: true)),
-      onRequestFinished: () => emit(state.copyWith(loadingDetail: false)),
-    );
+    final novelDto = await loadWenkuNovelDto(novelId);
     if (novelDto == null) return;
     emit(state.copyWith(
       wenkuNovelDtoMap: {
         ...state.wenkuNovelDtoMap,
         novelId: novelDto,
       },
+      loadingDetail: false,
       currentWenkuNovelDto: novelDto,
     ));
   }
@@ -173,5 +171,5 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
 
   bool currentNovelFavored(String novelId) =>
       favoredCubit.state.novelToFavoredIdMap[novelId] != null;
-  String get currentNovelId => state.currentWenkuNovelDto!.id;
+  String get currentNovelId => state.currentWenkuNovelDto?.id ?? '';
 }

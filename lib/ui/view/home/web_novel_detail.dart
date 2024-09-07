@@ -33,10 +33,8 @@ class WebNovelDetailContainer extends StatelessWidget {
       create: (context) => CommentCubit(),
       child: BlocSelector<WebHomeBloc, WebHomeState, WebNovelDto?>(
           selector: (state) {
-        final dto = state.currentWebNovelDto!;
-        return state.webNovelDtoMap[dto.novelKey];
+        return state.loadingNovelDetail ? null : state.currentWebNovelDto;
       }, builder: (context, novelDto) {
-        final novelKey = readWebHomeBloc(context).currentNovelKey;
         return Scaffold(
             appBar: AppBar(
               shadowColor: styleManager.colorScheme.shadow,
@@ -47,13 +45,14 @@ class WebNovelDetailContainer extends StatelessWidget {
             drawer: Drawer(
               child: ChapterList(
                 tocList: novelDto?.toc ?? [],
-                novelKey: novelKey,
+                novelKey: novelDto?.novelKey ?? '',
               ),
             ),
-            body: WebNovelDetail(
-              novelDto: novelDto,
-              novelKey: novelKey,
-            ));
+            body: (novelDto == null)
+                ? const Center(child: CircularProgressIndicator())
+                : WebNovelDetail(
+                    novelDto: novelDto,
+                  ));
       }),
     );
   }
@@ -83,11 +82,9 @@ class WebNovelDetailContainer extends StatelessWidget {
 }
 
 class WebNovelDetail extends StatefulWidget {
-  const WebNovelDetail(
-      {super.key, required this.novelDto, required this.novelKey});
+  const WebNovelDetail({super.key, required this.novelDto});
 
-  final WebNovelDto? novelDto;
-  final String novelKey;
+  final WebNovelDto novelDto;
 
   @override
   State<WebNovelDetail> createState() => _WebNovelDetailState();
@@ -98,9 +95,11 @@ class _WebNovelDetailState extends State<WebNovelDetail> {
   var shouldLoadMore = false;
   late PageLoader<Comment, Response<dynamic>> pageLoader;
   int currentPage = 0;
+  late String novelKey;
   @override
   void initState() {
-    final commentKey = 'web-${widget.novelKey}';
+    novelKey = widget.novelDto.novelKey;
+    final commentKey = 'web-$novelKey';
     super.initState();
     pageLoader = PageLoader(
       initPage: 0,
@@ -149,15 +148,13 @@ class _WebNovelDetailState extends State<WebNovelDetail> {
           if (Scaffold.of(context).isDrawerOpen) return;
           readWebHomeBloc(context).add(const WebHomeEvent.leaveDetail());
         },
-        child: (widget.novelDto == null)
-            ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8.0,
-                ),
-                child: _buildNovelDetail(widget.novelDto!, context),
-              ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 16.0,
+            vertical: 8.0,
+          ),
+          child: _buildNovelDetail(widget.novelDto, context),
+        ),
       ),
     );
   }
@@ -272,7 +269,7 @@ class _WebNovelDetailState extends State<WebNovelDetail> {
           selector: (state) {
             return readWebCacheCubit(context)
                 .state
-                .lastReadChapterMap[widget.novelKey];
+                .lastReadChapterMap[novelKey];
           },
           builder: (context, lastReadChapterId) {
             return LineButton(
