@@ -75,12 +75,20 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
+    return Stack(
       children: [
-        _buildSearchBar(),
-        const SizedBox(height: 16.0),
-        _buildAnimatedFilter()
+        GestureDetector(
+          onTap: () => _toggleVisibility(false),
+          child: Container(),
+        ),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildSearchBar(),
+            const SizedBox(height: 16.0),
+            _buildAnimatedFilter()
+          ],
+        ),
       ],
     );
   }
@@ -172,12 +180,14 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
   }
 
   void _toggleVisibility(bool value) {
+    if (_isFilterVisible == value) return;
     setState(() {
       _isFilterVisible = value;
       if (_isFilterVisible) {
         _animationController.forward();
       } else {
         _animationController.reverse();
+        FocusScope.of(context).unfocus(); // NEED TEST 退出键盘
       }
     });
   }
