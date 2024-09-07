@@ -75,7 +75,7 @@ class PreferenceSettings extends StatelessWidget {
   Widget _buildMaskKeyWordSetter(BuildContext context) {
     return IconOption(
         icon: UniconsLine.ban,
-        text: 'Tag 屏蔽',
+        text: '屏蔽设置',
         onTap: () => Navigator.push(
             context,
             MaterialPageRoute(

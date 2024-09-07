@@ -11,8 +11,6 @@ class WebHomeState with _$WebHomeState {
 
     // 小说详情
     WebNovelDto? currentWebNovelDto,
-    String? currentNovelId,
-    String? currentNovelProviderId,
     @Default({}) Map<String, WebNovelDto?> webNovelDtoMap,
     @Default(false) bool loadingNovelDetail,
     // 小说正文

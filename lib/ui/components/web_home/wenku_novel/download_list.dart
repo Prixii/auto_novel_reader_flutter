@@ -132,7 +132,7 @@ class JpVolumeListTile extends StatelessWidget {
   Widget _buildTrail(BuildContext context) {
     final state = readWenkuHomeBloc(context).state;
     final (filename, url) = jpDownloadUrlGenerator(
-        readWenkuHomeBloc(context).state.currentNovelId, dto.volumeId,
+        readWenkuHomeBloc(context).currentNovelId, dto.volumeId,
         mode: state.language,
         translationsMode: state.translationMode,
         translations: state.translationOrder);
@@ -183,7 +183,7 @@ class ZhVolumeListTile extends StatelessWidget {
                   _downloadZhEpub(
                     context,
                     zhDownloadUrlGenerator(
-                      readWenkuHomeBloc(context).state.currentNovelId,
+                      readWenkuHomeBloc(context).currentNovelId,
                       title,
                     ),
                     title,

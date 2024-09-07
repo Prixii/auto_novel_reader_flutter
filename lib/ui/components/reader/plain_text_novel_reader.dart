@@ -29,17 +29,16 @@ class PlainTextNovelReaderContainer extends StatelessWidget {
           drawer: Drawer(
             child: BlocSelector<WebHomeBloc, WebHomeState, WebNovelDto?>(
               selector: (state) {
-                return state.webNovelDtoMap[
-                    '${state.currentNovelProviderId}-${state.currentNovelId}'];
+                final dto = state.currentWebNovelDto!;
+                return state.webNovelDtoMap[dto.novelKey];
               },
               builder: (context, novelDto) {
                 final state = readWebHomeBloc(context).state;
-                final novelKey =
-                    '${state.currentNovelProviderId}-${state.currentNovelId}';
+                final dto = state.currentWebNovelDto!;
                 return ChapterList(
                   tocList: novelDto?.toc ?? [],
                   readMode: true,
-                  novelKey: novelKey,
+                  novelKey: dto.novelKey,
                 );
               },
             ),

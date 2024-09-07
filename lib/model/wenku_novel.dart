@@ -11,6 +11,7 @@ class WenkuNovel with _$WenkuNovel {
   }) = WenkuNovelOutline;
 
   const factory WenkuNovel.wenkuNovelDto(
+    String id,
     String title,
     String titleZh, {
     String? cover,

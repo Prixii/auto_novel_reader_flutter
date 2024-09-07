@@ -1,4 +1,3 @@
-import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:flutter/material.dart';
 
 class NavTitle extends StatelessWidget {

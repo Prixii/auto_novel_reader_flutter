@@ -140,6 +140,8 @@ Future<WebNovelDto?> loadWebNovelDto(
   final body = response.body;
   try {
     final webNovelDto = WebNovelDto(
+      providerId,
+      novelId,
       body['titleJp'],
       attentions: body['attentions'].cast<String>(),
       authors: parseToAuthorList(body['authors']),
@@ -251,6 +253,7 @@ Future<WenkuNovelDto?> _requestWenkuNovelDto(String novelId) async {
       return null;
     }
     final wenkuDto = WenkuNovelDto(
+      novelId,
       body['title'],
       body['titleZh'],
       cover: body['cover'],

@@ -12,7 +12,6 @@ class WenkuHomeState with _$WenkuHomeState {
 
     // 详情
     @Default(false) bool loadingDetail,
-    @Default('') String currentNovelId,
     @Default(Language.zhJp) Language language,
     @Default(TranslationMode.priority) TranslationMode translationMode,
     @Default([

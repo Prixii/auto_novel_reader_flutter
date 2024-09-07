@@ -31,7 +31,7 @@ class WenkuNovelDetailContainer extends StatelessWidget {
       create: (context) => CommentCubit(),
       child: BlocSelector<WenkuHomeBloc, WenkuHomeState, WenkuNovelDto?>(
         selector: (state) {
-          return state.wenkuNovelDtoMap[state.currentNovelId];
+          return state.wenkuNovelDtoMap[state.currentWenkuNovelDto!.id];
         },
         builder: (context, novelDto) {
           return Scaffold(
@@ -43,7 +43,7 @@ class WenkuNovelDetailContainer extends StatelessWidget {
               ),
               body: WenkuNovelDetail(
                 novelDto: novelDto,
-                novelId: readWenkuHomeBloc(context).state.currentNovelId,
+                novelId: readWenkuHomeBloc(context).currentNovelId,
               ));
         },
       ),
@@ -62,7 +62,7 @@ class WenkuNovelDetailContainer extends StatelessWidget {
       IconButton(
         onPressed: () {
           final host = readConfigCubit(context).state.host;
-          final novelId = readWenkuHomeBloc(context).state.currentNovelId;
+          final novelId = readWenkuHomeBloc(context).currentNovelId;
           final url = 'https://$host/wenku/$novelId';
           Clipboard.setData(ClipboardData(text: url)).then((value) {
             showSucceedToast('小说链接已复制到剪切板');

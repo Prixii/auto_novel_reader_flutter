@@ -33,12 +33,10 @@ class WebNovelDetailContainer extends StatelessWidget {
       create: (context) => CommentCubit(),
       child: BlocSelector<WebHomeBloc, WebHomeState, WebNovelDto?>(
           selector: (state) {
-        return state.webNovelDtoMap[
-            '${state.currentNovelProviderId}-${state.currentNovelId}'];
+        final dto = state.currentWebNovelDto!;
+        return state.webNovelDtoMap[dto.novelKey];
       }, builder: (context, novelDto) {
-        final state = readWebHomeBloc(context).state;
-        final novelKey =
-            '${state.currentNovelProviderId}-${state.currentNovelId}';
+        final novelKey = readWebHomeBloc(context).currentNovelKey;
         return Scaffold(
             appBar: AppBar(
               shadowColor: styleManager.colorScheme.shadow,
@@ -72,10 +70,8 @@ class WebNovelDetailContainer extends StatelessWidget {
       IconButton(
         onPressed: () {
           final host = readConfigCubit(context).state.host;
-          final state = readWebHomeBloc(context).state;
-          final provider = state.currentNovelProviderId;
-          final novelId = state.currentNovelId;
-          final url = 'https://$host/novel/$provider/$novelId';
+          final dto = readWebHomeBloc(context).state.currentWebNovelDto!;
+          final url = 'https://$host/novel/${dto.providerId}/${dto.novelId}';
           Clipboard.setData(ClipboardData(text: url)).then((value) {
             showSucceedToast('小说链接已复制到剪切板');
           });
@@ -290,7 +286,7 @@ class _WebNovelDetailState extends State<WebNovelDetail> {
       Expanded(
         child: BlocSelector<FavoredCubit, FavoredState, String?>(
           selector: (state) {
-            final novelId = readWebHomeBloc(context).state.currentNovelId;
+            final novelId = readWebHomeBloc(context).currentNovelId;
             return state.novelToFavoredIdMap[novelId];
           },
           builder: (context, favoredStatus) {

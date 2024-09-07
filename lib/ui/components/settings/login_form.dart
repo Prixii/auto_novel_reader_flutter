@@ -69,23 +69,23 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 
-  Row _buildRememberCheckBok() {
-    return Row(
-      children: [
-        Checkbox(
-          value: isRememberMeChecked,
-          onChanged: (value) =>
-              {if (value != null) setState(() => isRememberMeChecked = value)},
-          visualDensity: VisualDensity.compact,
-        ),
-        const Text(
-          '记住我',
-          style: TextStyle(color: Colors.black87, fontSize: 14),
-        ),
-        Expanded(child: Container()),
-      ],
-    );
-  }
+  // Row _buildRememberCheckBok() {
+  //   return Row(
+  //     children: [
+  //       Checkbox(
+  //         value: isRememberMeChecked,
+  //         onChanged: (value) =>
+  //             {if (value != null) setState(() => isRememberMeChecked = value)},
+  //         visualDensity: VisualDensity.compact,
+  //       ),
+  //       const Text(
+  //         '记住我',
+  //         style: TextStyle(color: Colors.black87, fontSize: 14),
+  //       ),
+  //       Expanded(child: Container()),
+  //     ],
+  //   );
+  // }
 
   void _doSignIn(BuildContext context) async {
     if (requesting) return;

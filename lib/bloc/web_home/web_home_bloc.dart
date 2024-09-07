@@ -78,10 +78,6 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   }
 
   _onToNovelDetail(_ToNovelDetail event, Emitter<WebHomeState> emit) async {
-    emit(state.copyWith(
-      currentNovelProviderId: event.providerId,
-      currentNovelId: event.novelId,
-    ));
     final dto = await loadWebNovelDto(
       event.providerId,
       event.novelId,
@@ -96,7 +92,11 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
         currentNovelKey: dto,
       },
     ));
-    _updateLastReadChapterId(dto.lastReadChapterId);
+    _updateLastReadChapterId(
+      dto.providerId,
+      dto.novelId,
+      dto.lastReadChapterId,
+    );
   }
 
   _onReadChapter(_ReadChapter event, Emitter<WebHomeState> emit) async {
@@ -104,14 +104,15 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
 
     var targetChapterId = event.chapterId;
     targetChapterId ??= findChapterId(state.currentWebNovelDto!);
-    _updateLastReadChapterId(targetChapterId);
+    final dto = state.currentWebNovelDto!;
+    _updateLastReadChapterId(dto.providerId, dto.novelId, targetChapterId);
     globalBloc.add(const GlobalEvent.setReadType(ReadType.web));
     emit(state.copyWith(loadingNovelChapter: true));
     final chapterKey = currentNovelKey + targetChapterId;
 
     final targetDto = await loadNovelChapter(
-      currentNovelProviderId ?? '',
-      currentNovelId ?? '',
+      currentNovelProviderId,
+      currentNovelId,
       targetChapterId,
       onRequest: () => emit(state.copyWith(loadingNovelChapter: true)),
       onRequestFinished: () => emit(state.copyWith(loadingNovelChapter: false)),
@@ -124,13 +125,13 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
       currentChapterDto: targetDto,
     ));
     _requestUpdateReadHistory(
-        currentNovelProviderId!, currentNovelId!, targetChapterId);
+        currentNovelProviderId, currentNovelId, targetChapterId);
 
     // 预加载下一章节
     final nextChapterKey = currentNovelKey + (targetDto.nextId ?? '');
     final nextDto = await loadNovelChapter(
-      currentNovelProviderId ?? '',
-      currentNovelId ?? '',
+      currentNovelProviderId,
+      currentNovelId,
       targetDto.nextId,
     );
     var dtoMapSnapshot = <String, ChapterDto?>{
@@ -231,23 +232,22 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     ));
   }
 
-  void _updateLastReadChapterId(String? chapterId) =>
-      webCacheCubit.updateLastReadChapter(
-          state.currentNovelProviderId!, state.currentNovelId!, chapterId);
+  void _updateLastReadChapterId(
+          String providerId, String novelId, String? chapterId) =>
+      webCacheCubit.updateLastReadChapter(providerId, novelId, chapterId);
 
   Future<WebHomeState> _favorWeb(String favoredId) async {
-    if (currentNovelId == null || currentNovelProviderId == null) return state;
     final response = await apiClient.userFavoredWebService.putNovelId(
-        currentNovelProviderId!, currentNovelId!,
+        currentNovelProviderId, currentNovelId,
         favoredId: favoredId);
 
     if (response!.statusCode == 200) {
       favoredCubit
-          .setNovelToFavoredIdMap(simpleFavored: (currentNovelId!, favoredId));
+          .setNovelToFavoredIdMap(simpleFavored: (currentNovelId, favoredId));
       showSucceedToast('收藏成功');
 
       favoredCubit
-          .setNovelToFavoredIdMap(simpleFavored: (currentNovelId!, favoredId));
+          .setNovelToFavoredIdMap(simpleFavored: (currentNovelId, favoredId));
     }
     if (response.statusCode == 502) {
       Fluttertoast.showToast(msg: '服务器维护中');
@@ -257,15 +257,14 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   }
 
   Future<WebHomeState> _unFavorWeb(String favoredId) async {
-    if (currentNovelId == null || currentNovelProviderId == null) return state;
     final response = await apiClient.userFavoredWebService
-        .deleteNovelId(currentNovelProviderId!, currentNovelId!);
+        .deleteNovelId(currentNovelProviderId, currentNovelId);
     if (response!.statusCode == 200) {
       var favoredWebSnapshot = {...state.favoredWebMap};
       favoredWebSnapshot.remove(currentNovelKey);
       showSucceedToast('取消收藏成功');
       favoredCubit.unFavor(
-          type: NovelType.web, favoredId: favoredId, novelId: currentNovelId!);
+          type: NovelType.web, favoredId: favoredId, novelId: currentNovelId);
       return state.copyWith(favoredWebMap: favoredWebSnapshot);
     }
     if (response.statusCode == 502) {
@@ -282,8 +281,7 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   }
 
   bool get loadingChapter => state.loadingNovelChapter;
-  String? get currentNovelId => state.currentNovelId;
-  String? get currentNovelProviderId => state.currentNovelProviderId;
-  String get currentNovelKey =>
-      '${state.currentNovelProviderId ?? ''}-${state.currentNovelId ?? ''}';
+  String get currentNovelId => state.currentWebNovelDto!.novelId;
+  String get currentNovelProviderId => state.currentWebNovelDto!.providerId;
+  String get currentNovelKey => state.currentWebNovelDto!.novelKey;
 }

@@ -40,6 +40,8 @@ class WebNovel with _$WebNovel {
   }) = WebNovelToc;
 
   const factory WebNovel.webNovelDto(
+    String providerId,
+    String novelId,
     String titleJp, {
     String? titleZh,
     @Default([]) List<Author> authors,
@@ -135,4 +137,8 @@ List<WebNovelOutline> parseToWebNovelOutline(dynamic body) {
     talker.error(stackTrace);
     return [];
   }
+}
+
+extension WebNovelDtoExt on WebNovelDto {
+  String get novelKey => '$providerId-$novelId';
 }

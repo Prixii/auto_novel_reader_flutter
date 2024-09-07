@@ -48,17 +48,19 @@ class DownloadCubit extends HydratedCubit<DownloadState> {
         showSucceedToast('已重新创建下载任务');
       case DownloadStatus.none:
         showSucceedToast('已创建下载任务');
-        emit(state.copyWith(taskProgress: {
-          ...state.taskProgress,
-          filename: 0.0,
-        }, taskStatus: {
-          ...state.taskStatus,
-          filename: DownloadStatus.redirecting,
-        }));
-        downloadFile(url: url, path: path, filename: filename, wenku: true);
       default:
-        break;
+        showWarnToast('请勿重复创建');
+        return;
     }
+    // NEED TEST 重新创建下载任务
+    emit(state.copyWith(taskProgress: {
+      ...state.taskProgress,
+      filename: 0.0,
+    }, taskStatus: {
+      ...state.taskStatus,
+      filename: DownloadStatus.redirecting,
+    }));
+    downloadFile(url: url, path: path, filename: filename, wenku: true);
   }
 
   updateStatus(String filename, DownloadStatus status) {
@@ -69,7 +71,7 @@ class DownloadCubit extends HydratedCubit<DownloadState> {
   }
 
   finishRedirect(String filename) {
-    updateStatus(filename, DownloadStatus.parsing);
+    updateStatus(filename, DownloadStatus.downloading);
   }
 
   updateProgress(String filename, double progress) {
