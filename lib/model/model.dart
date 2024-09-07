@@ -10,6 +10,7 @@ part 'web_novel_config.dart';
 part 'favored.dart';
 part 'comment.dart';
 part 'novel_appearance_config.dart';
+part 'shield_config.dart';
 
 part 'model.freezed.dart';
 part 'model.g.dart';
