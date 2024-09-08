@@ -37,18 +37,18 @@ class UserInfoTile extends StatelessWidget {
         children: [
           Text(
             '@${state.username}',
-            style: styleManager.titleSmall,
+            style: styleManager.titleSmall(context),
           ),
           const SizedBox(width: 8.0),
           Text(
             parseTimeStamp((state.createAt ?? 0) * 1000),
-            style: styleManager.tipText,
+            style: styleManager.tipText(context),
           ),
           Expanded(child: Container()),
           IconButton(
               onPressed: () => tryLogout(context),
               icon: const Icon(UniconsLine.signout),
-              color: Theme.of(context).colorScheme.error),
+              color: styleManager.colorScheme(context).error),
         ],
       ),
     );

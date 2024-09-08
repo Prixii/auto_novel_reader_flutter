@@ -67,7 +67,7 @@ class _ChapterListState extends State<ChapterList> {
               Expanded(
                 child: Text(
                   '章节',
-                  style: styleManager.textTheme.headlineSmall,
+                  style: styleManager.textTheme(context).headlineSmall,
                 ),
               ),
               IconButton(
@@ -164,7 +164,7 @@ class ChapterListTile extends StatelessWidget {
             bottomLeft: Radius.circular(8.0),
           ),
           color: isCurrent
-              ? styleManager.colorScheme.primaryContainer
+              ? styleManager.colorScheme(context).primaryContainer
               : Colors.transparent,
         ),
         width: double.infinity,
@@ -181,33 +181,39 @@ class ChapterListTile extends StatelessWidget {
                   Text(titleJp,
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
-                      style: styleManager.primaryColorTitleSmall?.copyWith(
-                        color: isCurrent
-                            ? styleManager.colorScheme.onPrimaryContainer
-                            : styleManager.colorScheme.primary,
-                      )),
+                      style: styleManager
+                          .primaryColorTitleSmall(context)
+                          ?.copyWith(
+                            color: isCurrent
+                                ? styleManager
+                                    .colorScheme(context)
+                                    .onPrimaryContainer
+                                : styleManager.colorScheme(context).primary,
+                          )),
                   Text(titleZh ?? '',
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
-                      style: styleManager.titleSmall?.copyWith(
-                        color: isCurrent
-                            ? styleManager.colorScheme.onSecondaryContainer
-                            : Colors.black54,
-                      ))
+                      style: styleManager.titleSmall(context)?.copyWith(
+                            color: isCurrent
+                                ? styleManager
+                                    .colorScheme(context)
+                                    .onSecondaryContainer
+                                : Colors.black54,
+                          ))
                 ],
               ),
             ),
             Text(
               '$index',
-              style: styleManager.textTheme.titleLarge?.copyWith(
-                color: isCurrent
-                    ? styleManager.colorScheme.primary
-                    : MediaQuery.of(context).platformBrightness ==
-                            Brightness.dark
-                        ? Colors.grey
-                        : Colors.grey[300],
-                fontWeight: FontWeight.bold,
-              ),
+              style: styleManager.textTheme(context).titleLarge?.copyWith(
+                    color: isCurrent
+                        ? styleManager.colorScheme(context).primary
+                        : MediaQuery.of(context).platformBrightness ==
+                                Brightness.dark
+                            ? Colors.grey
+                            : Colors.grey[300],
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ],
         ),

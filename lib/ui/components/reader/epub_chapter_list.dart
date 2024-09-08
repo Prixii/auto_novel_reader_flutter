@@ -1,4 +1,5 @@
 import 'package:auto_novel_reader_flutter/bloc/epub_viewer/epub_viewer_bloc.dart';
+import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -39,7 +40,7 @@ class _EpubChapterListState extends State<EpubChapterList> {
         children: [
           Text(
             '章节',
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: styleManager.textTheme(context).headlineSmall,
           ),
           const SizedBox(height: 8.0),
           const Divider(),
@@ -93,7 +94,7 @@ class EpubChapterListTile extends StatelessWidget {
       },
       builder: (context, currentIndex) {
         final isCurrent = (currentIndex == index);
-        final colorScheme = Theme.of(context).colorScheme;
+        final colorScheme = styleManager.colorScheme(context);
         return InkWell(
           onTap: () {
             readEpubViewerBloc(context)
@@ -117,10 +118,10 @@ class EpubChapterListTile extends StatelessWidget {
                   title,
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
-                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  style: styleManager.textTheme(context).bodyMedium!.copyWith(
                         color: isCurrent
                             ? colorScheme.primary
-                            : Theme.of(context).colorScheme.onSurface,
+                            : styleManager.colorScheme(context).onSurface,
                       ),
                 ),
                 _buildActiveBar(isCurrent, colorScheme),

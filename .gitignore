@@ -54,3 +54,8 @@ app.*.map.json
 
 # devtools
 devtools_options.yaml
+
+# keystore
+/android/sign/keystore.properties
+**.jks
+**.jks.old

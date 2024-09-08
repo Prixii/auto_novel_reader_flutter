@@ -80,7 +80,7 @@ class WenkuNovelTile extends StatelessWidget {
             ),
             Align(
               alignment: Alignment.bottomCenter,
-              child: _buildMicaTitle(novel),
+              child: _buildMicaTitle(novel, context),
             ),
           ],
         ),
@@ -88,14 +88,14 @@ class WenkuNovelTile extends StatelessWidget {
     );
   }
 
-  Widget _buildMicaTitle(WenkuNovelOutline novel) {
+  Widget _buildMicaTitle(WenkuNovelOutline novel, BuildContext context) {
     return ClipRect(
       clipBehavior: Clip.hardEdge,
       child: Container(
         padding: const EdgeInsets.all(4),
         height: 46,
         width: double.infinity,
-        color: styleManager.colorScheme.surface.withOpacity(0.8),
+        color: styleManager.colorScheme(context).surface.withOpacity(0.8),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
           child: Text(
@@ -103,9 +103,9 @@ class WenkuNovelTile extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.start,
-            style: styleManager.titleSmall?.copyWith(
-              color: styleManager.colorScheme.onPrimaryContainer,
-            ),
+            style: styleManager.titleSmall(context)?.copyWith(
+                  color: styleManager.colorScheme(context).onPrimaryContainer,
+                ),
           ),
         ),
       ),

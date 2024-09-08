@@ -4,12 +4,6 @@ import 'package:flutter/material.dart';
 final styleManager = _StyleManager();
 
 class _StyleManager {
-  late ThemeData theme;
-
-  setTheme(ThemeData theme) {
-    this.theme = theme;
-  }
-
   final lightTheme = ThemeData(
     brightness: Brightness.light,
     colorSchemeSeed: const Color(0xFF18A058),
@@ -34,35 +28,44 @@ class _StyleManager {
     }),
   );
 
-  TextStyle? get primaryColorTitleSmall => theme.textTheme.titleSmall?.copyWith(
-        color: theme.colorScheme.primary,
-      );
-  TextStyle? get primaryColorTitleLarge => theme.textTheme.titleLarge?.copyWith(
-        color: theme.colorScheme.primary,
-      );
-  TextStyle? get greyTitleMedium => theme.textTheme.titleMedium?.copyWith(
-        color: Colors.grey,
-      );
+  TextStyle? primaryColorTitleSmall(BuildContext context) =>
+      Theme.of(context).textTheme.titleSmall?.copyWith(
+            color: Theme.of(context).colorScheme.primary,
+          );
+  TextStyle? primaryColorTitleLarge(BuildContext context) =>
+      Theme.of(context).textTheme.titleLarge?.copyWith(
+            color: Theme.of(context).colorScheme.primary,
+          );
+  TextStyle? greyTitleMedium(BuildContext context) =>
+      Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: Colors.grey,
+          );
 
-  TextStyle? get originalText => theme.textTheme.bodyMedium?.copyWith(
-        color: Colors.grey,
-      );
-  TextStyle? get zhText => theme.textTheme.bodyMedium?.copyWith(
-        color: colorScheme.onPrimaryContainer,
-      );
+  TextStyle? originalText(BuildContext context) =>
+      Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Colors.grey,
+          );
+  TextStyle? zhText(BuildContext context) =>
+      Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: colorScheme(context).onPrimaryContainer,
+          );
 
-  TextStyle? get titleSmall => theme.textTheme.titleSmall?.copyWith(
-        color: theme.colorScheme.secondary,
-      );
-  TextStyle? get boldMediumTitle =>
-      textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold);
+  TextStyle? titleSmall(BuildContext context) =>
+      Theme.of(context).textTheme.titleSmall?.copyWith(
+            color: Theme.of(context).colorScheme.secondary,
+          );
+  TextStyle? boldMediumTitle(BuildContext context) =>
+      textTheme(context).titleMedium?.copyWith(fontWeight: FontWeight.bold);
 
-  TextStyle? get tipText =>
-      theme.textTheme.bodySmall?.copyWith(color: Colors.grey);
-  ColorScheme get colorScheme => theme.colorScheme;
-  TextTheme get textTheme => theme.textTheme;
+  TextStyle? tipText(BuildContext context) =>
+      Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey);
+  ColorScheme colorScheme(BuildContext context) =>
+      Theme.of(context).colorScheme;
+  TextTheme textTheme(BuildContext context) => Theme.of(context).textTheme;
   Color get warnContainer => const Color(0xfffdf6ec);
   Color get onWarnContainer => const Color(0xffe6a23c);
   Color get succeedContainer => const Color(0xfff0f9eb);
   Color get onSucceedContainer => const Color(0xff67c23a);
+  Color get errorContainer => const Color(0xfffef0f0);
+  Color get onErrorContainer => const Color(0xfff56c6c);
 }

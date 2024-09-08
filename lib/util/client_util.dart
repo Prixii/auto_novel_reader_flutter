@@ -68,8 +68,8 @@ void initScreenSize(BuildContext context) {
 void showErrorToast(String message) {
   Fluttertoast.showToast(
     msg: message,
-    textColor: styleManager.colorScheme.onErrorContainer,
-    backgroundColor: styleManager.colorScheme.errorContainer,
+    textColor: styleManager.onErrorContainer,
+    backgroundColor: styleManager.errorContainer,
   );
 }
 

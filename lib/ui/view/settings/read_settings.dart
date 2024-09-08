@@ -13,8 +13,8 @@ class ReadSettings extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        shadowColor: styleManager.colorScheme.shadow,
-        backgroundColor: styleManager.colorScheme.secondaryContainer,
+        shadowColor: styleManager.colorScheme(context).shadow,
+        backgroundColor: styleManager.colorScheme(context).secondaryContainer,
         title: const Text('阅读设置'),
       ),
       body: SingleChildScrollView(

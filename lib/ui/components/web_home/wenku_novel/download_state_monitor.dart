@@ -51,13 +51,16 @@ class DownloadStateMonitor extends StatelessWidget {
                   ? _buildReadButton(context)
                   : FilledButton(
                       style: FilledButton.styleFrom(
-                        backgroundColor:
-                            styleManager.colorScheme.secondaryContainer,
+                        backgroundColor: styleManager
+                            .colorScheme(context)
+                            .secondaryContainer,
                       ),
                       onPressed: () => onPressed(),
                       child: Icon(
                         UniconsLine.file_download,
-                        color: styleManager.colorScheme.onSecondaryContainer,
+                        color: styleManager
+                            .colorScheme(context)
+                            .onSecondaryContainer,
                       ),
                     );
             },

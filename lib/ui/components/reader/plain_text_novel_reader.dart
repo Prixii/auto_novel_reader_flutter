@@ -25,8 +25,9 @@ class PlainTextNovelReaderContainer extends StatelessWidget {
         return Scaffold(
           appBar: AppBar(
             title: Text(dto?.titleJp ?? dto?.titleZh ?? ''),
-            shadowColor: styleManager.colorScheme.shadow,
-            backgroundColor: styleManager.colorScheme.secondaryContainer,
+            shadowColor: styleManager.colorScheme(context).shadow,
+            backgroundColor:
+                styleManager.colorScheme(context).secondaryContainer,
             actions: _buildActions(context),
           ),
           drawer: Drawer(
@@ -142,11 +143,11 @@ class _PlainTextNovelReaderState extends State<PlainTextNovelReader>
               children: [
                 Text(
                   widget.dto.titleJp ?? '',
-                  style: styleManager.primaryColorTitleLarge,
+                  style: styleManager.primaryColorTitleLarge(context),
                 ),
                 Text(
                   widget.dto.titleZh ?? '',
-                  style: styleManager.titleSmall,
+                  style: styleManager.titleSmall(context),
                 ),
                 const Divider(),
                 NovelRender(
@@ -402,7 +403,7 @@ class NovelRender extends StatelessWidget {
         style: TextStyle(
           color: grey
               ? Colors.grey
-              : Theme.of(context).colorScheme.onPrimaryContainer,
+              : styleManager.colorScheme(context).onPrimaryContainer,
           fontSize: config.fontSize.toDouble(),
           fontWeight: config.boldFont ? FontWeight.bold : FontWeight.normal,
         ),

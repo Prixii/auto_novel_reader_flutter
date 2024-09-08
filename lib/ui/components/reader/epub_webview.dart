@@ -140,7 +140,7 @@ class _EpubWebviewState extends State<EpubWebview> {
       stylesMap['color'] = isDark ? 'grey' : 'lightgrey';
     } else {
       if (isDark) {
-        final color = Theme.of(context).colorScheme.primary;
+        final color = styleManager.colorScheme(context).primary;
         stylesMap['color'] = 'rgb(${color.red},${color.green},${color.blue})';
       }
     }
@@ -219,7 +219,7 @@ class _EpubWebviewState extends State<EpubWebview> {
                   )),
               Container(
                 decoration: BoxDecoration(
-                  color: styleManager.colorScheme.secondary,
+                  color: styleManager.colorScheme(context).secondary,
                   borderRadius: BorderRadius.circular(radius),
                 ),
                 height: maxHeight * readProgress,

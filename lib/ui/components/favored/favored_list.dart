@@ -1,3 +1,4 @@
+import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
@@ -59,7 +60,7 @@ class FavoredListTile extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8.0),
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            color: styleManager.colorScheme(context).surfaceContainerHighest,
           ),
           padding: const EdgeInsets.all(12.0),
           child: Row(
@@ -74,7 +75,7 @@ class FavoredListTile extends StatelessWidget {
                   onTap: () => _tryDelete(context),
                   child: Icon(
                     UniconsLine.trash_alt,
-                    color: Theme.of(context).colorScheme.error,
+                    color: styleManager.colorScheme(context).error,
                   ),
                 ),
               const SizedBox(width: 12.0),
@@ -83,7 +84,7 @@ class FavoredListTile extends StatelessWidget {
                   onTap: () => _tryRename(context),
                   child: Icon(
                     UniconsLine.edit_alt,
-                    color: Theme.of(context).colorScheme.primary,
+                    color: styleManager.colorScheme(context).primary,
                   ),
                 ),
             ],

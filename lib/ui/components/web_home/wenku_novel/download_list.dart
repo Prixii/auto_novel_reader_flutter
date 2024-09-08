@@ -17,8 +17,8 @@ class DownloadList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          shadowColor: styleManager.colorScheme.shadow,
-          backgroundColor: styleManager.colorScheme.secondaryContainer,
+          shadowColor: styleManager.colorScheme(context).shadow,
+          backgroundColor: styleManager.colorScheme(context).secondaryContainer,
           title: const Text('小说详情'),
           actions: _buildActions(context),
         ),
@@ -28,11 +28,11 @@ class DownloadList extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('目录', style: styleManager.boldMediumTitle),
+              Text('目录', style: styleManager.boldMediumTitle(context)),
               const SizedBox(height: 8),
               _buildMenu(),
               const SizedBox(height: 8),
-              Text('中文', style: styleManager.boldMediumTitle),
+              Text('中文', style: styleManager.boldMediumTitle(context)),
               const SizedBox(height: 8),
               _buildZhMenu(),
               const SizedBox(height: 8),
@@ -111,13 +111,13 @@ class JpVolumeListTile extends StatelessWidget {
               const SizedBox(height: 8.0),
               Text(
                 dto.volumeId,
-                style: styleManager.primaryColorTitleSmall,
+                style: styleManager.primaryColorTitleSmall(context),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
               Text(
                 _getTranslationCount,
-                style: Theme.of(context).textTheme.bodySmall,
+                style: styleManager.textTheme(context).bodySmall,
               ),
               const SizedBox(height: 8.0),
             ],
@@ -168,7 +168,7 @@ class ZhVolumeListTile extends StatelessWidget {
               const SizedBox(height: 8.0),
               Text(
                 title,
-                style: styleManager.primaryColorTitleSmall,
+                style: styleManager.primaryColorTitleSmall(context),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),

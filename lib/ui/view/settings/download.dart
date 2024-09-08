@@ -13,8 +13,8 @@ class DownloadPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        shadowColor: styleManager.colorScheme.shadow,
-        backgroundColor: styleManager.colorScheme.secondaryContainer,
+        shadowColor: styleManager.colorScheme(context).shadow,
+        backgroundColor: styleManager.colorScheme(context).secondaryContainer,
         title: const Text('下载管理'),
       ),
       body: BlocBuilder<DownloadCubit, DownloadState>(
@@ -60,7 +60,7 @@ class DownloadItem extends StatelessWidget {
       margin: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8.0),
-        color: _getColor(),
+        color: _getColor(context),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -72,7 +72,7 @@ class DownloadItem extends StatelessWidget {
                 title,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: styleManager.primaryColorTitleSmall,
+                style: styleManager.primaryColorTitleSmall(context),
               ),
             ),
             SizedBox(
@@ -80,7 +80,8 @@ class DownloadItem extends StatelessWidget {
               child: _buildTrailingButton(context),
             )
           ]),
-          if (extraInfo != null) Text(extraInfo!, style: styleManager.tipText),
+          if (extraInfo != null)
+            Text(extraInfo!, style: styleManager.tipText(context)),
         ],
       ),
     );
@@ -95,14 +96,14 @@ class DownloadItem extends StatelessWidget {
     ]);
   }
 
-  Color _getColor() {
+  Color _getColor(BuildContext context) {
     switch (downloadStatus) {
       case DownloadStatus.failed:
-        return styleManager.colorScheme.errorContainer;
+        return styleManager.colorScheme(context).errorContainer;
       case DownloadStatus.succeed:
-        return styleManager.colorScheme.secondaryContainer;
+        return styleManager.colorScheme(context).secondaryContainer;
       default:
-        return styleManager.colorScheme.tertiaryContainer;
+        return styleManager.colorScheme(context).tertiaryContainer;
     }
   }
 

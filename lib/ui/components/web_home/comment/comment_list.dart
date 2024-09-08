@@ -72,7 +72,7 @@ class _CommentTileState extends State<CommentTile> {
               const SizedBox(width: 8.0),
               Text(
                 formatTimestamp(widget.comment.createAt * 1000),
-                style: styleManager.tipText,
+                style: styleManager.tipText(context),
               ),
               Expanded(child: Container()),
               if (isMyComment)
@@ -90,7 +90,8 @@ class _CommentTileState extends State<CommentTile> {
               width: double.infinity,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8.0),
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                color:
+                    styleManager.colorScheme(context).surfaceContainerHighest,
               ),
               child: (originalHidden && isMyComment)
                   ? const Text('评论已隐藏')
@@ -118,9 +119,9 @@ class _CommentTileState extends State<CommentTile> {
       },
       child: Text(
         '隐藏',
-        style: styleManager.tipText?.copyWith(
-          color: styleManager.colorScheme.primary,
-        ),
+        style: styleManager.tipText(context)?.copyWith(
+              color: styleManager.colorScheme(context).primary,
+            ),
       ),
     );
   }
@@ -137,9 +138,9 @@ class _CommentTileState extends State<CommentTile> {
       },
       child: Text(
         '显示',
-        style: styleManager.tipText?.copyWith(
-          color: styleManager.colorScheme.primary,
-        ),
+        style: styleManager.tipText(context)?.copyWith(
+              color: styleManager.colorScheme(context).primary,
+            ),
       ),
     );
   }

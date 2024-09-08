@@ -99,7 +99,9 @@ class _NovelRankState extends State<NovelRank>
               IconButton(
                   onPressed: _toggleVisibility,
                   icon: Icon(UniconsLine.sort_amount_down,
-                      color: styleManager.colorScheme.onSecondaryContainer)),
+                      color: styleManager
+                          .colorScheme(context)
+                          .onSecondaryContainer)),
             ],
           ),
         ),
@@ -129,7 +131,8 @@ class _NovelRankState extends State<NovelRank>
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16.0),
               boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15))],
-              color: styleManager.colorScheme.surface.withOpacity(0.6)),
+              color:
+                  styleManager.colorScheme(context).surface.withOpacity(0.6)),
           child: filterList[currentIndex],
         ),
       ),

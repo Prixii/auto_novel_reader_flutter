@@ -1,4 +1,5 @@
 import 'package:auto_novel_reader_flutter/bloc/global/global_bloc.dart';
+import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/ui/view/reader/favored.dart';
 import 'package:auto_novel_reader_flutter/ui/view/reader/history.dart';
@@ -22,8 +23,8 @@ class _ReaderViewState extends State<ReaderView> {
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          shadowColor: Theme.of(context).colorScheme.shadow,
-          backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+          shadowColor: styleManager.colorScheme(context).shadow,
+          backgroundColor: styleManager.colorScheme(context).secondaryContainer,
           title: _buildTabBar(),
         ),
         body: BlocListener<GlobalBloc, GlobalState>(

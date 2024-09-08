@@ -34,7 +34,7 @@ class HomeView extends StatelessWidget {
           prev.destinationIndex != state.destinationIndex,
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: styleManager.colorScheme.surface,
+          backgroundColor: styleManager.colorScheme(context).surface,
           body: Center(
             child: PageTransitionSwitcher(
               reverse: reverse,

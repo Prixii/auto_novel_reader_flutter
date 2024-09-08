@@ -36,7 +36,7 @@ class _CommentBoxState extends State<CommentBox> {
         Expanded(
           child: Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              color: styleManager.colorScheme(context).surfaceContainerHighest,
               borderRadius: BorderRadius.circular(24), // 圆角
             ),
             child: TextField(
@@ -44,7 +44,7 @@ class _CommentBoxState extends State<CommentBox> {
               decoration: InputDecoration(
                 hintText: '撰写评论',
                 hintStyle: TextStyle(
-                  color: Theme.of(context).colorScheme.secondaryFixedDim,
+                  color: styleManager.colorScheme(context).secondaryFixedDim,
                 ), // 提示文本颜色
                 border: InputBorder.none, // 去掉默认边框
                 contentPadding: const EdgeInsets.symmetric(
@@ -53,8 +53,9 @@ class _CommentBoxState extends State<CommentBox> {
               maxLines: 1,
               onSubmitted: (_) => _submitComment,
               style: TextStyle(
-                  color:
-                      styleManager.colorScheme.onSecondaryContainer), // 输入文本颜色
+                  color: styleManager
+                      .colorScheme(context)
+                      .onSecondaryContainer), // 输入文本颜色
             ),
           ),
         ),

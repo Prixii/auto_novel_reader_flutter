@@ -42,7 +42,7 @@ class _IntroductionCardState extends State<IntroductionCard> {
               },
               child: Text(
                 expand ? '收起' : '展开',
-                style: styleManager.primaryColorTitleSmall,
+                style: styleManager.primaryColorTitleSmall(context),
               ),
             ),
           ],

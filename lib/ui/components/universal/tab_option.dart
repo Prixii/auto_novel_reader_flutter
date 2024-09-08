@@ -83,7 +83,7 @@ class _TabOptionState extends State<TabOption> with TickerProviderStateMixin {
             ],
           ),
           if (widget.tip != null)
-            Text(widget.tip!, style: styleManager.tipText),
+            Text(widget.tip!, style: styleManager.tipText(context)),
         ],
       ),
     );

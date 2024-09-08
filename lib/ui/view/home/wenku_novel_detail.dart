@@ -36,8 +36,9 @@ class WenkuNovelDetailContainer extends StatelessWidget {
         builder: (context, novelDto) {
           return Scaffold(
               appBar: AppBar(
-                shadowColor: styleManager.colorScheme.shadow,
-                backgroundColor: styleManager.colorScheme.secondaryContainer,
+                shadowColor: styleManager.colorScheme(context).shadow,
+                backgroundColor:
+                    styleManager.colorScheme(context).secondaryContainer,
                 title: const Text('小说详情'),
                 actions: _buildActions(context),
               ),
@@ -139,7 +140,7 @@ class _WenkuNovelDetailState extends State<WenkuNovelDetail> {
         const SizedBox(height: 8.0),
         ..._buildIntroduction(novelDto),
         const SizedBox(height: 8.0),
-        Text('评论', style: styleManager.boldMediumTitle),
+        Text('评论', style: styleManager.boldMediumTitle(context)),
         const SizedBox(height: 8.0),
         CommentBox(onSucceedComment: () => pageLoader.refresh()),
         const SizedBox(height: 12.0),
@@ -169,42 +170,42 @@ class _WenkuNovelDetailState extends State<WenkuNovelDetail> {
 
   Widget _buildAuthorsInfo(WenkuNovelDto novelDto) {
     return Row(children: [
-      Text('作者: ', style: styleManager.tipText),
+      Text('作者: ', style: styleManager.tipText(context)),
       Text(_uniteMembers(novelDto.authors),
-          style: styleManager.tipText?.copyWith(
-            color: styleManager.colorScheme.primary,
-          )),
+          style: styleManager.tipText(context)?.copyWith(
+                color: styleManager.colorScheme(context).primary,
+              )),
     ]);
   }
 
   Widget _buildArtistsInfo(WenkuNovelDto novelDto) {
     return Row(children: [
-      Text('插图: ', style: styleManager.tipText),
+      Text('插图: ', style: styleManager.tipText(context)),
       Text(_uniteMembers(novelDto.artists),
-          style: styleManager.tipText?.copyWith(
-            color: styleManager.colorScheme.primary,
-          )),
+          style: styleManager.tipText(context)?.copyWith(
+                color: styleManager.colorScheme(context).primary,
+              )),
     ]);
   }
 
   Widget _buildPublisherInfo(WenkuNovelDto novelDto) {
     return Row(children: [
-      Text('出版: ', style: styleManager.tipText),
+      Text('出版: ', style: styleManager.tipText(context)),
       Expanded(
         child: Text(
           '${novelDto.publisher} ',
-          style: styleManager.tipText?.copyWith(
-            color: styleManager.colorScheme.primary,
-          ),
+          style: styleManager.tipText(context)?.copyWith(
+                color: styleManager.colorScheme(context).primary,
+              ),
           overflow: TextOverflow.ellipsis,
         ),
       ),
       Expanded(
         child: Text(
           novelDto.imprint ?? '',
-          style: styleManager.tipText?.copyWith(
-            color: styleManager.colorScheme.primary,
-          ),
+          style: styleManager.tipText(context)?.copyWith(
+                color: styleManager.colorScheme(context).primary,
+              ),
           overflow: TextOverflow.ellipsis,
         ),
       ),
@@ -214,15 +215,16 @@ class _WenkuNovelDetailState extends State<WenkuNovelDetail> {
   Widget _buildUpdateInfo(WenkuNovelDto novelDto) {
     return Row(
       children: [
-        Text(novelDto.level, style: styleManager.tipText),
-        Text(' / ', style: styleManager.tipText),
-        Text('共 ${novelDto.volumes.length} 卷', style: styleManager.tipText),
-        Text(' / ', style: styleManager.tipText),
+        Text(novelDto.level, style: styleManager.tipText(context)),
+        Text(' / ', style: styleManager.tipText(context)),
+        Text('共 ${novelDto.volumes.length} 卷',
+            style: styleManager.tipText(context)),
+        Text(' / ', style: styleManager.tipText(context)),
         Text('${parseLargeNumber(novelDto.visited)} 浏览',
-            style: styleManager.tipText),
+            style: styleManager.tipText(context)),
         Expanded(child: Container()),
         Text('最新出版 ${parseTimeStamp((novelDto.latestPublishAt ?? 0) * 1000)}',
-            style: styleManager.tipText),
+            style: styleManager.tipText(context)),
       ],
     );
   }
@@ -231,11 +233,11 @@ class _WenkuNovelDetailState extends State<WenkuNovelDetail> {
     return [
       Text(
         novelDto.title,
-        style: styleManager.primaryColorTitleLarge,
+        style: styleManager.primaryColorTitleLarge(context),
       ),
       Text(
         novelDto.titleZh,
-        style: styleManager.greyTitleMedium,
+        style: styleManager.greyTitleMedium(context),
       ),
     ];
   }
@@ -244,12 +246,14 @@ class _WenkuNovelDetailState extends State<WenkuNovelDetail> {
     return [
       Text(
         '简介',
-        style: styleManager.textTheme.titleMedium
+        style: styleManager
+            .textTheme(context)
+            .titleMedium
             ?.copyWith(fontWeight: FontWeight.bold),
       ),
       IntroductionCard(
         content: novelDto.introduction,
-        style: styleManager.textTheme.bodyMedium,
+        style: styleManager.textTheme(context).bodyMedium,
       ),
     ];
   }
@@ -337,7 +341,7 @@ class _WenkuNovelDetailState extends State<WenkuNovelDetail> {
                 child: Text(
                   '选择收藏夹',
                   textAlign: TextAlign.center,
-                  style: styleManager.primaryColorTitleLarge,
+                  style: styleManager.primaryColorTitleLarge(context),
                 ),
               ),
               BlocSelector<FavoredCubit, FavoredState, List<Favored>>(

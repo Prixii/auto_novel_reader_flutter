@@ -1,5 +1,6 @@
 import 'package:auto_novel_reader_flutter/bloc/favored_cubit/favored_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/user/user_cubit.dart';
+import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/ui/components/favored/favored_manager.dart';
@@ -142,7 +143,7 @@ class FavoredView extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.all(12.0),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
+            color: styleManager.colorScheme(context).surface,
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(12),
               topRight: Radius.circular(12),

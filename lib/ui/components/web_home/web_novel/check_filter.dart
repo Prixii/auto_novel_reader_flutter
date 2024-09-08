@@ -22,11 +22,12 @@ class CheckFilter<T> extends StatefulWidget {
 class _CheckFilterState<T> extends State<CheckFilter> {
   final Map<String, bool> _selectedOptions = {};
   final Map<T, bool> _selectedValues = {};
-  final activeColor = styleManager.colorScheme.secondary;
+  late final Color activeColor;
   final inactiveColor = Colors.white;
   @override
   void initState() {
     super.initState();
+    activeColor = styleManager.colorScheme(context).secondary;
     widget.controller.setGetOptionsFunc(() {
       var list = <T>[];
       for (var entry in _selectedValues.entries) {
@@ -53,7 +54,7 @@ class _CheckFilterState<T> extends State<CheckFilter> {
       children: [
         Text(
           widget.title,
-          style: styleManager.primaryColorTitleSmall,
+          style: styleManager.primaryColorTitleSmall(context),
         ),
         const SizedBox(height: 4),
         Wrap(

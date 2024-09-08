@@ -93,7 +93,7 @@ class _WenkuSearchWidgetState extends State<WenkuSearchWidget>
   Widget _buildSearchBar() {
     return Container(
       decoration: BoxDecoration(
-        color: styleManager.colorScheme.secondaryContainer, // 设置底色
+        color: styleManager.colorScheme(context).secondaryContainer, // 设置底色
         borderRadius: BorderRadius.circular(24), // 圆角
       ),
       child: TextField(
@@ -101,10 +101,13 @@ class _WenkuSearchWidgetState extends State<WenkuSearchWidget>
         decoration: InputDecoration(
           hintText: '中/日文标题或作者',
           hintStyle: TextStyle(
-              color: styleManager.colorScheme.secondaryFixedDim), // 提示文本颜色
+              color: styleManager
+                  .colorScheme(context)
+                  .secondaryFixedDim), // 提示文本颜色
           border: InputBorder.none, // 去掉默认边框
           prefixIcon: Icon(Icons.search,
-              color: styleManager.colorScheme.secondaryFixedDim), // 搜索图标
+              color:
+                  styleManager.colorScheme(context).secondaryFixedDim), // 搜索图标
           contentPadding:
               const EdgeInsets.symmetric(vertical: 12, horizontal: 20), // 内边距
         ),
@@ -115,7 +118,9 @@ class _WenkuSearchWidgetState extends State<WenkuSearchWidget>
           _toggleVisibility(false);
         },
         style: TextStyle(
-            color: styleManager.colorScheme.onSecondaryContainer), // 输入文本颜色
+            color: styleManager
+                .colorScheme(context)
+                .onSecondaryContainer), // 输入文本颜色
       ),
     );
   }
@@ -133,7 +138,8 @@ class _WenkuSearchWidgetState extends State<WenkuSearchWidget>
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16.0),
                 boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15))],
-                color: Theme.of(context).colorScheme.surface.withOpacity(0.6)),
+                color:
+                    styleManager.colorScheme(context).surface.withOpacity(0.6)),
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
               child: _buildFilters(),

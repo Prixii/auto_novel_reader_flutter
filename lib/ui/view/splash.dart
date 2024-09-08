@@ -36,7 +36,7 @@ class _SplashViewState extends State<SplashView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: styleManager.colorScheme(context).surface,
       body: Stack(
         children: [
           Center(
@@ -56,7 +56,6 @@ class _SplashViewState extends State<SplashView> {
   }
 
   Future<void> _startInit() async {
-    styleManager.setTheme(Theme.of(context));
     localFileManager.init();
     initKeyDownChannel();
     globalBloc.add(GlobalEvent.switchNavigationDestination(

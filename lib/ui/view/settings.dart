@@ -1,5 +1,7 @@
+import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/ui/components/settings/user_info_tile.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/icon_option.dart';
+import 'package:auto_novel_reader_flutter/ui/view/settings/about_page.dart';
 import 'package:auto_novel_reader_flutter/ui/view/settings/data_settings.dart';
 import 'package:auto_novel_reader_flutter/ui/view/settings/download.dart';
 import 'package:auto_novel_reader_flutter/ui/view/settings/preference_settings.dart';
@@ -17,9 +19,11 @@ class SettingsView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('设置'),
-        shadowColor: Theme.of(context).colorScheme.shadow,
-        backgroundColor:
-            Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.5),
+        shadowColor: styleManager.colorScheme(context).shadow,
+        backgroundColor: styleManager
+            .colorScheme(context)
+            .secondaryContainer
+            .withOpacity(0.5),
       ),
       body: SingleChildScrollView(
         child: _buildOptions(theme, context),
@@ -58,10 +62,11 @@ class SettingsView extends StatelessWidget {
             onTap: () => Navigator.push(context,
                 MaterialPageRoute(builder: (context) => const DataSettings()))),
         _buildDivider(theme),
-        const IconOption(
-          icon: UniconsLine.question_circle,
-          text: '关于',
-        ),
+        IconOption(
+            icon: UniconsLine.question_circle,
+            text: '关于',
+            onTap: () => Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const AboutPage()))),
       ],
     );
   }

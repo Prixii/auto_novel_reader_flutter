@@ -23,7 +23,7 @@ class FavoredManager extends StatelessWidget {
             child: Text(
               '收藏夹管理',
               textAlign: TextAlign.center,
-              style: styleManager.primaryColorTitleLarge,
+              style: styleManager.primaryColorTitleLarge(context),
             ),
           ),
           Text(
@@ -102,17 +102,17 @@ class FavoredManager extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8.0),
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            color: styleManager.colorScheme(context).surfaceContainerHighest,
           ),
           padding: const EdgeInsets.all(12.0),
           child: Row(
             children: [
               Icon(UniconsLine.plus,
-                  color: Theme.of(context).colorScheme.primary),
+                  color: styleManager.colorScheme(context).primary),
               const SizedBox(width: 8),
               Text('创建收藏夹',
-                  style: const TextStyle()
-                      .copyWith(color: Theme.of(context).colorScheme.primary)),
+                  style: const TextStyle().copyWith(
+                      color: styleManager.colorScheme(context).primary)),
             ],
           ),
         ),

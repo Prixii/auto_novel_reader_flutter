@@ -1,3 +1,4 @@
+import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:flutter/material.dart';
 
 class SwitchOption extends StatefulWidget {
@@ -36,13 +37,14 @@ class _SwitchOptionState extends State<SwitchOption> {
                   padding: const EdgeInsets.only(right: 8.0),
                   child: Icon(
                     widget.icon,
-                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                    color:
+                        styleManager.colorScheme(context).onSecondaryContainer,
                   ),
                 ),
           Expanded(
               child: Text(
             widget.label,
-            style: Theme.of(context).textTheme.bodyLarge,
+            style: styleManager.textTheme(context).bodyLarge,
           )),
           Switch(
               value: value,

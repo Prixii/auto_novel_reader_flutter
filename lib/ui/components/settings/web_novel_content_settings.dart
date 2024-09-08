@@ -76,14 +76,14 @@ class WebNovelContentSettings extends StatelessWidget {
         children: [
           Text(
             '翻译顺序',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.onSecondaryContainer,
+            style: styleManager.textTheme(context).bodyLarge?.copyWith(
+                  color: styleManager.colorScheme(context).onSecondaryContainer,
                 ),
           ),
           const SizedBox(width: 8),
           Text(
             '长按调整顺序, 双击设置启用状态',
-            style: styleManager.tipText,
+            style: styleManager.tipText(context),
           ),
         ],
       ),
@@ -131,7 +131,7 @@ class WebNovelContentSettings extends StatelessWidget {
             alignment: Alignment.centerLeft,
             decoration: BoxDecoration(
               color: config.translationSourcesEnabled[item]!
-                  ? Theme.of(context).colorScheme.secondaryContainer
+                  ? styleManager.colorScheme(context).secondaryContainer
                   : Theme.of(context).disabledColor,
               borderRadius: BorderRadius.only(
                 topLeft: i == 0 ? const Radius.circular(10) : Radius.zero,
@@ -188,13 +188,13 @@ class WebNovelContentSettings extends StatelessWidget {
       children: [
         Icon(
           UniconsLine.book,
-          color: Theme.of(context).colorScheme.onSecondaryContainer,
+          color: styleManager.colorScheme(context).onSecondaryContainer,
         ),
         const SizedBox(width: 10),
         Expanded(
           child: Text(
             'Web 阅读内容设置',
-            style: Theme.of(context).textTheme.titleMedium,
+            style: styleManager.textTheme(context).titleMedium,
           ),
         ),
       ],

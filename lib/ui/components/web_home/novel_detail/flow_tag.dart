@@ -14,14 +14,14 @@ class FlowTag extends StatelessWidget {
       for (var tag in attentions)
         InfoBadge(
           tag,
-          backgroundColor: styleManager.colorScheme.errorContainer,
-          fontColor: styleManager.colorScheme.onErrorContainer,
+          backgroundColor: styleManager.colorScheme(context).errorContainer,
+          fontColor: styleManager.colorScheme(context).onErrorContainer,
         ),
       for (var tag in keywords)
         InfoBadge(
           tag,
-          backgroundColor: styleManager.colorScheme.secondaryContainer,
-          fontColor: styleManager.colorScheme.onSecondaryContainer,
+          backgroundColor: styleManager.colorScheme(context).secondaryContainer,
+          fontColor: styleManager.colorScheme(context).onSecondaryContainer,
         )
     ]);
   }

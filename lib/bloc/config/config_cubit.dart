@@ -19,7 +19,6 @@ class ConfigCubit extends HydratedCubit<ConfigState> {
   setPreloadNovel(bool value) => emit(state.copyWith(preloadNovel: value));
   setThemeMode(ThemeMode value) {
     emit(state.copyWith(themeMode: value));
-    styleManager.setTheme(styleManager.lightTheme);
   }
 
   setWebNovelConfig(WebNovelConfig value) =>

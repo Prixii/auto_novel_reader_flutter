@@ -9,8 +9,8 @@ class ShieldSettings extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        shadowColor: styleManager.colorScheme.shadow,
-        backgroundColor: styleManager.colorScheme.secondaryContainer,
+        shadowColor: styleManager.colorScheme(context).shadow,
+        backgroundColor: styleManager.colorScheme(context).secondaryContainer,
         title: const Text('屏蔽设置'),
       ),
       body: const SingleChildScrollView(

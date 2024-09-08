@@ -1,4 +1,5 @@
 import 'package:auto_novel_reader_flutter/bloc/config/config_cubit.dart';
+import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/switch_option.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
@@ -27,7 +28,7 @@ class NovelAppearanceSettings extends StatelessWidget {
                   const SizedBox(width: 20),
                   Text(
                     '字体大小',
-                    style: Theme.of(context).textTheme.bodyLarge,
+                    style: styleManager.textTheme(context).bodyLarge,
                   ),
                   Expanded(
                     child: Slider(
@@ -71,13 +72,13 @@ class NovelAppearanceSettings extends StatelessWidget {
       children: [
         Icon(
           UniconsLine.book,
-          color: Theme.of(context).colorScheme.onSecondaryContainer,
+          color: styleManager.colorScheme(context).onSecondaryContainer,
         ),
         const SizedBox(width: 10),
         Expanded(
           child: Text(
             'Web 显示样式设置',
-            style: Theme.of(context).textTheme.titleMedium,
+            style: styleManager.textTheme(context).titleMedium,
           ),
         ),
       ],

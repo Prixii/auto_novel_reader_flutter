@@ -37,8 +37,9 @@ class WebNovelDetailContainer extends StatelessWidget {
       }, builder: (context, novelDto) {
         return Scaffold(
             appBar: AppBar(
-              shadowColor: styleManager.colorScheme.shadow,
-              backgroundColor: styleManager.colorScheme.secondaryContainer,
+              shadowColor: styleManager.colorScheme(context).shadow,
+              backgroundColor:
+                  styleManager.colorScheme(context).secondaryContainer,
               title: const Text('小说详情'),
               actions: _buildActions(context),
             ),
@@ -175,7 +176,7 @@ class _WebNovelDetailState extends State<WebNovelDetail> {
         const SizedBox(height: 8.0),
         ..._buildIntroduction(novelDto),
         const SizedBox(height: 8.0),
-        Text('评论', style: styleManager.boldMediumTitle),
+        Text('评论', style: styleManager.boldMediumTitle(context)),
         const SizedBox(height: 8.0),
         CommentBox(onSucceedComment: () => pageLoader.refresh()),
         const SizedBox(height: 12.0),
@@ -192,28 +193,28 @@ class _WebNovelDetailState extends State<WebNovelDetail> {
 
   Widget _buildAuthorInfo(WebNovelDto novelDto) {
     return Row(children: [
-      Text('作者: ', style: styleManager.tipText),
+      Text('作者: ', style: styleManager.tipText(context)),
       Text(_getAuthors(novelDto),
-          style: styleManager.tipText?.copyWith(
-            color: styleManager.colorScheme.primary,
-          )),
+          style: styleManager.tipText(context)?.copyWith(
+                color: styleManager.colorScheme(context).primary,
+              )),
     ]);
   }
 
   Widget _buildUpdateInfo(WebNovelDto novelDto) {
     return Row(
       children: [
-        Text(novelDto.type, style: styleManager.tipText),
-        Text(' / ', style: styleManager.tipText),
+        Text(novelDto.type, style: styleManager.tipText(context)),
+        Text(' / ', style: styleManager.tipText(context)),
         Text('${parseLargeNumber(novelDto.totalCharacters ?? 0)} 字',
-            style: styleManager.tipText),
-        Text(' / ', style: styleManager.tipText),
+            style: styleManager.tipText(context)),
+        Text(' / ', style: styleManager.tipText(context)),
         Text('${parseLargeNumber(novelDto.visited)} 浏览',
-            style: styleManager.tipText),
+            style: styleManager.tipText(context)),
         Expanded(child: Container()),
         Text(
             '最近更新 ${parseTimeStamp((novelDto.toc?.last.createAt ?? 0) * 1000)}',
-            style: styleManager.tipText),
+            style: styleManager.tipText(context)),
       ],
     );
   }
@@ -222,11 +223,11 @@ class _WebNovelDetailState extends State<WebNovelDetail> {
     return [
       Text(
         novelDto.titleJp,
-        style: styleManager.primaryColorTitleLarge,
+        style: styleManager.primaryColorTitleLarge(context),
       ),
       Text(
         novelDto.titleZh ?? '',
-        style: styleManager.greyTitleMedium,
+        style: styleManager.greyTitleMedium(context),
       ),
     ];
   }
@@ -235,16 +236,18 @@ class _WebNovelDetailState extends State<WebNovelDetail> {
     return [
       Text(
         '简介',
-        style: styleManager.textTheme.titleMedium
+        style: styleManager
+            .textTheme(context)
+            .titleMedium
             ?.copyWith(fontWeight: FontWeight.bold),
       ),
       IntroductionCard(
         content: novelDto.introductionZh ?? '',
-        style: styleManager.textTheme.bodyMedium,
+        style: styleManager.textTheme(context).bodyMedium,
       ),
       IntroductionCard(
         content: novelDto.introductionJp,
-        style: styleManager.tipText,
+        style: styleManager.tipText(context),
       ),
     ];
   }
@@ -345,7 +348,7 @@ class _WebNovelDetailState extends State<WebNovelDetail> {
                 child: Text(
                   '选择收藏夹',
                   textAlign: TextAlign.center,
-                  style: styleManager.primaryColorTitleLarge,
+                  style: styleManager.primaryColorTitleLarge(context),
                 ),
               ),
               BlocSelector<FavoredCubit, FavoredState, List<Favored>>(

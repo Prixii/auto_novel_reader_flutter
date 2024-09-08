@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:auto_novel_reader_flutter/bloc/epub_viewer/epub_viewer_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/local_file_manager.dart';
+import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/ui/components/reader/plain_text_book_cover.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/line_button.dart';
@@ -118,7 +119,7 @@ class _BookListTileState extends State<BookListTile> {
           widget.epubManageData.name.trim(),
           maxLines: 3,
           overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.titleSmall,
+          style: styleManager.textTheme(context).titleSmall,
         ),
         Expanded(child: Container()),
         _buildFooter(context),
@@ -163,7 +164,7 @@ class _BookListTileState extends State<BookListTile> {
               child: Text(
                 '删除',
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.error,
+                  color: styleManager.colorScheme(context).error,
                 ),
               ),
               onTap: () async {
@@ -208,7 +209,7 @@ class _BookListTileState extends State<BookListTile> {
               child: Text(
                 '删！',
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.error,
+                  color: styleManager.colorScheme(context).error,
                 ),
               ),
               onPressed: () {
@@ -238,7 +239,7 @@ class _BookListTileState extends State<BookListTile> {
         return Container(
           padding: const EdgeInsets.all(12.0),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
+            color: styleManager.colorScheme(context).surface,
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(12),
               topRight: Radius.circular(12),
@@ -257,7 +258,7 @@ class _BookListTileState extends State<BookListTile> {
               const SizedBox(height: 12.0),
               Text(
                 widget.epubManageData.name.trim(),
-                style: Theme.of(context).textTheme.titleLarge,
+                style: styleManager.textTheme(context).titleLarge,
               ),
               ..._buildEditOption(),
             ],

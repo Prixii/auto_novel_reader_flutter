@@ -101,8 +101,8 @@ class WebNovelTile extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(8.0),
           color: (MediaQuery.of(context).platformBrightness == Brightness.dark)
-              ? Theme.of(context).colorScheme.surfaceContainerHighest
-              : Theme.of(context).colorScheme.surface,
+              ? styleManager.colorScheme(context).surfaceContainerHighest
+              : styleManager.colorScheme(context).surface,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -110,7 +110,7 @@ class WebNovelTile extends StatelessWidget {
               Text(novelOutline.titleJp,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: styleManager.primaryColorTitleSmall),
+                  style: styleManager.primaryColorTitleSmall(context)),
               Text(
                 novelOutline.titleZh ?? '',
                 maxLines: 2,
@@ -156,18 +156,20 @@ class WebNovelTile extends StatelessWidget {
         //         maxLines: 1,
         //         overflow: TextOverflow.ellipsis,
         //       ),
-        rankMode ? _buildRankInfo(webOutline) : _buildNormalInfo(webOutline),
+        rankMode
+            ? _buildRankInfo(webOutline, context)
+            : _buildNormalInfo(webOutline, context),
       ],
     );
   }
 
-  Row _buildNormalInfo(WebNovelOutline webOutline) {
+  Row _buildNormalInfo(WebNovelOutline webOutline, BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           '总计 ${webOutline.total} ',
-          style: styleManager.tipText,
+          style: styleManager.tipText(context),
         ),
         InfoBadge(
           webOutline.type,
@@ -177,7 +179,7 @@ class WebNovelTile extends StatelessWidget {
     );
   }
 
-  Widget _buildRankInfo(WebNovelOutline webOutline) {
-    return Text(webOutline.extra ?? '', style: styleManager.tipText);
+  Widget _buildRankInfo(WebNovelOutline webOutline, BuildContext context) {
+    return Text(webOutline.extra ?? '', style: styleManager.tipText(context));
   }
 }

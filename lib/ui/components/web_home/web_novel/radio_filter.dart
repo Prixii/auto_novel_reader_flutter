@@ -27,16 +27,17 @@ class RadioFilter<T> extends StatefulWidget {
 class _RadioFilterState<T> extends State<RadioFilter> {
   late String _selectedOption;
   late T _selectedValue;
-  final activeColor = styleManager.colorScheme.secondary;
+  late final Color activeColor;
   final inactiveColor = Colors.white;
 
   @override
   void initState() {
+    super.initState();
+    activeColor = styleManager.colorScheme(context).secondary;
     _selectedOption = widget.initOptionName ?? widget.options.first;
     _selectedValue = widget.initValue ?? widget.values.first;
     widget.controller
         .setGetOptionsFunc(() => _selectedOption, () => _selectedValue);
-    super.initState();
   }
 
   @override
@@ -47,7 +48,7 @@ class _RadioFilterState<T> extends State<RadioFilter> {
       children: [
         Text(
           widget.title,
-          style: styleManager.primaryColorTitleSmall,
+          style: styleManager.primaryColorTitleSmall(context),
         ),
         const SizedBox(height: 4),
         Wrap(

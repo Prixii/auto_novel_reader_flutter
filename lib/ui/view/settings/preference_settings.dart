@@ -14,8 +14,8 @@ class PreferenceSettings extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        shadowColor: styleManager.colorScheme.shadow,
-        backgroundColor: styleManager.colorScheme.secondaryContainer,
+        shadowColor: styleManager.colorScheme(context).shadow,
+        backgroundColor: styleManager.colorScheme(context).secondaryContainer,
         title: const Text('偏好设置'),
       ),
       body: SingleChildScrollView(
