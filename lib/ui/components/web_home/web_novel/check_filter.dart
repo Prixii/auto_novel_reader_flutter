@@ -27,7 +27,6 @@ class _CheckFilterState<T> extends State<CheckFilter> {
   @override
   void initState() {
     super.initState();
-    activeColor = styleManager.colorScheme(context).secondary;
     widget.controller.setGetOptionsFunc(() {
       var list = <T>[];
       for (var entry in _selectedValues.entries) {
@@ -48,6 +47,7 @@ class _CheckFilterState<T> extends State<CheckFilter> {
 
   @override
   Widget build(BuildContext context) {
+    activeColor = styleManager.colorScheme(context).secondary;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,

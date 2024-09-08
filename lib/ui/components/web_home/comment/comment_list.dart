@@ -170,6 +170,7 @@ class _CommentTileState extends State<CommentTile> {
                     Navigator.of(context).pop(); // 关闭对话框
                   }
                 },
+                autofocus: true,
                 decoration: InputDecoration(
                     hintText: '回复给 ${widget.comment.user.username}'),
               ),

@@ -33,7 +33,6 @@ class _RadioFilterState<T> extends State<RadioFilter> {
   @override
   void initState() {
     super.initState();
-    activeColor = styleManager.colorScheme(context).secondary;
     _selectedOption = widget.initOptionName ?? widget.options.first;
     _selectedValue = widget.initValue ?? widget.values.first;
     widget.controller
@@ -42,6 +41,7 @@ class _RadioFilterState<T> extends State<RadioFilter> {
 
   @override
   Widget build(BuildContext context) {
+    activeColor = styleManager.colorScheme(context).secondary;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,

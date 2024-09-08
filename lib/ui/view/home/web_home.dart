@@ -74,6 +74,7 @@ class WebHomeView extends StatelessWidget {
               TextField(
                 controller: controller,
                 decoration: const InputDecoration(hintText: '通过 Web 链接打开小说'),
+                autofocus: true,
               ),
             ],
           ),
