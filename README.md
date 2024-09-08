@@ -1,7 +1,13 @@
 # 掌(上)绿(站)
 
-适配[轻小说机翻机器人](https://books.fishhawk.top/)的，完全面向阅读的第三方客户端
+适配[轻小说机翻机器人](https://books.fishhawk.top/)的，完全面向阅读的第三方客户端, 内置了 epub 解析
 <del>名字绝对不是 neta 掌阅
+<div style="display: flex; justify-content: center; flex-wrap: wrap;">
+    <img src="./.github/img/0.jpg" alt="Image 3" style="margin: 5px; width: 130px; height: auto;">
+    <img src="./.github/img/1.jpg" alt="Image 1" style="margin: 5px; width: 130px; height: auto;">
+    <img src="./.github/img/2.jpg" alt="Image 2" style="margin: 5px; width: 130px; height: auto;">
+    <img src="./.github/img/3.jpg" alt="Image 3" style="margin: 5px; width: 130px; height: auto;">
+</div>
 
 # ⬇️ 下载
 
