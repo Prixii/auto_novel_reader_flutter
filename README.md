@@ -1,6 +1,6 @@
 # 掌(上)绿(站)
 
-[轻小说机翻机器人](https://books.fishhawk.top/)的第三方客户端
+适配[轻小说机翻机器人](https://books.fishhawk.top/)的，完全面向阅读的第三方客户端
 <del>名字绝对不是 neta 掌阅
 
 # ⬇️ 下载
@@ -50,12 +50,11 @@ $ dart run build_runner build
 
 **✈️ 在途更新计划**
 
-- 弃用 WebView
-- 支持分页阅读
+- 弃用 WebView，并支持将刘诗雯本转换成分页阅读
 - 下载 web 小说内容，以支持离线阅读
 - 点击 Tag 搜索
 - 支持预加载，大幅提高阅览体验
-- 升级本地 epub 系统功能
+- 升级本地 epub 系统
 - 日志记录
 
 **😭 以下内容因为 Api 不支持，暂时无法实现**
