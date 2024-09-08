@@ -5,9 +5,9 @@
 
 # ⬇️ 下载
 
-[蓝奏云](https://github.com/Prixii/auto_novel_reader_flutter)(进度不一定同步，不推荐)
+[蓝奏云](https://wwrn.lanzouv.com/b00uyfaz9a)(密码: apd9, 更新进度不一定同步)
 
-[Release](https://github.com/Prixii/auto_novel_reader_flutter)
+[Release](https://github.com/Prixii/auto_novel_reader_flutter/releases)
 
 
 # 📦 如何运行
