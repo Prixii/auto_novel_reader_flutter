@@ -30,7 +30,7 @@ class DownloadStateMonitor extends StatelessWidget {
         }, builder: (context, downloadType) {
           switch (downloadType) {
             case DownloadStatus.redirecting:
-              return const Text('正在重定向');
+              return const Center(child: CircularProgressIndicator());
             case DownloadStatus.downloading:
               return _buildDownloadProgress(filename);
             case DownloadStatus.parsing:

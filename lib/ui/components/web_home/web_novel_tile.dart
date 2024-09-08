@@ -174,6 +174,7 @@ class WebNovelTile extends StatelessWidget {
         InfoBadge(
           webOutline.type,
           padding: const EdgeInsets.all(2),
+          copyOnLongPress: false,
         ),
       ],
     );

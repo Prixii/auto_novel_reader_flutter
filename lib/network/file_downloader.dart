@@ -42,9 +42,10 @@ Future<File?> _downloadWenkuEpub(String url, String filename, File file) async {
     file.writeAsBytesSync(response.data);
     downloadCubit.finishDownload(filename, true, file: file);
     return file;
-  } on DioException catch (e) {
+  } on DioException catch (e, stackTrace) {
     downloadCubit.downloadFailed(filename);
     showErrorToast('下载失败: ${e.type}');
+    talker.error('下载失败', e, stackTrace);
     return null;
   }
 }
@@ -64,7 +65,8 @@ Future<File?> _downloadZhEpub(String url, String filename, File file) async {
     );
     file.writeAsBytesSync(response.data);
     return file;
-  } on DioException catch (e) {
+  } on DioException catch (e, stackTrace) {
+    talker.error(e, stackTrace);
     downloadCubit.downloadFailed(filename);
     showErrorToast('下载失败: ${e.type}');
     return null;

@@ -224,7 +224,8 @@ class _EpubUtil {
       try {
         file.createSync(recursive: true);
         await file.writeAsBytes(encodePng(coverImage));
-      } catch (e) {
+      } catch (e, stackTrace) {
+        talker.error(e, stackTrace);
         talker.error('Error writing to file: $e');
       }
     }

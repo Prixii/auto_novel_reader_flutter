@@ -6,6 +6,7 @@
 # ⬇️ 下载
 
 [蓝奏云](https://github.com/Prixii/auto_novel_reader_flutter)(进度不一定同步，不推荐)
+
 [Release](https://github.com/Prixii/auto_novel_reader_flutter)
 
 

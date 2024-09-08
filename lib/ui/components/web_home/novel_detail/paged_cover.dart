@@ -35,7 +35,10 @@ class _PagedCoverState extends State<PagedCover> {
               });
             },
           ),
-          InfoBadge('${currentPage + 1}/${widget.urls.length}'),
+          InfoBadge(
+            '${currentPage + 1}/${widget.urls.length}',
+            copyOnLongPress: false,
+          ),
         ],
       ),
     );

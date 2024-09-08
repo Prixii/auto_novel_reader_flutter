@@ -177,7 +177,10 @@ class _EpubWebviewState extends State<EpubWebview> {
       builder: (context, chapterIndex) {
         return Padding(
           padding: const EdgeInsets.all(8.0),
-          child: _buildInfoBadge('第${chapterIndex + 1}章'),
+          child: InfoBadge(
+            '第${chapterIndex + 1}章',
+            copyOnLongPress: false,
+          ),
         );
       },
     );
@@ -186,12 +189,11 @@ class _EpubWebviewState extends State<EpubWebview> {
   Widget _buildChapterProgress() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: _buildInfoBadge('${(readProgress * 100).floor()}%'),
+      child: InfoBadge(
+        '${(readProgress * 100).floor()}%',
+        copyOnLongPress: false,
+      ),
     );
-  }
-
-  Widget _buildInfoBadge(String info) {
-    return InfoBadge(info);
   }
 
   Widget _buildProgressBar() {

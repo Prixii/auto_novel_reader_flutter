@@ -8,7 +8,8 @@ import 'package:epubx/epubx.dart';
 
 main() async {
   String fileName = "stevenson-a-childs-garden-of-verses-illustrations.epub";
-  String fullPath = path.join(io.Directory.current.path, "test", "res", fileName);
+  String fullPath =
+      path.join(io.Directory.current.path, "test", "res", fileName);
   var targetFile = new io.File(fullPath);
   if (!(await targetFile.exists())) {
     throw new Exception("Specified epub file not found: ${fullPath}");
@@ -28,13 +29,16 @@ main() async {
   });
 
   test("Test can read", () async {
-    String baseName = path.join(io.Directory.current.path, "test", "res", "std");
+    String baseName =
+        path.join(io.Directory.current.path, "test", "res", "std");
     io.Directory baseDir = new io.Directory(baseName);
     if (!(await baseDir.exists())) {
       throw new Exception("Base path does not exist: ${baseName}");
     }
 
-    await baseDir.list(recursive: false, followLinks: false).forEach((io.FileSystemEntity fe) async {
+    await baseDir
+        .list(recursive: false, followLinks: false)
+        .forEach((io.FileSystemEntity fe) async {
       try {
         io.File tf = new io.File(fe.path);
         List<int> bytes = await tf.readAsBytes();
@@ -54,7 +58,9 @@ main() async {
       throw new Exception("Base path does not exist: ${baseName}");
     }
 
-    await baseDir.list(recursive: false, followLinks: false).forEach((io.FileSystemEntity fe) async {
+    await baseDir
+        .list(recursive: false, followLinks: false)
+        .forEach((io.FileSystemEntity fe) async {
       try {
         var tf = new io.File(fe.path);
         var bytes = await tf.readAsBytes();

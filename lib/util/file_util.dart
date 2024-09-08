@@ -14,7 +14,8 @@ Future<void> writeStringToFile(String name, String content, String path) async {
     final file = File('$path/$name');
     if (!file.parent.existsSync()) file.parent.createSync();
     await file.writeAsString(content);
-  } catch (e) {
+  } catch (e, stackTrace) {
+    talker.error(e, stackTrace);
     talker.error('Error writing string: $e');
   }
 }
@@ -25,7 +26,8 @@ Future<void> writeImageToFile(
     final file = File('$path/$name');
     if (!file.parent.existsSync()) file.parent.createSync();
     await file.writeAsBytes(imageData);
-  } catch (e) {
+  } catch (e, stackTrace) {
+    talker.error(e, stackTrace);
     talker.error('Error writing image: $e');
   }
 }

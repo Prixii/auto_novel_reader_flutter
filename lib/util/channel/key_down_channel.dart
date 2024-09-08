@@ -31,7 +31,8 @@ void subscribeVolumeKeyEvent() {
           handleVolumeUp();
           return;
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      talker.error(e, stackTrace);
       talker.error('key code error: $e');
     }
   });

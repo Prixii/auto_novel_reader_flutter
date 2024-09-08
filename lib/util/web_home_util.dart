@@ -146,6 +146,7 @@ Future<WebNovelDto?> loadWebNovelDto(
       attentions: body['attentions'].cast<String>(),
       authors: parseToAuthorList(body['authors']),
       baidu: body['baidu'],
+      wenkuId: body['wenkuId'],
       favored: body['favored'],
       glossary: Map<String, String>.from(body['glossary']),
       gpt: body['gpt'],
@@ -168,8 +169,8 @@ Future<WebNovelDto?> loadWebNovelDto(
     favoredCubit
         .setNovelToFavoredIdMap(webNovelDtoData: (novelId, webNovelDto));
     return webNovelDto;
-  } catch (e) {
-    talker.error(e);
+  } catch (e, stackTrace) {
+    talker.error(e, stackTrace);
     onRequestFinished?.call();
     return null;
   }
@@ -225,8 +226,8 @@ Future<ChapterDto?> _requestNovelChapter(
       titleZh: body['titleZh'],
     );
     return chapterDto;
-  } catch (e) {
-    talker.error(e);
+  } catch (e, stackTrace) {
+    talker.error(e, stackTrace);
     return null;
   }
 }
@@ -275,8 +276,8 @@ Future<WenkuNovelDto?> _requestWenkuNovelDto(String novelId) async {
     );
     favoredCubit.setNovelToFavoredIdMap(wenkuNovelDtoData: (novelId, wenkuDto));
     return wenkuDto;
-  } catch (e) {
-    talker.error(e);
+  } catch (e, stackTrace) {
+    talker.error(e, stackTrace);
     return null;
   }
 }
@@ -296,8 +297,8 @@ List<VolumeJpDto> _parseVolumeJpDtoList(body) {
         ),
       );
     }
-  } catch (e) {
-    talker.error(e);
+  } catch (e, stackTrace) {
+    talker.error(e, stackTrace);
   }
   return list;
 }
@@ -319,8 +320,8 @@ List<WenkuVolumeDto> _parseWenkuVolumeList(body) {
         ),
       );
     }
-  } catch (e) {
-    talker.error(e);
+  } catch (e, stackTrace) {
+    talker.error(e, stackTrace);
   }
   return list;
 }

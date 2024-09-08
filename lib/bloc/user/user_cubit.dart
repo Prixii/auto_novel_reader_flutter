@@ -86,7 +86,8 @@ class UserCubit extends HydratedCubit<UserState> {
         token: token,
         signInTime: DateTime.now(),
       ));
-    } catch (e) {
+    } catch (e, stackTrace) {
+      talker.error(e, stackTrace);
       talker.info(e.toString());
       return false;
     }

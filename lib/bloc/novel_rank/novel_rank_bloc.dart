@@ -44,8 +44,8 @@ class NovelRankBloc extends Bloc<NovelRankEvent, NovelRankState> {
     ));
     try {
       await _requestByRankCategory(event.rankCategory, emit);
-    } catch (e) {
-      talker.error(e);
+    } catch (e, stackTrace) {
+      talker.error(e, stackTrace);
       emit(state.copyWith(
         searchingStatus: {...state.searchingStatus, event.rankCategory: false},
       ));

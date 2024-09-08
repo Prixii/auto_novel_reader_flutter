@@ -137,7 +137,8 @@ class DownloadCubit extends HydratedCubit<DownloadState> {
       );
       localFileCubit.addEpubManageData(epubManageData);
       finishParse(filename);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      talker.error(e, stackTrace);
       parseFailed(filename, Exception(e));
     }
   }

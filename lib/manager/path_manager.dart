@@ -9,6 +9,7 @@ class _PathManager {
   final _parseDirPath = '/parse/epub';
   final _epubCoverPath = '/parse/epub/cover';
   final _backupPath = '/parse/epub/backup';
+  final _loggerPath = '/log';
 
   _PathManager();
 
@@ -41,6 +42,8 @@ class _PathManager {
 
   /// externalStorageDirectory/parse/epub/backup
   String get backupPath => externalStorageDirectory + _backupPath;
+
+  String get loggerPath => externalStorageDirectory + _loggerPath;
 
   String getPathByUid(String uid) => '$parseDirPath/$uid';
 }

@@ -56,6 +56,7 @@ class WebNovel with _$WebNovel {
     @Default([]) List<WebNovelToc>? toc,
     required int visited,
     required int syncAt,
+    String? wenkuId,
     String? favored,
     String? lastReadChapterId,
     int? jp,
@@ -85,8 +86,8 @@ List<Author> parseToAuthorList(dynamic body) {
       authorList.add(Author(name: item['name'], link: item['link']));
     }
     return authorList;
-  } catch (e) {
-    talker.error(e);
+  } catch (e, stackTrace) {
+    talker.error(e, stackTrace);
     return [];
   }
 }
@@ -101,8 +102,8 @@ List<WebNovelToc> parseTocList(dynamic body) {
           createAt: item['createAt']));
     }
     return tocList;
-  } catch (e) {
-    talker.error(e);
+  } catch (e, stackTrace) {
+    talker.error(e, stackTrace);
     return [];
   }
 }

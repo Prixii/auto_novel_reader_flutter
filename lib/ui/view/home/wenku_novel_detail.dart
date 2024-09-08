@@ -1,5 +1,6 @@
 import 'package:auto_novel_reader_flutter/bloc/comment/comment_cubit.dart';
 import 'package:auto_novel_reader_flutter/bloc/favored_cubit/favored_cubit.dart';
+import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/bloc/wenku_home/wenku_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
@@ -13,6 +14,7 @@ import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_detail/fl
 import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_detail/introduction_card.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_detail/paged_cover.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/wenku_novel/download_list.dart';
+import 'package:auto_novel_reader_flutter/ui/view/home/web_novel_detail.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/page_loader.dart';
 import 'package:auto_novel_reader_flutter/util/web_home_util.dart';
@@ -23,7 +25,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:unicons/unicons.dart';
 
 class WenkuNovelDetailContainer extends StatelessWidget {
-  const WenkuNovelDetailContainer({super.key});
+  const WenkuNovelDetailContainer({super.key, this.openFromWeb = false});
+
+  final bool openFromWeb;
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +51,7 @@ class WenkuNovelDetailContainer extends StatelessWidget {
                   : WenkuNovelDetail(
                       novelDto: novelDto,
                       novelId: readWenkuHomeBloc(context).currentNovelId,
+                      openFromWeb: openFromWeb,
                     ));
         },
       ),
@@ -79,10 +84,14 @@ class WenkuNovelDetailContainer extends StatelessWidget {
 
 class WenkuNovelDetail extends StatefulWidget {
   const WenkuNovelDetail(
-      {super.key, required this.novelDto, required this.novelId});
+      {super.key,
+      required this.novelDto,
+      required this.novelId,
+      required this.openFromWeb});
 
   final WenkuNovelDto novelDto;
   final String novelId;
+  final bool openFromWeb;
 
   @override
   State<WenkuNovelDetail> createState() => _WenkuNovelDetailState();
@@ -272,43 +281,78 @@ class _WenkuNovelDetailState extends State<WenkuNovelDetail> {
   Widget _buildButtonGroup(BuildContext context) {
     return Row(children: [
       Expanded(
-        child: LineButton(
-          enabled: readUserCubit(context).isSignIn,
-          onPressed: () => _toDownload(context),
-          onDisabledPressed: () => showWarnToast('请先登录'),
-          text: '阅读',
-        ),
+        child: _buildReadButton(context),
       ),
       const SizedBox(width: 8),
       Expanded(
-        child: BlocSelector<FavoredCubit, FavoredState, String?>(
-          selector: (state) {
-            return state.novelToFavoredIdMap[widget.novelId];
-          },
-          builder: (context, favoredStatus) {
-            return LineButton(
-                onPressed: () async {
-                  if (favoredStatus != null) {
-                    readWenkuHomeBloc(context).add(
-                        WenkuHomeEvent.unFavorNovel(novelId: widget.novelId));
-                  } else {
-                    final favored = await _selectFavored(context);
-                    if (favored == null || !context.mounted) return;
-                    readWenkuHomeBloc(context).add(
-                      WenkuHomeEvent.favorNovel(
-                        novelId: widget.novelId,
-                        favoredId: favored.id,
-                      ),
-                    );
-                  }
-                },
-                onDisabledPressed: () => showWarnToast('请先登录'),
-                enabled: readUserCubit(context).isSignIn,
-                text: (favoredStatus != null) ? '已收藏' : '收藏');
-          },
-        ),
+        child: _buildFavoredButton(),
+      ),
+      const SizedBox(width: 8),
+      Expanded(
+        child: _buildToWebButton(context),
       )
     ]);
+  }
+
+  Widget _buildToWebButton(BuildContext context) {
+    return LineButton(
+      enabled: widget.novelDto.webIds.isNotEmpty,
+      onPressed: () {
+        widget.openFromWeb ? Navigator.pop(context) : toWebDetail(context);
+      },
+      onDisabledPressed: () => {showWarnToast('暂无 Web')},
+      text: 'Web',
+    );
+  }
+
+  void toWebDetail(BuildContext context) {
+    final webIdData = widget.novelDto.webIds.first.split('/');
+    final providerId = webIdData[0].trim();
+    final novelId = webIdData[1].trim();
+    readWebHomeBloc(context)
+        .add(WebHomeEvent.toNovelDetail(providerId, novelId));
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (_) => const WebNovelDetailContainer(openFromWeb: true)));
+  }
+
+  LineButton _buildReadButton(BuildContext context) {
+    return LineButton(
+      enabled: readUserCubit(context).isSignIn,
+      onPressed: () => _toDownload(context),
+      onDisabledPressed: () => showWarnToast('请先登录'),
+      text: '阅读',
+    );
+  }
+
+  BlocSelector<FavoredCubit, FavoredState, String?> _buildFavoredButton() {
+    return BlocSelector<FavoredCubit, FavoredState, String?>(
+      selector: (state) {
+        return state.novelToFavoredIdMap[widget.novelId];
+      },
+      builder: (context, favoredStatus) {
+        return LineButton(
+            onPressed: () async {
+              if (favoredStatus != null) {
+                readWenkuHomeBloc(context)
+                    .add(WenkuHomeEvent.unFavorNovel(novelId: widget.novelId));
+              } else {
+                final favored = await _selectFavored(context);
+                if (favored == null || !context.mounted) return;
+                readWenkuHomeBloc(context).add(
+                  WenkuHomeEvent.favorNovel(
+                    novelId: widget.novelId,
+                    favoredId: favored.id,
+                  ),
+                );
+              }
+            },
+            onDisabledPressed: () => showWarnToast('请先登录'),
+            enabled: readUserCubit(context).isSignIn,
+            text: (favoredStatus != null) ? '已收藏' : '收藏');
+      },
+    );
   }
 
   _toDownload(BuildContext context) {
