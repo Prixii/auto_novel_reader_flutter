@@ -1,6 +1,7 @@
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
+import 'package:auto_novel_reader_flutter/util/error_logger.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 Future<List<WebNovelOutline>> loadFavoredWebOutline({
@@ -170,7 +171,7 @@ Future<WebNovelDto?> loadWebNovelDto(
         .setNovelToFavoredIdMap(webNovelDtoData: (novelId, webNovelDto));
     return webNovelDto;
   } catch (e, stackTrace) {
-    talker.error(e, stackTrace);
+    errorLogger.logError(e, stackTrace);
     onRequestFinished?.call();
     return null;
   }
@@ -227,7 +228,7 @@ Future<ChapterDto?> _requestNovelChapter(
     );
     return chapterDto;
   } catch (e, stackTrace) {
-    talker.error(e, stackTrace);
+    errorLogger.logError(e, stackTrace);
     return null;
   }
 }
@@ -277,7 +278,7 @@ Future<WenkuNovelDto?> _requestWenkuNovelDto(String novelId) async {
     favoredCubit.setNovelToFavoredIdMap(wenkuNovelDtoData: (novelId, wenkuDto));
     return wenkuDto;
   } catch (e, stackTrace) {
-    talker.error(e, stackTrace);
+    errorLogger.logError(e, stackTrace);
     return null;
   }
 }
@@ -298,7 +299,7 @@ List<VolumeJpDto> _parseVolumeJpDtoList(body) {
       );
     }
   } catch (e, stackTrace) {
-    talker.error(e, stackTrace);
+    errorLogger.logError(e, stackTrace);
   }
   return list;
 }
@@ -321,7 +322,7 @@ List<WenkuVolumeDto> _parseWenkuVolumeList(body) {
       );
     }
   } catch (e, stackTrace) {
-    talker.error(e, stackTrace);
+    errorLogger.logError(e, stackTrace);
   }
   return list;
 }
@@ -344,7 +345,7 @@ List<Comment> parseCommentList(body) {
       ));
     }
   } catch (e, stackTrace) {
-    talker.error('parse comment error', e, stackTrace);
+    errorLogger.logError(e, stackTrace);
   }
   return list;
 }

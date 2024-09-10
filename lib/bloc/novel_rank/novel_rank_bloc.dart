@@ -2,6 +2,7 @@ import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
+import 'package:auto_novel_reader_flutter/util/error_logger.dart';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -45,7 +46,7 @@ class NovelRankBloc extends Bloc<NovelRankEvent, NovelRankState> {
     try {
       await _requestByRankCategory(event.rankCategory, emit);
     } catch (e, stackTrace) {
-      talker.error(e, stackTrace);
+      errorLogger.logError(e, stackTrace);
       emit(state.copyWith(
         searchingStatus: {...state.searchingStatus, event.rankCategory: false},
       ));

@@ -2,6 +2,7 @@ import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
+import 'package:auto_novel_reader_flutter/util/error_logger.dart';
 import 'package:bloc/bloc.dart';
 import 'package:chopper/chopper.dart';
 import 'package:flutter/foundation.dart';
@@ -246,8 +247,9 @@ class FavoredCubit extends Cubit<FavoredState> {
         },
       ));
       setNovelToFavoredIdMap(webOutlines: newWebNovelList);
-    } catch (e, stacktrace) {
-      talker.error('error', e, stacktrace);
+    } catch (e, stackTrace) {
+      errorLogger.logError(e, stackTrace);
+
       emit(state.copyWith(isWebRequestingMap: {
         ...state.isWebRequestingMap,
         favoredId: false,
@@ -302,8 +304,9 @@ class FavoredCubit extends Cubit<FavoredState> {
         },
       ));
       setNovelToFavoredIdMap(wenkuOutlines: newWenkuNovelList);
-    }).catchError((e, stacktrace) {
-      talker.error('error', e, stacktrace);
+    }).catchError((e, stackTrace) {
+      errorLogger.logError(e, stackTrace);
+
       emit(state.copyWith(isWenkuRequestingMap: {
         ...state.isWenkuRequestingMap,
         favoredId: false,

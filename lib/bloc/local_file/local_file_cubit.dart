@@ -6,6 +6,7 @@ import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/epub_util.dart';
+import 'package:auto_novel_reader_flutter/util/error_logger.dart';
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
@@ -32,7 +33,7 @@ class LocalFileCubit extends HydratedCubit<LocalFileState> {
     } catch (e, stackTrace) {
       showErrorToast(e.toString());
       globalBloc.add(const GlobalEvent.endProgress(ProgressType.parsingEpub));
-      talker.error('err', e, stackTrace);
+      errorLogger.logError(e, stackTrace);
       throw Exception(e);
     }
   }

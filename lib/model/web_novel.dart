@@ -87,7 +87,8 @@ List<Author> parseToAuthorList(dynamic body) {
     }
     return authorList;
   } catch (e, stackTrace) {
-    talker.error(e, stackTrace);
+    errorLogger.logError(e, stackTrace);
+
     return [];
   }
 }
@@ -103,14 +104,15 @@ List<WebNovelToc> parseTocList(dynamic body) {
     }
     return tocList;
   } catch (e, stackTrace) {
-    talker.error(e, stackTrace);
+    errorLogger.logError(e, stackTrace);
+
     return [];
   }
 }
 
 List<WebNovelOutline> parseToWebNovelOutline(dynamic body) {
   try {
-    final items = body['items'] as List<dynamic>;
+    final items = (body['items'] ?? []) as List<dynamic>;
     var webNovelOutlines = <WebNovelOutline>[];
     for (final item in items) {
       webNovelOutlines.add(
@@ -135,7 +137,8 @@ List<WebNovelOutline> parseToWebNovelOutline(dynamic body) {
     }
     return webNovelOutlines;
   } catch (e, stackTrace) {
-    talker.error(stackTrace);
+    errorLogger.logError(e, stackTrace);
+
     return [];
   }
 }

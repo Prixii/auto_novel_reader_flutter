@@ -4,6 +4,7 @@ import 'package:auto_novel_reader_flutter/bloc/epub_viewer/epub_viewer_bloc.dart
 import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
+import 'package:auto_novel_reader_flutter/util/error_logger.dart';
 import 'package:flutter/services.dart';
 
 EventChannel? eventChannel;
@@ -32,8 +33,7 @@ void subscribeVolumeKeyEvent() {
           return;
       }
     } catch (e, stackTrace) {
-      talker.error(e, stackTrace);
-      talker.error('key code error: $e');
+      errorLogger.logError(e, stackTrace);
     }
   });
 }

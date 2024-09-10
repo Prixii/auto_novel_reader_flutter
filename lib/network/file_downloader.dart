@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
+import 'package:auto_novel_reader_flutter/util/error_logger.dart';
 import 'package:dio/dio.dart';
 
 Future<File?> downloadFile({
@@ -45,7 +46,7 @@ Future<File?> _downloadWenkuEpub(String url, String filename, File file) async {
   } on DioException catch (e, stackTrace) {
     downloadCubit.downloadFailed(filename);
     showErrorToast('下载失败: ${e.type}');
-    talker.error('下载失败', e, stackTrace);
+    errorLogger.logError(e, stackTrace);
     return null;
   }
 }
@@ -66,7 +67,7 @@ Future<File?> _downloadZhEpub(String url, String filename, File file) async {
     file.writeAsBytesSync(response.data);
     return file;
   } on DioException catch (e, stackTrace) {
-    talker.error(e, stackTrace);
+    errorLogger.logError(e, stackTrace);
     downloadCubit.downloadFailed(filename);
     showErrorToast('下载失败: ${e.type}');
     return null;

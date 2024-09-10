@@ -5,6 +5,7 @@ import 'package:auto_novel_reader_flutter/manager/path_manager.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
+import 'package:auto_novel_reader_flutter/util/error_logger.dart';
 import 'package:auto_novel_reader_flutter/util/file_util.dart';
 import 'package:epubx/epubx.dart' as epubx;
 import 'package:image/image.dart';
@@ -82,7 +83,7 @@ class _EpubUtil {
       });
       return epubData;
     } catch (e, stackTrace) {
-      talker.error('err', e, stackTrace);
+      errorLogger.logError(e, stackTrace);
       throw Exception(e);
     }
   }
@@ -225,8 +226,7 @@ class _EpubUtil {
         file.createSync(recursive: true);
         await file.writeAsBytes(encodePng(coverImage));
       } catch (e, stackTrace) {
-        talker.error(e, stackTrace);
-        talker.error('Error writing to file: $e');
+        errorLogger.logError(e, stackTrace);
       }
     }
   }

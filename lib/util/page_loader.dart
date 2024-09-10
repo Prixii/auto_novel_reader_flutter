@@ -1,4 +1,4 @@
-import 'package:auto_novel_reader_flutter/util/client_util.dart';
+import 'package:auto_novel_reader_flutter/util/error_logger.dart';
 
 class PageLoader<T, R> {
   ///
@@ -45,7 +45,7 @@ class PageLoader<T, R> {
           dataList = [...dataList, ...newData];
           afterLoad();
         } catch (e, stackTrace) {
-          talker.error('error', e, stackTrace);
+          errorLogger.logError(e, stackTrace);
         }
       },
       onError: (error) {

@@ -3,8 +3,10 @@ import 'dart:ui';
 import 'package:auto_novel_reader_flutter/bloc/wenku_home/wenku_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
+import 'package:auto_novel_reader_flutter/ui/components/reader/plain_text_book_cover.dart';
 import 'package:auto_novel_reader_flutter/ui/view/home/wenku_novel_detail.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
+import 'package:auto_novel_reader_flutter/util/error_logger.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
@@ -75,9 +77,13 @@ class WenkuNovelTile extends StatelessWidget {
         child: Stack(
           children: [
             CachedNetworkImage(
-              imageUrl: novel.cover,
-              fit: BoxFit.cover,
-            ),
+                imageUrl: novel.cover,
+                fit: BoxFit.cover,
+                errorWidget: (_, url, error) {
+                  errorLogger.logError(error, StackTrace.current,
+                      extra: 'url: $url');
+                  return PlainTextBookCover(title: novel.title);
+                }),
             Align(
               alignment: Alignment.bottomCenter,
               child: _buildMicaTitle(novel, context),

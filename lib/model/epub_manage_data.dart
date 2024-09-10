@@ -13,6 +13,9 @@ class EpubManageData with _$EpubManageData {
     @Default(false) bool finished,
     String? filename,
     required NovelType novelType,
+
+    // new
+    // @Default([]) List<(String, NovelContentType)> parsedResults,
   }) = _EpubManageData;
 
   factory EpubManageData.fromJson(Map<String, dynamic> json) =>

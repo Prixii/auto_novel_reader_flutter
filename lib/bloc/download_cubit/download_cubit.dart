@@ -4,6 +4,7 @@ import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/network/file_downloader.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/epub_util.dart';
+import 'package:auto_novel_reader_flutter/util/error_logger.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
@@ -138,7 +139,7 @@ class DownloadCubit extends HydratedCubit<DownloadState> {
       localFileCubit.addEpubManageData(epubManageData);
       finishParse(filename);
     } catch (e, stackTrace) {
-      talker.error(e, stackTrace);
+      errorLogger.logError(e, stackTrace);
       parseFailed(filename, Exception(e));
     }
   }

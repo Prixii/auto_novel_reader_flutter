@@ -431,3 +431,17 @@ enum RankCategory {
     return null; // 如果没有找到，返回 null
   }
 }
+
+enum NovelContentType {
+  text,
+  image,
+  ruby,
+  h1,
+  h2,
+  h3,
+}
+
+enum NovelRenderType {
+  streaming,
+  paged;
+}

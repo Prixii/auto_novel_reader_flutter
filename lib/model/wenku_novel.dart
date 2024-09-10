@@ -228,7 +228,7 @@ List<WenkuNovelOutline> parseToWenkuNovelOutline(dynamic body) {
     }
     return wenkuNovelOutlines;
   } catch (e, stackTrace) {
-    talker.error(e, stackTrace);
+    errorLogger.logError(e, stackTrace);
     return [];
   }
 }

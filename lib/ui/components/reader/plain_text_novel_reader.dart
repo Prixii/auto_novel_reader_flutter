@@ -7,6 +7,7 @@ import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/chapter_list.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
+import 'package:auto_novel_reader_flutter/util/reader_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -99,9 +100,14 @@ class _PlainTextNovelReaderState extends State<PlainTextNovelReader>
   late AnimationController _maskAnimationController;
   late Animation<double> _maskAnimation;
   late ScrollController _scrollController;
+  TextStyle? style;
+  late Size size;
+
+  List<String> result = [];
   @override
   void initState() {
     super.initState();
+
     _maskAnimationController = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
@@ -109,10 +115,23 @@ class _PlainTextNovelReaderState extends State<PlainTextNovelReader>
     _maskAnimation =
         Tween(begin: 0.0, end: 1.0).animate(_maskAnimationController);
     _scrollController = ScrollController();
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      final resultText = ReaderUtil.pagingText(
+        widget.dto.youdaoParagraphs?.join('\n') ?? '',
+        size,
+        style!,
+      );
+      setState(() {
+        result = resultText;
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    // return _buildPagedContent(context);
+
     return PopScope(
       onPopInvoked: (value) {
         if (Scaffold.of(context).isDrawerOpen) return;
@@ -123,6 +142,27 @@ class _PlainTextNovelReaderState extends State<PlainTextNovelReader>
           _buildNovelRender(),
           _buildLoadingMask(),
         ],
+      ),
+    );
+  }
+
+  // TODO 分页阅览
+  SingleChildScrollView _buildPagedContent(BuildContext context) {
+    final config = readConfigCubit(context).state.novelAppearanceConfig;
+    style = TextStyle(
+      color: Colors.black,
+      fontSize: config.fontSize.toDouble(),
+      fontWeight: config.boldFont ? FontWeight.bold : FontWeight.normal,
+    );
+    size = Size(screenSize.width, screenSize.height - appBarHeight - 60);
+    return SingleChildScrollView(
+      child: ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemBuilder: (context, index) => ReaderUtil.buildPagedText(
+            size: size, text: result[index], style: style!),
+        separatorBuilder: (context, index) => const Divider(),
+        itemCount: result.length,
       ),
     );
   }

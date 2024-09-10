@@ -1,6 +1,8 @@
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/icon_option.dart';
+import 'package:auto_novel_reader_flutter/ui/view/settings/log_page.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
+import 'package:auto_novel_reader_flutter/util/error_logger.dart';
 import 'package:flutter/material.dart';
 import 'package:unicons/unicons.dart';
 
@@ -26,10 +28,24 @@ class DataSettings extends StatelessWidget {
               onTap: () => {_cleanCache(context)},
             ),
             IconOption(
-              icon: UniconsLine.download_alt,
+              icon: UniconsLine.brush_alt,
+              text: '清理日志',
+              onTap: () => errorLogger.cleanAllLogs(),
+            ),
+            IconOption(
+              icon: UniconsLine.brush_alt,
               text: '清空下载任务记录',
               onTap: () => readDownloadCubit(context).clearAllTasks(),
             ),
+            Divider(
+                indent: 16,
+                endIndent: 16,
+                color: Theme.of(context).dividerColor),
+            IconOption(
+                icon: UniconsLine.exclamation_triangle,
+                text: '查看日志',
+                onTap: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => const LogPage()))),
           ],
         ),
       ),

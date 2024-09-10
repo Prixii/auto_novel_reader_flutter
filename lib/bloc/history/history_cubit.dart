@@ -1,6 +1,7 @@
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
+import 'package:auto_novel_reader_flutter/util/error_logger.dart';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -55,14 +56,14 @@ class HistoryCubit extends Cubit<HistoryState> {
         maxPage: maxPage,
         isRequesting: false,
       ));
-    } catch (e, stacktrace) {
+    } catch (e, stackTrace) {
       try {
         emit(state.copyWith(
           isRequesting: false,
         ));
-        talker.error('', e, stacktrace);
-      } catch (e, stacktrace) {
-        talker.error('', e, stacktrace);
+        errorLogger.logError(e, stackTrace);
+      } catch (e, stackTrace) {
+        errorLogger.logError(e, stackTrace);
       }
     }
   }

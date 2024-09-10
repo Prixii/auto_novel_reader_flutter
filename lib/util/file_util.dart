@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:auto_novel_reader_flutter/util/client_util.dart';
+import 'package:auto_novel_reader_flutter/util/error_logger.dart';
 
 Future<void> createDirectoryIfNotExists(String path) async {
   final directory = Directory(path);
@@ -15,8 +15,7 @@ Future<void> writeStringToFile(String name, String content, String path) async {
     if (!file.parent.existsSync()) file.parent.createSync();
     await file.writeAsString(content);
   } catch (e, stackTrace) {
-    talker.error(e, stackTrace);
-    talker.error('Error writing string: $e');
+    errorLogger.logError(e, stackTrace);
   }
 }
 
@@ -27,8 +26,7 @@ Future<void> writeImageToFile(
     if (!file.parent.existsSync()) file.parent.createSync();
     await file.writeAsBytes(imageData);
   } catch (e, stackTrace) {
-    talker.error(e, stackTrace);
-    talker.error('Error writing image: $e');
+    errorLogger.logError(e, stackTrace);
   }
 }
 
