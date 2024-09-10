@@ -5,6 +5,7 @@ import 'package:auto_novel_reader_flutter/network/interceptor/request_intercepto
 import 'package:auto_novel_reader_flutter/network/service/service.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:chopper/chopper.dart';
+
 import 'package:http/io_client.dart' as http;
 
 typedef JsonBody = Map<String, dynamic>;

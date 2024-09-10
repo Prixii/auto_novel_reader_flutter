@@ -1,3 +1,4 @@
+import 'package:auto_novel_reader_flutter/bloc/global/global_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/ui/components/settings/user_info_tile.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/icon_option.dart';
@@ -6,6 +7,7 @@ import 'package:auto_novel_reader_flutter/ui/view/settings/data_settings.dart';
 import 'package:auto_novel_reader_flutter/ui/view/settings/download.dart';
 import 'package:auto_novel_reader_flutter/ui/view/settings/preference_settings.dart';
 import 'package:auto_novel_reader_flutter/ui/view/settings/read_settings.dart';
+import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
 import 'package:unicons/unicons.dart';
 
@@ -67,6 +69,11 @@ class SettingsView extends StatelessWidget {
             text: '关于',
             onTap: () => Navigator.push(context,
                 MaterialPageRoute(builder: (context) => const AboutPage()))),
+        IconOption(
+            icon: UniconsLine.refresh,
+            text: '检查新版本',
+            onTap: () =>
+                readGlobalBloc(context).add(const GlobalEvent.checkUpdate())),
       ],
     );
   }

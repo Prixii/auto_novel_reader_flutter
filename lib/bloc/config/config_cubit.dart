@@ -1,4 +1,3 @@
-import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +16,8 @@ class ConfigCubit extends HydratedCubit<ConfigState> {
   setHelloPage(int value) => emit(state.copyWith(helloPageIndex: value));
   setVolumeKeyShift(bool value) => emit(state.copyWith(volumeKeyShift: value));
   setPreloadNovel(bool value) => emit(state.copyWith(preloadNovel: value));
+  setAutoCheckUpdate(bool value) =>
+      emit(state.copyWith(autoCheckUpdate: value));
   setThemeMode(ThemeMode value) {
     emit(state.copyWith(themeMode: value));
   }

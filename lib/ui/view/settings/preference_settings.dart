@@ -1,6 +1,7 @@
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/icon_option.dart';
+import 'package:auto_novel_reader_flutter/ui/components/universal/switch_option.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/tab_option.dart';
 import 'package:auto_novel_reader_flutter/ui/view/settings/shield_settings.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
@@ -25,6 +26,14 @@ class PreferenceSettings extends StatelessWidget {
             _buildHelloPageSetter(context),
             _buildUrlSetter(context),
             _buildThemeSetter(context),
+            SwitchOption(
+              icon: UniconsLine.refresh,
+              label: '自动检查更新',
+              value: readConfigCubit(context).state.autoCheckUpdate,
+              onChanged: (value) => {
+                readConfigCubit(context).setAutoCheckUpdate(value),
+              },
+            ),
           ],
         ),
       ),
