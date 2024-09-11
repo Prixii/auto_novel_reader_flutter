@@ -112,6 +112,7 @@ List<WebNovelToc> parseTocList(dynamic body) {
 
 List<WebNovelOutline> parseToWebNovelOutline(dynamic body) {
   try {
+    if (body == null) return [];
     final items = (body['items'] ?? []) as List<dynamic>;
     var webNovelOutlines = <WebNovelOutline>[];
     for (final item in items) {

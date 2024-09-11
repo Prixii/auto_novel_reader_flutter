@@ -15,22 +15,10 @@ class CommentBox extends StatefulWidget {
 class _CommentBoxState extends State<CommentBox> {
   final TextEditingController _controller = TextEditingController();
 
-  void _submitComment() async {
-    if (_controller.text.isNotEmpty) {
-      final result =
-          await readCommentCubit(context).comment(content: _controller.text);
-      if (result) {
-        widget.onSucceedComment.call();
-        setState(() {
-          _controller.clear(); // 清空输入框
-          FocusScope.of(context).unfocus(); // 退出键盘
-        });
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final isSignIn = readUserCubit(context).isSignIn;
+
     return Row(
       children: [
         Expanded(
@@ -40,9 +28,10 @@ class _CommentBoxState extends State<CommentBox> {
               borderRadius: BorderRadius.circular(24),
             ),
             child: TextField(
+              enabled: isSignIn,
               controller: _controller,
               decoration: InputDecoration(
-                hintText: '撰写评论',
+                hintText: isSignIn ? '撰写评论' : '登录后才能评论',
                 hintStyle: TextStyle(
                   color: styleManager.colorScheme(context).secondaryFixedDim,
                 ),
@@ -61,9 +50,23 @@ class _CommentBoxState extends State<CommentBox> {
         ),
         IconButton(
           icon: const Icon(UniconsLine.message),
-          onPressed: _submitComment,
+          onPressed: isSignIn ? _submitComment : null,
         ),
       ],
     );
+  }
+
+  void _submitComment() async {
+    if (_controller.text.isNotEmpty) {
+      final result =
+          await readCommentCubit(context).comment(content: _controller.text);
+      if (result) {
+        widget.onSucceedComment.call();
+        setState(() {
+          _controller.clear(); // 清空输入框
+          FocusScope.of(context).unfocus(); // 退出键盘
+        });
+      }
+    }
   }
 }
