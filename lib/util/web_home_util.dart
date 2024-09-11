@@ -125,7 +125,7 @@ Future<WebNovelDto?> loadWebNovelDto(
   Function? onRequestFinished,
 }) async {
   // 检查是否有缓存
-  final existDto = webHomeBloc.state.webNovelDtoMap['$providerId$novelId'];
+  final existDto = webHomeBloc.state.webNovelDtoMap['$providerId-$novelId'];
   if (existDto != null) {
     return existDto;
   }
@@ -185,7 +185,7 @@ Future<ChapterDto?> loadNovelChapter(
   Function? onRequestFinished,
 }) async {
   if (chapterId == null) return null;
-  final chapterKey = providerId + novelId + chapterId;
+  final chapterKey = '$providerId-$novelId-$chapterId';
 
   // 检查是否有缓存
   final existDto = webHomeBloc.state.chapterDtoMap[chapterKey];

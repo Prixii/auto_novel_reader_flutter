@@ -92,6 +92,7 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
         ...state.webNovelDtoMap,
         dto.novelKey: dto,
       },
+      chapterDtoMap: {},
       loadingNovelDetail: false,
     ));
     _updateLastReadChapterId(
@@ -110,14 +111,16 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     _updateLastReadChapterId(dto.providerId, dto.novelId, targetChapterId);
     globalBloc.add(const GlobalEvent.setReadType(ReadType.web));
     emit(state.copyWith(loadingNovelChapter: true));
-    final chapterKey = currentNovelKey! + targetChapterId;
+    final chapterKey = '${currentNovelKey!}-$targetChapterId';
 
     final targetDto = await loadNovelChapter(
       currentNovelProviderId,
       currentNovelId,
       targetChapterId,
       onRequest: () => emit(state.copyWith(loadingNovelChapter: true)),
-      onRequestFinished: () => emit(state.copyWith(loadingNovelChapter: false)),
+      onRequestFinished: () => emit(state.copyWith(
+        loadingNovelChapter: false,
+      )),
     );
 
     if (targetDto == null) throw Exception('targetDto is null');
@@ -128,20 +131,20 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     ));
     _requestUpdateReadHistory(
         currentNovelProviderId, currentNovelId, targetChapterId);
-
-    // 预加载下一章节
-    final nextChapterKey = currentNovelKey! + (targetDto.nextId ?? '');
-    final nextDto = await loadNovelChapter(
-      currentNovelProviderId,
-      currentNovelId,
-      targetDto.nextId,
-    );
     var dtoMapSnapshot = <String, ChapterDto?>{
       ...state.chapterDtoMap,
       chapterKey: targetDto,
-      nextChapterKey: nextDto,
     };
-
+    // 预加载下一章节
+    if (targetDto.nextId != null) {
+      final nextChapterKey = '${currentNovelKey!}-${targetDto.nextId ?? ''}';
+      final nextDto = await loadNovelChapter(
+        currentNovelProviderId,
+        currentNovelId,
+        targetDto.nextId,
+      );
+      dtoMapSnapshot[nextChapterKey] = nextDto;
+    }
     emit(state.copyWith(
       chapterDtoMap: dtoMapSnapshot,
     ));

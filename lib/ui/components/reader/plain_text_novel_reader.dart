@@ -116,16 +116,16 @@ class _PlainTextNovelReaderState extends State<PlainTextNovelReader>
         Tween(begin: 0.0, end: 1.0).animate(_maskAnimationController);
     _scrollController = ScrollController();
 
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      final resultText = ReaderUtil.pagingText(
-        widget.dto.youdaoParagraphs?.join('\n') ?? '',
-        size,
-        style!,
-      );
-      setState(() {
-        result = resultText;
-      });
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    //   final resultText = ReaderUtil.pagingText(
+    //     widget.dto.youdaoParagraphs?.join('\n') ?? '',
+    //     size,
+    //     style!,
+    //   );
+    //   setState(() {
+    //     result = resultText;
+    //   });
+    // });
   }
 
   @override
