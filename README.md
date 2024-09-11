@@ -59,7 +59,6 @@ $ dart run build_runner build
 - 弃用 WebView，并支持将流式本转换成分页阅读
 - 下载 web 小说内容，以支持离线阅读
 - 点击 Tag 搜索
-- 支持预加载，大幅提高阅览体验
 - 升级本地 epub 系统
 
 **😭 以下内容因为 Api 不支持，暂时无法实现**
