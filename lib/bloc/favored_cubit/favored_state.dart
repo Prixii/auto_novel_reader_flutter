@@ -3,6 +3,7 @@ part of 'favored_cubit.dart';
 @freezed
 class FavoredState with _$FavoredState {
   const factory FavoredState.initial({
+    // 收藏页面
     @Default({
       NovelType.web: [],
       NovelType.wenku: [],

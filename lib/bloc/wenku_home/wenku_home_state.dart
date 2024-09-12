@@ -3,6 +3,7 @@ part of 'wenku_home_bloc.dart';
 @freezed
 class WenkuHomeState with _$WenkuHomeState {
   const factory WenkuHomeState.initial({
+    @Default({}) Map<RequestLabel, LoadingStatus?> loadingStatusMap,
     List<WenkuNovelOutline>? wenkuLatestUpdate,
     // 缓存
     @Default({}) Map<String, WenkuNovelDto> wenkuNovelDtoMap,

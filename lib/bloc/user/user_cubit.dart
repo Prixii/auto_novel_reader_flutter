@@ -1,4 +1,3 @@
-import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/error_logger.dart';
@@ -91,7 +90,6 @@ class UserCubit extends HydratedCubit<UserState> {
       errorLogger.logError(e, stackTrace);
       return false;
     }
-    webHomeBloc.add(const WebHomeEvent.refreshFavoredWeb());
     favoredCubit.init();
     return true;
   }
@@ -110,7 +108,7 @@ class UserCubit extends HydratedCubit<UserState> {
     }
     if (signInTime.difference(DateTime.now()).inDays >= 30) {
       await _autoSignIn(context);
-    } else if (signInTime.difference(DateTime.now()).inDays >= 20) {
+    } else if (signInTime.difference(DateTime.now()).inDays >= 25) {
       await _renewToken();
     }
   }

@@ -16,9 +16,10 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   WebHomeBloc() : super(const _Initial()) {
     on<WebHomeEvent>((event, emit) async {
       await event.map(
-        init: (event) async => await _onInit(event, emit),
-        refreshFavoredWeb: (event) async =>
-            await _onRefreshFavoredWeb(event, emit),
+        setWebMostVisited: (event) async =>
+            await _onSetWebMostVisited(event, emit),
+        setLoadingState: (event) async => await _onSetLoadingState(event, emit),
+        setWebFavored: (event) async => await _onSetWebFavored(event, emit),
         toNovelDetail: (event) async => await _onToNovelDetail(event, emit),
         readChapter: (event) async => await _onReadChapter(event, emit),
         nextChapter: (event) async => await _onNextChapter(event, emit),
@@ -33,12 +34,14 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     });
   }
 
-  _onInit(_Init event, Emitter<WebHomeState> emit) async {
+  _onSetWebMostVisited(
+      _SetWebMostVisited event, Emitter<WebHomeState> emit) async {
     if (state.inInit) return;
     emit(state.copyWith(inInit: true));
     Set<WebNovelOutline> newWebOutlines = {};
     await Future.wait([
-      loadFavoredWebOutline().then((webNovelOutlines) {
+      loadFavoredWebOutline().then((result) {
+        final webNovelOutlines = result.$1;
         var favoredWebMapSnapshot = <String, WebNovelOutline>{};
         for (var webNovelOutline in webNovelOutlines) {
           favoredWebMapSnapshot[
@@ -48,26 +51,16 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
         emit(state.copyWith(favoredWebMap: favoredWebMapSnapshot));
         newWebOutlines.addAll(webNovelOutlines);
       }),
-      loadPagedWebOutline(
-        provider: 'kakuyomu,syosetu,novelup,hameln,pixiv,alphapolis',
-      ).then((webNovelOutlinesResult) {
-        emit(state.copyWith(webMostVisited: webNovelOutlinesResult.$1));
-        newWebOutlines.addAll(webNovelOutlinesResult.$1);
-      }),
     ]);
-    var webNovelOutlineMapSnapshot = {...state.webNovelOutlineMap};
-    for (var webNovelOutline in newWebOutlines) {
-      final novelKey =
-          '${webNovelOutline.providerId}-${webNovelOutline.novelId}';
-      webNovelOutlineMapSnapshot[novelKey] = webNovelOutline;
-    }
-    emit(state.copyWith(
-        inInit: false, webNovelOutlineMap: webNovelOutlineMapSnapshot));
+
+    emit(state.copyWith(webMostVisited: event.webMostVisited));
+    newWebOutlines.addAll(event.webMostVisited);
+    _updateWebOutlinesCache(event.webMostVisited, emit);
   }
 
-  _onRefreshFavoredWeb(
-      _RefreshFavoredWeb event, Emitter<WebHomeState> emit) async {
-    final webNovelOutlines = await loadFavoredWebOutline();
+  _onSetWebFavored(_SetWebFavored event, Emitter<WebHomeState> emit) async {
+    final webNovelOutlines = event.webFavored;
+    // TODO 迁移到 FavoredCubit
     var favoredWebMapSnapshot = <String, WebNovelOutline>{};
     for (var webNovelOutline in webNovelOutlines) {
       favoredWebMapSnapshot[
@@ -216,6 +209,17 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     await _loadPagedWebNovel(emit);
   }
 
+  void _updateWebOutlinesCache(
+      List<WebNovelOutline> outlines, Emitter<WebHomeState> emit) async {
+    var webNovelOutlineMapSnapshot = {...state.webNovelOutlineMap};
+    for (var webNovelOutline in outlines) {
+      webNovelOutlineMapSnapshot[webNovelOutline.novelId] = webNovelOutline;
+    }
+    emit(state.copyWith(
+      webNovelOutlineMap: webNovelOutlineMapSnapshot,
+    ));
+  }
+
   Future<void> _loadPagedWebNovel(Emitter<WebHomeState> emit) async {
     final (newNovelList, pageNumber) = await loadPagedWebOutline(
       page: state.currentWebSearchPage,
@@ -289,4 +293,11 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   String get currentNovelId => state.currentWebNovelDto!.novelId;
   String get currentNovelProviderId => state.currentWebNovelDto!.providerId;
   String? get currentNovelKey => state.currentWebNovelDto?.novelKey;
+
+  _onSetLoadingState(_SetSetLoadingState event, Emitter<WebHomeState> emit) {
+    emit(state.copyWith(loadingStatusMap: {
+      ...state.loadingStatusMap,
+      ...event.loadingStatusMap,
+    }));
+  }
 }

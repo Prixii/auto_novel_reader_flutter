@@ -4,12 +4,13 @@ import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/error_logger.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-Future<List<WebNovelOutline>> loadFavoredWebOutline({
+Future<(List<WebNovelOutline>, int)> loadFavoredWebOutline({
   String favoredId = 'default',
   int page = 0,
   int pageSize = 8,
   String sort = 'update',
 }) async {
+  if (!userCubit.isSignIn) throw Exception('未登录');
   return apiClient.userFavoredWebService
       .getIdList(
     favoredId: favoredId,
@@ -18,15 +19,11 @@ Future<List<WebNovelOutline>> loadFavoredWebOutline({
     sort: sort,
   )
       .then((response) {
-    if (response?.statusCode == 502) {
-      Fluttertoast.showToast(msg: '服务器维护中');
-      return [];
-    }
     final body = response?.body;
     final webNovelOutlines = parseToWebNovelOutline(body);
     favoredCubit.setNovelToFavoredIdMap(webOutlines: webNovelOutlines.toList());
 
-    return webNovelOutlines;
+    return (webNovelOutlines, body['pageNumber'] as int);
   });
 }
 

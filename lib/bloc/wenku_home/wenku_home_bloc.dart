@@ -14,7 +14,11 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
   WenkuHomeBloc() : super(const _Initial()) {
     on<WenkuHomeEvent>((event, emit) async {
       await event.map(
-        init: (event) async => await _onInit(event, emit),
+        setWenkuLatestUpdate: (event) async =>
+            await _onSetWenkuLatestUpdate(event, emit),
+        setWenkuNovelOutlines: (event) async =>
+            await _onSetWenkuNovelOutlines(event, emit),
+        setLoadingState: (event) async => await _onSetLoadingState(event, emit),
         toWenkuDetail: (event) async => await _onToDetail(event, emit),
         favorNovel: (event) async => await _onFavorNovel(event, emit),
         unFavorNovel: (event) async => await _onUnFavorNovel(event, emit),
@@ -25,18 +29,34 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
     });
   }
 
-  _onInit(_Init event, Emitter<WenkuHomeState> emit) async {
-    await loadPagedWenkuOutline(level: 1).then((wenkuNovelOutlinesResult) {
-      emit(
-        state.copyWith(wenkuLatestUpdate: wenkuNovelOutlinesResult.$1),
-      );
-      var favoredMap = <String, WenkuNovelOutline>{};
-      for (var outline in wenkuNovelOutlinesResult.$1) {
-        if (outline.favored != null) {
-          favoredMap[outline.favored!] = outline;
-        }
+  _onSetWenkuLatestUpdate(
+      _SetWenkuLatestUpdate event, Emitter<WenkuHomeState> emit) async {
+    final wenkuList = event.wenkuNovelOutlines;
+    emit(
+      state.copyWith(wenkuLatestUpdate: wenkuList),
+    );
+    // TODO 移动到 Favored Cubit
+    var favoredMap = <String, WenkuNovelOutline>{};
+    for (var outline in wenkuList) {
+      if (outline.favored != null) {
+        favoredMap[outline.favored!] = outline;
       }
-    });
+    }
+  }
+
+  _onSetWenkuNovelOutlines(
+      _SetWenkuNovelOutlines event, Emitter<WenkuHomeState> emit) async {
+    final wenkuList = event.wenkuNovelOutlines;
+    emit(
+      state.copyWith(wenkuLatestUpdate: wenkuList),
+    );
+    // TODO 移动到 Favored Cubit
+    var favoredMap = <String, WenkuNovelOutline>{};
+    for (var outline in wenkuList) {
+      if (outline.favored != null) {
+        favoredMap[outline.favored!] = outline;
+      }
+    }
   }
 
   _onToDetail(_ToWenkuDetail event, Emitter<WenkuHomeState> emit) async {
@@ -172,4 +192,11 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
   bool currentNovelFavored(String novelId) =>
       favoredCubit.state.novelToFavoredIdMap[novelId] != null;
   String get currentNovelId => state.currentWenkuNovelDto?.id ?? '';
+
+  _onSetLoadingState(_SetSetLoadingState event, Emitter<WenkuHomeState> emit) {
+    emit(state.copyWith(loadingStatusMap: {
+      ...state.loadingStatusMap,
+      ...event.loadingStatusMap,
+    }));
+  }
 }

@@ -3,6 +3,7 @@ part of 'web_home_bloc.dart';
 @freezed
 class WebHomeState with _$WebHomeState {
   const factory WebHomeState.initial({
+    @Default({}) Map<RequestLabel, LoadingStatus?> loadingStatusMap,
     @Default(false) bool inInit,
     List<WebNovelOutline>? webMostVisited,
     @Default({}) Map<String, WebNovelOutline> favoredWebMap,

@@ -1,7 +1,5 @@
 import 'package:animations/animations.dart';
 import 'package:auto_novel_reader_flutter/bloc/global/global_bloc.dart';
-import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
-import 'package:auto_novel_reader_flutter/bloc/wenku_home/wenku_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
@@ -30,9 +28,7 @@ class HomeView extends StatelessWidget {
       _showNewReleaseDialog(
           context, readGlobalBloc(context).state.latestReleaseData!);
     }
-    readWebHomeBloc(context).add(const WebHomeEvent.init());
     readFavoredCubit(context).init();
-    readWenkuHomeBloc(context).add(const WenkuHomeEvent.init());
     readDownloadCubit(context).init();
     return BlocListener<GlobalBloc, GlobalState>(
       listener: (context, state) {

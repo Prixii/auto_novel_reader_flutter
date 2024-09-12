@@ -445,3 +445,16 @@ enum NovelRenderType {
   streaming,
   paged;
 }
+
+enum LoadingStatus { loading, failed, serverError }
+
+enum RequestLabel {
+  // 主页
+  loadWebFavored,
+  loadWebMostVisited,
+  loadWenkuLatestUpdated,
+  //
+  loadNovelDetail,
+  loadNovelChapter,
+  loadNextPageWeb,
+}
