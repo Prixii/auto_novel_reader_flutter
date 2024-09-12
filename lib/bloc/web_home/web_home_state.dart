@@ -4,7 +4,6 @@ part of 'web_home_bloc.dart';
 class WebHomeState with _$WebHomeState {
   const factory WebHomeState.initial({
     @Default({}) Map<RequestLabel, LoadingStatus?> loadingStatusMap,
-    @Default(false) bool inInit,
     List<WebNovelOutline>? webMostVisited,
     @Default({}) Map<String, WebNovelOutline> favoredWebMap,
     // 小说大纲缓存
@@ -13,7 +12,6 @@ class WebHomeState with _$WebHomeState {
     // 小说详情
     WebNovelDto? currentWebNovelDto,
     @Default({}) Map<String, WebNovelDto?> webNovelDtoMap,
-    @Default(false) bool loadingNovelDetail,
     // 小说正文
     @Default(false) bool loadingNovelChapter,
     @Default({}) Map<String, ChapterDto?> chapterDtoMap,

@@ -126,17 +126,13 @@ Future<WebNovelDto?> loadWebNovelDto(
   if (existDto != null) {
     return existDto;
   }
-  // 没有缓存，则请求
-  onRequest?.call();
-  final response =
-      await apiClient.webNovelService.getNovelId(providerId, novelId);
-  if (response.statusCode == 502) {
-    Fluttertoast.showToast(msg: '服务器维护中');
-    onRequestFinished?.call();
-    return null;
-  }
-  final body = response.body;
+
   try {
+    // 没有缓存，则请求
+    onRequest?.call();
+    final response =
+        await apiClient.webNovelService.getNovelId(providerId, novelId);
+    final body = response.body;
     final webNovelDto = WebNovelDto(
       providerId,
       novelId,
@@ -170,7 +166,7 @@ Future<WebNovelDto?> loadWebNovelDto(
   } catch (e, stackTrace) {
     errorLogger.logError(e, stackTrace);
     onRequestFinished?.call();
-    return null;
+    rethrow;
   }
 }
 
@@ -204,14 +200,10 @@ Future<ChapterDto?> _requestNovelChapter(
   String novelId,
   String chapterId,
 ) async {
-  final response = await apiClient.webNovelService
-      .getChapter(providerId, novelId, chapterId);
-  if (response.statusCode == 502) {
-    Fluttertoast.showToast(msg: '服务器维护中');
-    return null;
-  }
-  final body = response.body;
   try {
+    final response = await apiClient.webNovelService
+        .getChapter(providerId, novelId, chapterId);
+    final body = response.body;
     final chapterDto = ChapterDto(
       baiduParagraphs: body['youdaoParagraphs']?.cast<String>(),
       originalParagraphs: body['paragraphs']?.cast<String>(),
@@ -226,7 +218,7 @@ Future<ChapterDto?> _requestNovelChapter(
     return chapterDto;
   } catch (e, stackTrace) {
     errorLogger.logError(e, stackTrace);
-    return null;
+    rethrow;
   }
 }
 
@@ -237,10 +229,15 @@ Future<WenkuNovelDto?> loadWenkuNovelDto(
 }) async {
   final existDto = wenkuHomeBloc.state.wenkuNovelDtoMap[novelId];
   if (existDto != null) return existDto;
-  onRequest?.call();
-  final wenkuDto = await _requestWenkuNovelDto(novelId);
-  onRequestFinished?.call();
-  return wenkuDto;
+  try {
+    onRequest?.call();
+    final wenkuDto = await _requestWenkuNovelDto(novelId);
+    onRequestFinished?.call();
+    return wenkuDto;
+  } catch (e, stackTrace) {
+    errorLogger.logError(e, stackTrace);
+    rethrow;
+  }
 }
 
 Future<WenkuNovelDto?> _requestWenkuNovelDto(String novelId) async {

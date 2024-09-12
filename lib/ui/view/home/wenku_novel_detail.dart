@@ -314,7 +314,11 @@ class _WenkuNovelDetailState extends State<WenkuNovelDetail> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (_) => const WebNovelDetailContainer(openFromWeb: true)));
+            builder: (_) => WebNovelDetailContainer(
+                  providerId,
+                  novelId,
+                  openFromWeb: true,
+                )));
   }
 
   LineButton _buildReadButton(BuildContext context) {

@@ -98,7 +98,8 @@ class WebHomeView extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (_) => const WebNovelDetailContainer()));
+                            builder: (_) => WebNovelDetailContainer(
+                                result.$2[0]!, result.$2[1]!)));
                   }
                   if (result.$1 == NovelType.wenku) {
                     readWenkuHomeBloc(context)

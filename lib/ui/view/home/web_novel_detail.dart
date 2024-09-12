@@ -10,6 +10,7 @@ import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:auto_novel_reader_flutter/ui/components/favored/favored_list.dart';
 import 'package:auto_novel_reader_flutter/ui/components/reader/plain_text_novel_reader.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/line_button.dart';
+import 'package:auto_novel_reader_flutter/ui/components/universal/timeout_info_container.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/chapter_list.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/comment/comment_box.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/comment/comment_list.dart';
@@ -27,7 +28,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:unicons/unicons.dart';
 
 class WebNovelDetailContainer extends StatelessWidget {
-  const WebNovelDetailContainer({super.key, this.openFromWeb = false});
+  const WebNovelDetailContainer(
+    this.providerId,
+    this.novelId, {
+    super.key,
+    this.openFromWeb = false,
+  });
+  final String novelId;
+  final String providerId;
 
   final bool openFromWeb;
   @override
@@ -36,29 +44,51 @@ class WebNovelDetailContainer extends StatelessWidget {
       create: (context) => CommentCubit(),
       child: BlocSelector<WebHomeBloc, WebHomeState, WebNovelDto?>(
           selector: (state) {
-        return state.loadingNovelDetail ? null : state.currentWebNovelDto;
+        return state.currentWebNovelDto;
       }, builder: (context, novelDto) {
         return Scaffold(
-            appBar: AppBar(
-              shadowColor: styleManager.colorScheme(context).shadow,
-              backgroundColor:
-                  styleManager.colorScheme(context).secondaryContainer,
-              title: const Text('小说详情'),
-              actions: _buildActions(context),
+          appBar: AppBar(
+            shadowColor: styleManager.colorScheme(context).shadow,
+            backgroundColor:
+                styleManager.colorScheme(context).secondaryContainer,
+            title: const Text('小说详情'),
+            actions: _buildActions(context),
+          ),
+          drawer: Drawer(
+            child: ChapterList(
+              tocList: novelDto?.toc ?? [],
+              novelKey: novelDto?.novelKey ?? '',
             ),
-            drawer: Drawer(
-              child: ChapterList(
-                tocList: novelDto?.toc ?? [],
-                novelKey: novelDto?.novelKey ?? '',
-              ),
-            ),
-            body: (novelDto == null)
-                ? const Center(child: CircularProgressIndicator())
-                : WebNovelDetail(
-                    novelDto: novelDto,
-                    openFromWeb: openFromWeb,
-                  ));
+          ),
+          body: _buildNovelDetailBody(novelDto),
+        );
       }),
+    );
+  }
+
+  BlocSelector<WebHomeBloc, WebHomeState, LoadingStatus?> _buildNovelDetailBody(
+      WebNovelDto? novelDto) {
+    return BlocSelector<WebHomeBloc, WebHomeState, LoadingStatus?>(
+      selector: (state) {
+        return state.loadingStatusMap[RequestLabel.loadNovelDetail];
+      },
+      builder: (context, state) {
+        return TimeoutInfoContainer(
+          status: state,
+          child: novelDto == null
+              ? Container()
+              : WebNovelDetail(
+                  novelDto: novelDto,
+                  openFromWeb: openFromWeb,
+                ),
+          onRetry: () {
+            readWebHomeBloc(context).add(WebHomeEvent.toNovelDetail(
+              providerId,
+              novelId,
+            ));
+          },
+        );
+      },
     );
   }
 

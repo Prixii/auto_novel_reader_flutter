@@ -2,6 +2,7 @@ import 'package:auto_novel_reader_flutter/bloc/global/global_bloc.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
+import 'package:auto_novel_reader_flutter/network/interceptor/response_interceptor.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/web_home_util.dart';
 import 'package:bloc/bloc.dart';
@@ -18,7 +19,8 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
       await event.map(
         setWebMostVisited: (event) async =>
             await _onSetWebMostVisited(event, emit),
-        setLoadingState: (event) async => await _onSetLoadingState(event, emit),
+        setLoadingState: (event) async =>
+            await _onSetLoadingStatus(event, emit),
         setWebFavored: (event) async => await _onSetWebFavored(event, emit),
         toNovelDetail: (event) async => await _onToNovelDetail(event, emit),
         readChapter: (event) async => await _onReadChapter(event, emit),
@@ -36,8 +38,6 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
 
   _onSetWebMostVisited(
       _SetWebMostVisited event, Emitter<WebHomeState> emit) async {
-    if (state.inInit) return;
-    emit(state.copyWith(inInit: true));
     Set<WebNovelOutline> newWebOutlines = {};
     await Future.wait([
       loadFavoredWebOutline().then((result) {
@@ -71,14 +71,25 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   }
 
   _onToNovelDetail(_ToNovelDetail event, Emitter<WebHomeState> emit) async {
-    emit(state.copyWith(loadingNovelDetail: true));
-    final dto = await loadWebNovelDto(
-      event.providerId,
-      event.novelId,
-      onRequest: () => {},
-      onRequestFinished: () => {},
-    );
-    if (dto == null) return;
+    add(const WebHomeEvent.setLoadingState({
+      RequestLabel.loadNovelDetail: LoadingStatus.loading,
+    }));
+    late final WebNovelDto dto;
+    try {
+      dto = await loadWebNovelDto(
+        event.providerId,
+        event.novelId,
+        onRequest: () => {},
+        onRequestFinished: () => {},
+      ) as WebNovelDto;
+    } catch (e) {
+      add(WebHomeEvent.setLoadingState({
+        RequestLabel.loadNovelDetail: (e is ServerException)
+            ? LoadingStatus.serverError
+            : LoadingStatus.failed,
+      }));
+      return;
+    }
     emit(state.copyWith(
       currentWebNovelDto: dto,
       webNovelDtoMap: {
@@ -86,13 +97,15 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
         dto.novelKey: dto,
       },
       chapterDtoMap: {},
-      loadingNovelDetail: false,
     ));
     _updateLastReadChapterId(
       dto.providerId,
       dto.novelId,
       dto.lastReadChapterId,
     );
+    add(const WebHomeEvent.setLoadingState({
+      RequestLabel.loadNovelDetail: null,
+    }));
   }
 
   _onReadChapter(_ReadChapter event, Emitter<WebHomeState> emit) async {
@@ -294,7 +307,7 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   String get currentNovelProviderId => state.currentWebNovelDto!.providerId;
   String? get currentNovelKey => state.currentWebNovelDto?.novelKey;
 
-  _onSetLoadingState(_SetSetLoadingState event, Emitter<WebHomeState> emit) {
+  _onSetLoadingStatus(_SetSetLoadingState event, Emitter<WebHomeState> emit) {
     emit(state.copyWith(loadingStatusMap: {
       ...state.loadingStatusMap,
       ...event.loadingStatusMap,
