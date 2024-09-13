@@ -241,6 +241,9 @@ enum WenkuNovelLevel {
     if (name == '严肃向') return 3;
     return -1;
   }
+
+  static List<WenkuNovelLevel> get oldAss => [general, adult, serious];
+  static List<WenkuNovelLevel> get youngAss => [general, serious];
 }
 
 enum NovelStatus {

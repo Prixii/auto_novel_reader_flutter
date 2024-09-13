@@ -22,7 +22,6 @@ class CheckFilter<T> extends StatefulWidget {
 class _CheckFilterState<T> extends State<CheckFilter> {
   final Map<String, bool> _selectedOptions = {};
   final Map<T, bool> _selectedValues = {};
-  late final Color activeColor;
   final inactiveColor = Colors.white;
   @override
   void initState() {
@@ -47,7 +46,7 @@ class _CheckFilterState<T> extends State<CheckFilter> {
 
   @override
   Widget build(BuildContext context) {
-    activeColor = styleManager.colorScheme(context).secondary;
+    final activeColor = styleManager.colorScheme(context).secondary;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,

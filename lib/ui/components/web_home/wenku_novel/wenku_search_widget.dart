@@ -151,14 +151,17 @@ class _WenkuSearchWidgetState extends State<WenkuSearchWidget>
   }
 
   Column _buildFilters() {
+    final isOldAss = readUserCubit(context).isOldAss;
+    final levelList =
+        isOldAss ? WenkuNovelLevel.values : WenkuNovelLevel.youngAss;
     return Column(mainAxisSize: MainAxisSize.min, children: [
       SizedBox(
         width: double.infinity,
         child: RadioFilter(
             title: '分级',
             controller: _levelController,
-            values: WenkuNovelLevel.values,
-            options: WenkuNovelLevel.values.map((e) => e.zhName).toList()),
+            values: levelList,
+            options: levelList.map((e) => e.zhName).toList()),
       ),
     ]);
   }
@@ -171,7 +174,7 @@ class _WenkuSearchWidgetState extends State<WenkuSearchWidget>
         _animationController.forward();
       } else {
         _animationController.reverse();
-        FocusScope.of(context).unfocus(); // NEED TEST 退出键盘
+        FocusScope.of(context).unfocus();
       }
     });
   }
