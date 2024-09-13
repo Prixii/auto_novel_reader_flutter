@@ -147,6 +147,11 @@ class UserCubit extends HydratedCubit<UserState> {
   }
 
   bool get isSignIn => state.token != null;
+  bool get isOldAss {
+    final signInTime = state.signInTime;
+    if (signInTime == null) return false;
+    return signInTime.difference(DateTime.now()).inDays >= 30;
+  }
 
   @override
   UserState? fromJson(Map<String, dynamic> json) => UserState.fromJson(json);

@@ -13,6 +13,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:unicons/unicons.dart';
 
+const standardSwitchPageVelocity = 100.0;
+
 class PlainTextNovelReaderContainer extends StatelessWidget {
   const PlainTextNovelReaderContainer({super.key});
 
@@ -175,25 +177,37 @@ class _PlainTextNovelReaderState extends State<PlainTextNovelReader>
       builder: (context, isLoading) {
         return AbsorbPointer(
           absorbing: isLoading,
-          child: SingleChildScrollView(
-            controller: _scrollController,
-            padding:
-                const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-            child: Column(
-              children: [
-                Text(
-                  widget.dto.titleJp ?? '',
-                  style: styleManager.primaryColorTitleLarge(context),
-                ),
-                Text(
-                  widget.dto.titleZh ?? '',
-                  style: styleManager.titleSmall(context),
-                ),
-                const Divider(),
-                NovelRender(
-                  chapterDto: widget.dto,
-                )
-              ],
+          child: GestureDetector(
+            onHorizontalDragEnd: (detail) {
+              if (detail.velocity.pixelsPerSecond.dx <
+                  -standardSwitchPageVelocity) {
+                if (readConfigCubit(context).state.slideShift) nextPage();
+              } else if (detail.velocity.pixelsPerSecond.dx >
+                  standardSwitchPageVelocity) {
+                if (readConfigCubit(context).state.slideShift) previousPage();
+              }
+            },
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+              child: Column(
+                children: [
+                  Text(
+                    widget.dto.titleJp ?? '',
+                    style: styleManager.primaryColorTitleLarge(context),
+                  ),
+                  Text(
+                    widget.dto.titleZh ?? '',
+                    style: styleManager.titleSmall(context),
+                  ),
+                  const Divider(),
+                  NovelRender(
+                    chapterDto: widget.dto,
+                  ),
+                  _buildBottomPageSwitcher(),
+                ],
+              ),
             ),
           ),
         );
@@ -226,6 +240,24 @@ class _PlainTextNovelReaderState extends State<PlainTextNovelReader>
             child: const Center(child: CircularProgressIndicator()),
           ),
         ));
+  }
+
+  Widget _buildBottomPageSwitcher() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        TextButton(onPressed: previousPage, child: const Text('上一章')),
+        TextButton(onPressed: nextPage, child: const Text('下一章'))
+      ],
+    );
+  }
+
+  void nextPage() {
+    readWebHomeBloc(context).add(const WebHomeEvent.nextChapter());
+  }
+
+  void previousPage() {
+    readWebHomeBloc(context).add(const WebHomeEvent.previousChapter());
   }
 }
 

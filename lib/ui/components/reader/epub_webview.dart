@@ -151,20 +151,18 @@ class _EpubWebviewState extends State<EpubWebview> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        TextButton(onPressed: previousPage, child: const Text('上一页')),
-        TextButton(onPressed: nextPage, child: const Text('下一页'))
+        TextButton(onPressed: previousPage, child: const Text('上一章')),
+        TextButton(onPressed: nextPage, child: const Text('下一章'))
       ],
     );
   }
 
   void nextPage() {
-    talker.debug('nextPage!');
     readProgress = 0.0;
     readEpubViewerBloc(context).add(const EpubViewerEvent.nextChapter());
   }
 
   void previousPage() {
-    talker.debug('previousPage!');
     readProgress = 0.0;
     readEpubViewerBloc(context).add(const EpubViewerEvent.previousChapter());
   }
