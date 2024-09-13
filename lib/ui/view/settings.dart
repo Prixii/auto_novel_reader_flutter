@@ -72,8 +72,8 @@ class SettingsView extends StatelessWidget {
         IconOption(
             icon: UniconsLine.refresh,
             text: '检查新版本',
-            onTap: () =>
-                readGlobalBloc(context).add(const GlobalEvent.checkUpdate())),
+            onTap: () => readGlobalBloc(context)
+                .add(const GlobalEvent.checkUpdate(showSuccessToast: true))),
       ],
     );
   }

@@ -13,7 +13,9 @@ class WebNovelSearchPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (context.read<WebHomeBloc>().state.webNovelSearchResult.isEmpty) {
-      readWebHomeBloc(context).add(const WebHomeEvent.searchWeb());
+      readWebHomeBloc(context).add(WebHomeEvent.searchWeb(
+        level: readUserCubit(context).isOldAss ? 0 : 1,
+      ));
     }
     return const Stack(
       children: [

@@ -40,7 +40,9 @@ class GlobalBloc extends Bloc<GlobalEvent, GlobalState> {
       return;
     }
     if (packageInfo.version == latestReleaseData!.tag) {
-      showSucceedToast('已是最新版本');
+      if (event.showSuccessToast) {
+        showSucceedToast('已是最新版本');
+      }
       return;
     }
     emit(state.copyWith(

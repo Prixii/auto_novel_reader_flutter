@@ -24,9 +24,12 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
   late CurvedAnimation _curvedScaleAnimation;
   late CurvedAnimation _curvedFadeAnimation;
   late CheckFilterController<NovelProvider> _checkFilterController;
-  late RadioFilterController _categoryController;
-  late RadioFilterController _translationController;
-  late RadioFilterController _sortController;
+  late RadioFilterController _categoryController,
+      _translationController,
+      _sortController,
+      _levelController;
+
+  late bool isOldAss;
 
   bool _isFilterVisible = false;
   // bool _isHistoryVisible = false;
@@ -35,13 +38,14 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
   @override
   void initState() {
     super.initState();
-
+    isOldAss = readUserCubit(context).isOldAss;
     _initAnimation();
 
     _checkFilterController = CheckFilterController();
     _categoryController = RadioFilterController();
     _translationController = RadioFilterController();
     _sortController = RadioFilterController();
+    _levelController = RadioFilterController();
     _searchController = TextEditingController();
   }
 
@@ -70,6 +74,8 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
   @override
   void dispose() {
     _animationController.dispose();
+    _searchController.dispose();
+
     super.dispose();
   }
 
@@ -176,6 +182,7 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
               controller: _categoryController,
               values: NovelStatus.values,
               options: NovelStatus.values.map((e) => e.zhName).toList()),
+          ..._buildLevelFilter(),
           const SizedBox(height: 16.0),
           RadioFilter(
               title: '翻译',
@@ -192,6 +199,19 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
         ]);
   }
 
+  List<Widget> _buildLevelFilter() {
+    return isOldAss
+        ? [
+            const SizedBox(height: 16.0),
+            RadioFilter(
+                title: '分级',
+                controller: _levelController,
+                values: WebNovelLevel.values,
+                options: WebNovelLevel.values.map((e) => e.zhName).toList()),
+          ]
+        : [];
+  }
+
   void _toggleVisibility(bool value) {
     if (_isFilterVisible == value) return;
     setState(() {
@@ -200,7 +220,7 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
         _animationController.forward();
       } else {
         _animationController.reverse();
-        FocusScope.of(context).unfocus(); // NEED TEST 退出键盘
+        FocusScope.of(context).unfocus();
       }
     });
   }
@@ -213,7 +233,9 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
       translate:
           WebTranslationSource.indexByZhName(_translationController.optionName),
       sort: WebNovelOrder.indexByZhName(_sortController.optionName),
-      level: 1,
+      level: isOldAss
+          ? WebNovelLevel.indexByZhName(_levelController.optionName)
+          : 1,
     ));
   }
 }

@@ -27,7 +27,7 @@ class RadioFilter<T> extends StatefulWidget {
 class _RadioFilterState<T> extends State<RadioFilter> {
   late String _selectedOption;
   late T _selectedValue;
-  late final Color activeColor;
+  late Color activeColor;
   final inactiveColor = Colors.white;
 
   @override
