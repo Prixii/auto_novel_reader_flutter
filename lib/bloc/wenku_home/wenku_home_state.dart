@@ -12,7 +12,6 @@ class WenkuHomeState with _$WenkuHomeState {
     @Default({}) Map<String, WenkuNovelOutline> wenkuNovelOutlineMap,
 
     // 详情
-    @Default(false) bool loadingDetail,
     @Default(Language.zhJp) Language language,
     @Default(TranslationMode.priority) TranslationMode translationMode,
     @Default([

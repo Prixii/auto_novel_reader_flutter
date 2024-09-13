@@ -39,20 +39,6 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   _onSetWebMostVisited(
       _SetWebMostVisited event, Emitter<WebHomeState> emit) async {
     Set<WebNovelOutline> newWebOutlines = {};
-    await Future.wait([
-      loadFavoredWebOutline().then((result) {
-        final webNovelOutlines = result.$1;
-        var favoredWebMapSnapshot = <String, WebNovelOutline>{};
-        for (var webNovelOutline in webNovelOutlines) {
-          favoredWebMapSnapshot[
-                  '${webNovelOutline.providerId}${webNovelOutline.novelId}'] =
-              webNovelOutline;
-        }
-        emit(state.copyWith(favoredWebMap: favoredWebMapSnapshot));
-        newWebOutlines.addAll(webNovelOutlines);
-      }),
-    ]);
-
     emit(state.copyWith(webMostVisited: event.webMostVisited));
     newWebOutlines.addAll(event.webMostVisited);
     _updateWebOutlinesCache(event.webMostVisited, emit);

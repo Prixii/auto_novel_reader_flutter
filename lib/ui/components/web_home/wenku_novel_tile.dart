@@ -121,7 +121,7 @@ class WenkuNovelTile extends StatelessWidget {
   void _toDetail(BuildContext context, WenkuNovelOutline novel) async {
     readWenkuHomeBloc(context).add(WenkuHomeEvent.toWenkuDetail(novel.id));
     Navigator.push(context,
-        MaterialPageRoute(builder: (_) => const WenkuNovelDetailContainer()));
+        MaterialPageRoute(builder: (_) => WenkuNovelDetailContainer(novel.id)));
   }
 
   Widget _buildForWenkuNovelDto(WenkuNovelDto novel) {

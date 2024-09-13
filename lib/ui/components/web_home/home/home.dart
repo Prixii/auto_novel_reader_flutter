@@ -157,6 +157,10 @@ class _HomeState extends State<Home> {
       loadWenkuLatestUpdate(context);
     }
     if (readUserCubit(context).state.token == null) return;
+    final webFavored = readWebHomeBloc(context).state.favoredWebMap;
+    if (webFavored.isEmpty) {
+      loadWebFavored(context);
+    }
   }
 
   Future<void> loadWebFavored(BuildContext context) async {
@@ -167,7 +171,7 @@ class _HomeState extends State<Home> {
     try {
       final (webNovelOutlineList, _) = await loadFavoredWebOutline();
 
-      bloc.add(WebHomeEvent.setWebMostVisited(webNovelOutlineList));
+      bloc.add(WebHomeEvent.setWebFavored(webNovelOutlineList));
       bloc.add(const WebHomeEvent.setLoadingState({
         RequestLabel.loadWebFavored: null,
       }));

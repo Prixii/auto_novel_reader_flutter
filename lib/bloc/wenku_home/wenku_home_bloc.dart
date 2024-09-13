@@ -1,6 +1,7 @@
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
+import 'package:auto_novel_reader_flutter/network/interceptor/response_interceptor.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/web_home_util.dart';
 import 'package:bloc/bloc.dart';
@@ -19,7 +20,7 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
         setWenkuNovelOutlines: (event) async =>
             await _onSetWenkuNovelOutlines(event, emit),
         setLoadingState: (event) async => await _onSetLoadingState(event, emit),
-        toWenkuDetail: (event) async => await _onToDetail(event, emit),
+        toWenkuDetail: (event) async => await _onToWenkuDetail(event, emit),
         favorNovel: (event) async => await _onFavorNovel(event, emit),
         unFavorNovel: (event) async => await _onUnFavorNovel(event, emit),
         searchWenku: (event) async => await _onSearchWenku(event, emit),
@@ -59,19 +60,31 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
     }
   }
 
-  _onToDetail(_ToWenkuDetail event, Emitter<WenkuHomeState> emit) async {
-    emit(state.copyWith(loadingDetail: true));
+  _onToWenkuDetail(_ToWenkuDetail event, Emitter<WenkuHomeState> emit) async {
+    add(const WenkuHomeEvent.setLoadingState({
+      RequestLabel.loadNovelDetail: LoadingStatus.loading,
+    }));
     var novelId = event.wenkuId;
-    final novelDto = await loadWenkuNovelDto(novelId);
-    if (novelDto == null) return;
-    emit(state.copyWith(
-      wenkuNovelDtoMap: {
-        ...state.wenkuNovelDtoMap,
-        novelId: novelDto,
-      },
-      loadingDetail: false,
-      currentWenkuNovelDto: novelDto,
-    ));
+    late final WenkuNovelDto novelDto;
+    try {
+      novelDto = await loadWenkuNovelDto(novelId) as WenkuNovelDto;
+      emit(state.copyWith(
+        wenkuNovelDtoMap: {
+          ...state.wenkuNovelDtoMap,
+          novelId: novelDto,
+        },
+        currentWenkuNovelDto: novelDto,
+      ));
+      add(const WenkuHomeEvent.setLoadingState({
+        RequestLabel.loadNovelDetail: null,
+      }));
+    } catch (e) {
+      add(WenkuHomeEvent.setLoadingState({
+        RequestLabel.loadNovelDetail: (e is ServerException)
+            ? LoadingStatus.serverError
+            : LoadingStatus.failed,
+      }));
+    }
   }
 
   _onFavorNovel(_FavorNovel event, Emitter<WenkuHomeState> emit) async {

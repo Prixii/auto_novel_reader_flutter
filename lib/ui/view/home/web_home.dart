@@ -102,13 +102,15 @@ class WebHomeView extends StatelessWidget {
                                 result.$2[0]!, result.$2[1]!)));
                   }
                   if (result.$1 == NovelType.wenku) {
+                    final wenkuId = result.$2[0]!;
                     readWenkuHomeBloc(context)
-                        .add(WenkuHomeEvent.toWenkuDetail(result.$2[0]!));
+                        .add(WenkuHomeEvent.toWenkuDetail(wenkuId));
                     Navigator.of(context).pop(); // 关闭对话框
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (_) => const WenkuNovelDetailContainer()));
+                            builder: (_) =>
+                                WenkuNovelDetailContainer(wenkuId)));
                   }
                 }
               },

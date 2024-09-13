@@ -338,7 +338,8 @@ class _WebNovelDetailState extends State<WebNovelDetail> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (_) => const WenkuNovelDetailContainer(
+            builder: (_) => WenkuNovelDetailContainer(
+                  widget.novelDto.wenkuId!,
                   openFromWeb: true,
                 )));
   }
