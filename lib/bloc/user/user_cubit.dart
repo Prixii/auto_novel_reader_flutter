@@ -143,7 +143,6 @@ class UserCubit extends HydratedCubit<UserState> {
 
   Future<void> signOut() async {
     emit(const UserState.initial());
-    // TODO 清除缓存
   }
 
   bool get isSignIn => state.token != null;
