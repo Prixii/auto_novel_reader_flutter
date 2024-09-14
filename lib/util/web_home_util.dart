@@ -57,26 +57,73 @@ Future<(List<WebNovelOutline>, int)> loadPagedWebOutline({
   });
 }
 
+Future<List<WenkuNovelOutline>> loadPagedWenkuOutlines(
+    WenkuSearchData data) async {
+  try {
+    final response = await apiClient.wenkuNovelService.getList(
+      data.page,
+      data.pageSize,
+      level: data.level,
+      query: data.query,
+    );
+    final body = response.body;
+    final wenkuNovelOutlines = parseToWenkuNovelOutline(body);
+    favoredCubit.setNovelToFavoredIdMap(wenkuOutlines: wenkuNovelOutlines);
+
+    return wenkuNovelOutlines;
+  } catch (e, stackTrace) {
+    errorLogger.logError(e, stackTrace);
+    rethrow;
+  }
+}
+
+@Deprecated('use loadPagedWenkuOutlines instead')
 Future<(List<WenkuNovelOutline>, int)> loadPagedWenkuOutline({
   int page = 0,
   int pageSize = 12,
   int level = 0,
   String? query,
 }) async {
-  return apiClient.wenkuNovelService
-      .getList(
-    page,
-    pageSize,
-    level: level,
-    query: query,
-  )
-      .then((response) {
+  try {
+    final response = await apiClient.wenkuNovelService.getList(
+      page,
+      pageSize,
+      level: level,
+      query: query,
+    );
     final body = response.body;
     final wenkuNovelOutlines = parseToWenkuNovelOutline(body);
     favoredCubit.setNovelToFavoredIdMap(wenkuOutlines: wenkuNovelOutlines);
 
     return (wenkuNovelOutlines, body['pageNumber'] as int);
-  });
+  } catch (e, stackTrace) {
+    errorLogger.logError(e, stackTrace);
+    rethrow;
+  }
+}
+
+Future<(List<WenkuNovelOutline>, int)> requestWenkuLatestUpdate({
+  int page = 0,
+  int pageSize = 12,
+  int level = 0,
+  String? query,
+}) async {
+  try {
+    final response = await apiClient.wenkuNovelService.getList(
+      page,
+      pageSize,
+      level: level,
+      query: query,
+    );
+    final body = response.body;
+    final wenkuNovelOutlines = parseToWenkuNovelOutline(body);
+    favoredCubit.setNovelToFavoredIdMap(wenkuOutlines: wenkuNovelOutlines);
+
+    return (wenkuNovelOutlines, body['pageNumber'] as int);
+  } catch (e, stackTrace) {
+    errorLogger.logError(e, stackTrace);
+    rethrow;
+  }
 }
 
 String findChapterId(WebNovelDto webNovelDto) {

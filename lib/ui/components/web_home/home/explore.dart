@@ -14,14 +14,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:unicons/unicons.dart';
 
-class Home extends StatefulWidget {
-  const Home({super.key});
+class Explore extends StatefulWidget {
+  const Explore({super.key});
 
   @override
-  State<Home> createState() => _HomeState();
+  State<Explore> createState() => _ExploreState();
 }
 
-class _HomeState extends State<Home> {
+class _ExploreState extends State<Explore> {
   @override
   void initState() {
     super.initState();
@@ -164,6 +164,7 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> loadWebFavored(BuildContext context) async {
+    if (readUserCubit(context).state.token == null) return;
     final bloc = readWebHomeBloc(context);
     bloc.add(const WebHomeEvent.setLoadingState({
       RequestLabel.loadWebFavored: LoadingStatus.loading,
@@ -208,17 +209,18 @@ class _HomeState extends State<Home> {
 
   Future<void> loadWenkuLatestUpdate(BuildContext context) async {
     final bloc = readWenkuHomeBloc(context);
-    bloc.add(const WenkuHomeEvent.setLoadingState({
+    bloc.add(const WenkuHomeEvent.setLoadingStatus({
       RequestLabel.loadWenkuLatestUpdated: LoadingStatus.loading,
     }));
     try {
-      final (wenkuNovelOutlineList, _) = await loadPagedWenkuOutline(level: 1);
-      bloc.add(WenkuHomeEvent.setWenkuNovelOutlines(wenkuNovelOutlineList));
-      bloc.add(const WenkuHomeEvent.setLoadingState({
+      final (wenkuNovelOutlineList, _) =
+          await requestWenkuLatestUpdate(level: 1);
+      bloc.add(WenkuHomeEvent.setWenkuLatestUpdate(wenkuNovelOutlineList));
+      bloc.add(const WenkuHomeEvent.setLoadingStatus({
         RequestLabel.loadWenkuLatestUpdated: null,
       }));
     } catch (e) {
-      bloc.add(WenkuHomeEvent.setLoadingState({
+      bloc.add(WenkuHomeEvent.setLoadingStatus({
         RequestLabel.loadWenkuLatestUpdated: (e is ServerException)
             ? LoadingStatus.serverError
             : LoadingStatus.failed,

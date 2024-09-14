@@ -52,7 +52,6 @@ class WenkuNovelDetailContainer extends StatelessWidget {
                 title: const Text('小说详情'),
                 actions: _buildActions(context),
               ),
-              // TODO 刷新
               body: _buildNovelDetailBody(novelDto));
         },
       ),

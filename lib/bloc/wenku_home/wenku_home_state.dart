@@ -24,7 +24,6 @@ class WenkuHomeState with _$WenkuHomeState {
     WenkuNovelDto? currentWenkuNovelDto,
 
     // 搜索
-    @Default(false) bool searchingWenku,
     @Default(0) int currentWenkuSearchPage,
     @Default(-1) int maxPage,
     @Default([]) List<WenkuNovelOutline> wenkuNovelSearchResult,

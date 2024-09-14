@@ -54,7 +54,6 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    // 使用 CurvedAnimation 添加曲线效果
     _curvedScaleAnimation = CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeOutCirc, // 选择曲线
@@ -66,7 +65,7 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
     );
 
     _scaleAnimation =
-        Tween<double>(begin: 0.8, end: 1.0).animate(_curvedScaleAnimation);
+        Tween<double>(begin: 0.0, end: 1.0).animate(_curvedScaleAnimation);
     _fadeAnimation =
         Tween<double>(begin: 0.0, end: 1.0).animate(_curvedFadeAnimation);
   }
@@ -142,24 +141,22 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
   }
 
   Widget _buildAnimatedFilter() {
-    return Visibility(
-      visible: _isFilterVisible,
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: Container(
-            clipBehavior: Clip.hardEdge,
-            padding: const EdgeInsets.all(12.0),
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16.0),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15))],
-                color:
-                    styleManager.colorScheme(context).surface.withOpacity(0.6)),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-              child: _buildFilters(),
-            ),
+    return SizeTransition(
+      sizeFactor: _scaleAnimation,
+      child: FadeTransition(
+        opacity: _fadeAnimation,
+        child: Container(
+          clipBehavior: Clip.hardEdge,
+          width: double.infinity,
+          padding: const EdgeInsets.all(12.0),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16.0),
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15))],
+              color:
+                  styleManager.colorScheme(context).surface.withOpacity(0.6)),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+            child: _buildFilters(),
           ),
         ),
       ),

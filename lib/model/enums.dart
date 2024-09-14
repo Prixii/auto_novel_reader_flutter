@@ -487,4 +487,8 @@ enum RequestLabel {
   loadNovelDetail,
   loadNovelChapter,
   loadNextPageWeb,
+  // 搜索
+  searchWenku,
+  searchWeb,
+  searchRank,
 }

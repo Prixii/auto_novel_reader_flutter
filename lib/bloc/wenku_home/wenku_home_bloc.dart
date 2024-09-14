@@ -3,6 +3,7 @@ import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:auto_novel_reader_flutter/network/interceptor/response_interceptor.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
+import 'package:auto_novel_reader_flutter/util/error_logger.dart';
 import 'package:auto_novel_reader_flutter/util/web_home_util.dart';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -19,7 +20,8 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
             await _onSetWenkuLatestUpdate(event, emit),
         setWenkuNovelOutlines: (event) async =>
             await _onSetWenkuNovelOutlines(event, emit),
-        setLoadingState: (event) async => await _onSetLoadingState(event, emit),
+        setLoadingStatus: (event) async =>
+            await _onSetLoadingStatus(event, emit),
         toWenkuDetail: (event) async => await _onToWenkuDetail(event, emit),
         favorNovel: (event) async => await _onFavorNovel(event, emit),
         unFavorNovel: (event) async => await _onUnFavorNovel(event, emit),
@@ -48,8 +50,14 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
   _onSetWenkuNovelOutlines(
       _SetWenkuNovelOutlines event, Emitter<WenkuHomeState> emit) async {
     final wenkuList = event.wenkuNovelOutlines;
+    var outlineMap = <String, WenkuNovelOutline>{};
+    for (var outline in wenkuList) {
+      outlineMap[outline.id] = outline;
+    }
     emit(
-      state.copyWith(wenkuLatestUpdate: wenkuList),
+      state.copyWith(
+          wenkuNovelSearchResult: wenkuList,
+          wenkuNovelOutlineMap: {...state.wenkuNovelOutlineMap, ...outlineMap}),
     );
     // TODO 移动到 Favored Cubit
     var favoredMap = <String, WenkuNovelOutline>{};
@@ -61,7 +69,7 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
   }
 
   _onToWenkuDetail(_ToWenkuDetail event, Emitter<WenkuHomeState> emit) async {
-    add(const WenkuHomeEvent.setLoadingState({
+    add(const WenkuHomeEvent.setLoadingStatus({
       RequestLabel.loadNovelDetail: LoadingStatus.loading,
     }));
     var novelId = event.wenkuId;
@@ -75,11 +83,11 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
         },
         currentWenkuNovelDto: novelDto,
       ));
-      add(const WenkuHomeEvent.setLoadingState({
+      add(const WenkuHomeEvent.setLoadingStatus({
         RequestLabel.loadNovelDetail: null,
       }));
     } catch (e) {
-      add(WenkuHomeEvent.setLoadingState({
+      add(WenkuHomeEvent.setLoadingStatus({
         RequestLabel.loadNovelDetail: (e is ServerException)
             ? LoadingStatus.serverError
             : LoadingStatus.failed,
@@ -151,21 +159,25 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
     showSucceedToast('取消收藏成功');
   }
 
+  @Deprecated('no longer use')
   _onSearchWenku(_SearchWenku event, Emitter<WenkuHomeState> emit) async {
-    if (state.searchingWenku) return;
+    if (isSearchingWenku) return;
     emit(state.copyWith(
-      searchingWenku: true,
       wenkuNovelSearchResult: [],
       currentWenkuSearchPage: 0,
       wenkuLevel: event.level,
       wenkuQuery: event.query,
     ));
+    add(const WenkuHomeEvent.setLoadingStatus({
+      RequestLabel.searchWenku: LoadingStatus.loading,
+    }));
+
     await _loadPagedWenkuNovel(emit);
   }
 
   _onLoadNextPageWenku(
       _LoadNextPageWenku event, Emitter<WenkuHomeState> emit) async {
-    if (state.searchingWenku) return;
+    if (isSearchingWenku) return;
     if (state.currentWenkuSearchPage == state.maxPage) {
       showWarnToast('一点都没有啦~');
       return;
@@ -173,43 +185,57 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
     if (state.currentWenkuSearchPage >= state.maxPage) return;
     emit(state.copyWith(
       currentWenkuSearchPage: state.currentWenkuSearchPage + 1,
-      searchingWenku: true,
     ));
     await _loadPagedWenkuNovel(emit);
   }
 
   Future<void> _loadPagedWenkuNovel(Emitter<WenkuHomeState> emit) async {
-    final (newNovelList, pageNumber) = await loadPagedWenkuOutline(
-      page: state.currentWenkuSearchPage,
-      pageSize: 21,
-      level: state.wenkuLevel,
-      query: state.wenkuQuery,
-    );
-    var newWenkuNovelOutlineMap = {...state.wenkuNovelOutlineMap};
-    for (var newNovel in newNovelList) {
-      newWenkuNovelOutlineMap[newNovel.id] = newNovel;
+    try {
+      final (newNovelList, pageNumber) = await loadPagedWenkuOutline(
+        page: state.currentWenkuSearchPage,
+        pageSize: 21,
+        level: state.wenkuLevel,
+        query: state.wenkuQuery,
+      );
+      var newWenkuNovelOutlineMap = {...state.wenkuNovelOutlineMap};
+      for (var newNovel in newNovelList) {
+        newWenkuNovelOutlineMap[newNovel.id] = newNovel;
+      }
+      emit(state.copyWith(
+          wenkuNovelSearchResult: [
+            ...state.wenkuNovelSearchResult,
+            ...newNovelList
+          ],
+          maxPage: pageNumber,
+          wenkuNovelOutlineMap: {
+            ...state.wenkuNovelOutlineMap,
+            ...newWenkuNovelOutlineMap,
+          }));
+      add(const WenkuHomeEvent.setLoadingStatus({
+        RequestLabel.searchWenku: null,
+      }));
+    } catch (e, stackTrace) {
+      errorLogger.logError(e, stackTrace);
+      add(WenkuHomeEvent.setLoadingStatus({
+        RequestLabel.searchWenku: (e is ServerException)
+            ? LoadingStatus.serverError
+            : LoadingStatus.failed,
+      }));
     }
-    emit(state.copyWith(
-        wenkuNovelSearchResult: [
-          ...state.wenkuNovelSearchResult,
-          ...newNovelList
-        ],
-        searchingWenku: false,
-        maxPage: pageNumber,
-        wenkuNovelOutlineMap: {
-          ...state.wenkuNovelOutlineMap,
-          ...newWenkuNovelOutlineMap,
-        }));
   }
 
   bool currentNovelFavored(String novelId) =>
       favoredCubit.state.novelToFavoredIdMap[novelId] != null;
   String get currentNovelId => state.currentWenkuNovelDto?.id ?? '';
 
-  _onSetLoadingState(_SetSetLoadingState event, Emitter<WenkuHomeState> emit) {
+  _onSetLoadingStatus(
+      _SetSetLoadingStatus event, Emitter<WenkuHomeState> emit) {
     emit(state.copyWith(loadingStatusMap: {
       ...state.loadingStatusMap,
       ...event.loadingStatusMap,
     }));
   }
+
+  bool get isSearchingWenku =>
+      state.loadingStatusMap[RequestLabel.searchWenku] == LoadingStatus.loading;
 }

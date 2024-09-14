@@ -11,7 +11,7 @@
 
 # ⬇️ 下载
 
-[蓝奏云](https://wwrn.lanzouv.com/b00uyfaz9a)(密码: apd9, 更新进度不一定同步)
+[蓝奏云](https://wwrn.lanzouv.com/b00uyftbja)(密码: hpst, 更新进度不一定同步)
 
 [Release](https://github.com/Prixii/auto_novel_reader_flutter/releases)
 
@@ -46,9 +46,9 @@ $ dart run build_runner build
 **⚠️ 已知问题**
 
 - 在「收藏」页面中，如果将当前收藏夹删除，会导致渲染错误
-  > 切出「收藏」页面重新进入即可
+  > 目前的选择器逻辑有缺陷，切出「收藏」页面重新进入即可
 - 弱网/无网状态下可能会出现一直加载的情况
-  >可以尝试切换页面或重启应用
+  > 基本修复，部分页面可能疏忽了，如果遇到还请提 issue
 - 阅读 epub 文件的时候，滚动条和进度指示会出现抽搐
   >目前的 epub 渲染方案在长文本的情况下，面临着流畅度和进度定位二选一的困境，epub 渲染方式后会解决
 - epub 封面不正确
@@ -56,11 +56,13 @@ $ dart run build_runner build
 
 **✈️ 在途更新计划**
 
-- 弃用 WebView，并支持将流式本转换成分页阅读
-- 下载 web 小说内容，以支持离线阅读
+- 弃用现有 html 渲染策略，重写这部分并支持将流式本转换成分页阅读
 - 点击 Tag 搜索
 - 升级本地 epub 系统
 - 通过自动添加正则, 屏蔽指定 Tag 小说
+- 替换选择器解决收藏夹问题
+- ui 升级
+- 论坛支持
 
 
 **😭 以下内容因为 Api 不支持，暂时无法实现**

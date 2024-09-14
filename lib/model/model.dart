@@ -12,6 +12,7 @@ part 'comment.dart';
 part 'novel_appearance_config.dart';
 part 'shield_config.dart';
 part 'release_data.dart';
+part 'search_data.dart';
 
 part 'model.freezed.dart';
 part 'model.g.dart';

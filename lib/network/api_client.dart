@@ -32,7 +32,7 @@ class _ApiClient {
   void createChopper() {
     chopper = ChopperClient(
       client: http.IOClient(
-        HttpClient()..connectionTimeout = const Duration(seconds: 10),
+        HttpClient()..connectionTimeout = const Duration(seconds: 5),
       ),
       baseUrl: Uri.parse('https://${configCubit.state.host}/api'),
       interceptors: [

@@ -90,10 +90,11 @@ class _RadioFilterState<T> extends State<RadioFilter> {
 }
 
 class RadioFilterController<T> {
-  RadioFilterController();
+  RadioFilterController({this.defaultOptionName = ''});
 
   String Function()? _getOptionNameFunc;
   T Function()? _getOptionValueFunc;
+  String defaultOptionName;
 
   void setGetOptionsFunc(String Function() nameFunc, T Function() valueFunc) {
     _getOptionNameFunc = nameFunc;
