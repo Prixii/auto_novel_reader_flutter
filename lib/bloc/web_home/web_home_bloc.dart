@@ -17,9 +17,11 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   WebHomeBloc() : super(const _Initial()) {
     on<WebHomeEvent>((event, emit) async {
       await event.map(
+        setWebNovelOutlines: (event) async =>
+            await _onSetWebNovelOutlines(event, emit),
         setWebMostVisited: (event) async =>
             await _onSetWebMostVisited(event, emit),
-        setLoadingState: (event) async =>
+        setLoadingStatus: (event) async =>
             await _onSetLoadingStatus(event, emit),
         setWebFavored: (event) async => await _onSetWebFavored(event, emit),
         toNovelDetail: (event) async => await _onToNovelDetail(event, emit),
@@ -57,7 +59,7 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   }
 
   _onToNovelDetail(_ToNovelDetail event, Emitter<WebHomeState> emit) async {
-    add(const WebHomeEvent.setLoadingState({
+    add(const WebHomeEvent.setLoadingStatus({
       RequestLabel.loadNovelDetail: LoadingStatus.loading,
     }));
     late final WebNovelDto dto;
@@ -69,7 +71,7 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
         onRequestFinished: () => {},
       ) as WebNovelDto;
     } catch (e) {
-      add(WebHomeEvent.setLoadingState({
+      add(WebHomeEvent.setLoadingStatus({
         RequestLabel.loadNovelDetail: (e is ServerException)
             ? LoadingStatus.serverError
             : LoadingStatus.failed,
@@ -89,14 +91,14 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
       dto.novelId,
       dto.lastReadChapterId,
     );
-    add(const WebHomeEvent.setLoadingState({
+    add(const WebHomeEvent.setLoadingStatus({
       RequestLabel.loadNovelDetail: null,
     }));
   }
 
   _onReadChapter(_ReadChapter event, Emitter<WebHomeState> emit) async {
     if (loadingChapter) return;
-
+    // BUG 打开时章节有误
     var targetChapterId = event.chapterId;
     targetChapterId ??= findChapterId(state.currentWebNovelDto!);
     final dto = state.currentWebNovelDto!;
@@ -180,16 +182,17 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
 
   _onSearchWeb(_SearchWeb event, Emitter<WebHomeState> emit) async {
     if (state.searchingWeb) return;
+    final data = event.data;
     emit(state.copyWith(
       searchingWeb: true,
       webNovelSearchResult: [],
       currentWebSearchPage: 0,
-      webProvider: event.provider,
-      webType: event.type,
-      webLevel: event.level,
-      webTranslate: event.translate,
-      webSort: event.sort,
-      webQuery: event.query,
+      webProvider: data.provider,
+      webType: data.type,
+      webLevel: data.level,
+      webTranslate: data.translate,
+      webSort: data.sort,
+      webQuery: data.query,
     ));
     await _loadPagedWebNovel(emit);
   }
@@ -293,10 +296,17 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   String get currentNovelProviderId => state.currentWebNovelDto!.providerId;
   String? get currentNovelKey => state.currentWebNovelDto?.novelKey;
 
-  _onSetLoadingStatus(_SetSetLoadingState event, Emitter<WebHomeState> emit) {
+  _onSetLoadingStatus(_SetLoadingStatus event, Emitter<WebHomeState> emit) {
     emit(state.copyWith(loadingStatusMap: {
       ...state.loadingStatusMap,
       ...event.loadingStatusMap,
     }));
+  }
+
+  _onSetWebNovelOutlines(
+      _SetWebNovelOutlines event, Emitter<WebHomeState> emit) {
+    emit(state.copyWith(
+      webNovelSearchResult: event.webOutlines,
+    ));
   }
 }

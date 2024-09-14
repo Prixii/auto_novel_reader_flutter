@@ -95,7 +95,8 @@ class _WenkuNovelSearchPageState extends State<WenkuNovelSearchPage> {
   Future<void> doRefresh() async {
     final bloc = readWenkuHomeBloc(context);
     try {
-      readWenkuHomeBloc(context).add(const WenkuHomeEvent.setLoadingStatus(
+      bloc.add(const WenkuHomeEvent.setWenkuNovelOutlines([]));
+      bloc.add(const WenkuHomeEvent.setLoadingStatus(
           {RequestLabel.searchWenku: LoadingStatus.loading}));
       await pageLoader.refresh();
     } catch (e, stackTrace) {
@@ -180,8 +181,7 @@ class _WenkuNovelDtoListState extends State<WenkuNovelDtoList> {
     );
   }
 
-  BlocSelector<WenkuHomeBloc, WenkuHomeState, LoadingStatus?>
-      _buildIndicator() {
+  Widget _buildIndicator() {
     return BlocSelector<WenkuHomeBloc, WenkuHomeState, LoadingStatus?>(
       selector: (state) {
         return state.loadingStatusMap[RequestLabel.searchWenku];

@@ -166,18 +166,18 @@ class _ExploreState extends State<Explore> {
   Future<void> loadWebFavored(BuildContext context) async {
     if (readUserCubit(context).state.token == null) return;
     final bloc = readWebHomeBloc(context);
-    bloc.add(const WebHomeEvent.setLoadingState({
+    bloc.add(const WebHomeEvent.setLoadingStatus({
       RequestLabel.loadWebFavored: LoadingStatus.loading,
     }));
     try {
       final (webNovelOutlineList, _) = await loadFavoredWebOutline();
 
       bloc.add(WebHomeEvent.setWebFavored(webNovelOutlineList));
-      bloc.add(const WebHomeEvent.setLoadingState({
+      bloc.add(const WebHomeEvent.setLoadingStatus({
         RequestLabel.loadWebFavored: null,
       }));
     } catch (e) {
-      bloc.add(WebHomeEvent.setLoadingState({
+      bloc.add(WebHomeEvent.setLoadingStatus({
         RequestLabel.loadWebFavored: (e is ServerException)
             ? LoadingStatus.serverError
             : LoadingStatus.failed,
@@ -187,7 +187,7 @@ class _ExploreState extends State<Explore> {
 
   Future<void> loadWebMostVisited(BuildContext context) async {
     final bloc = readWebHomeBloc(context);
-    bloc.add(const WebHomeEvent.setLoadingState({
+    bloc.add(const WebHomeEvent.setLoadingStatus({
       RequestLabel.loadWebMostVisited: LoadingStatus.loading,
     }));
     try {
@@ -195,11 +195,11 @@ class _ExploreState extends State<Explore> {
         provider: NovelProvider.values.map((e) => e.name).join(','),
       );
       bloc.add(WebHomeEvent.setWebMostVisited(webNovelOutlineList));
-      bloc.add(const WebHomeEvent.setLoadingState({
+      bloc.add(const WebHomeEvent.setLoadingStatus({
         RequestLabel.loadWebMostVisited: null,
       }));
     } catch (e) {
-      bloc.add(WebHomeEvent.setLoadingState({
+      bloc.add(WebHomeEvent.setLoadingStatus({
         RequestLabel.loadWebMostVisited: (e is ServerException)
             ? LoadingStatus.serverError
             : LoadingStatus.failed,

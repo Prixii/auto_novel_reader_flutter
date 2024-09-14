@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/web_novel/check_filter.dart';
@@ -9,25 +8,34 @@ import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
 
 class WebSearchWidget extends StatefulWidget {
-  const WebSearchWidget({super.key});
-
+  const WebSearchWidget({
+    super.key,
+    required this.searchController,
+    required this.checkFilterController,
+    required this.categoryController,
+    required this.translationController,
+    required this.sortController,
+    required this.levelController,
+    required this.onSearch,
+  });
+  final TextEditingController searchController;
+  final CheckFilterController<NovelProvider> checkFilterController;
+  final RadioFilterController categoryController,
+      translationController,
+      sortController,
+      levelController;
+  final Function onSearch;
   @override
   State<WebSearchWidget> createState() => _WebSearchWidgetState();
 }
 
 class _WebSearchWidgetState extends State<WebSearchWidget>
     with SingleTickerProviderStateMixin {
-  late TextEditingController _searchController;
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
   late CurvedAnimation _curvedScaleAnimation;
   late CurvedAnimation _curvedFadeAnimation;
-  late CheckFilterController<NovelProvider> _checkFilterController;
-  late RadioFilterController _categoryController,
-      _translationController,
-      _sortController,
-      _levelController;
 
   late bool isOldAss;
 
@@ -40,13 +48,6 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
     super.initState();
     isOldAss = readUserCubit(context).isOldAss;
     _initAnimation();
-
-    _checkFilterController = CheckFilterController();
-    _categoryController = RadioFilterController();
-    _translationController = RadioFilterController();
-    _sortController = RadioFilterController();
-    _levelController = RadioFilterController();
-    _searchController = TextEditingController();
   }
 
   void _initAnimation() {
@@ -73,8 +74,6 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
   @override
   void dispose() {
     _animationController.dispose();
-    _searchController.dispose();
-
     super.dispose();
   }
 
@@ -112,7 +111,7 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
         borderRadius: BorderRadius.circular(24), // 圆角
       ),
       child: TextField(
-        controller: _searchController,
+        controller: widget.searchController,
         decoration: InputDecoration(
           hintText: '中/日文标题或作者',
           hintStyle: TextStyle(
@@ -129,7 +128,7 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
         onTap: () => _toggleVisibility(true),
         maxLines: 1,
         onSubmitted: (_) {
-          _search();
+          widget.onSearch.call();
           _toggleVisibility(false);
         },
         style: TextStyle(
@@ -170,27 +169,27 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
         children: [
           CheckFilter<NovelProvider>(
               title: '来源',
-              controller: _checkFilterController,
+              controller: widget.checkFilterController,
               optionsValue: NovelProvider.values,
               options: NovelProvider.values.map((e) => e.zhName).toList()),
           const SizedBox(height: 16.0),
           RadioFilter(
               title: '类型',
-              controller: _categoryController,
+              controller: widget.categoryController,
               values: NovelStatus.values,
               options: NovelStatus.values.map((e) => e.zhName).toList()),
           ..._buildLevelFilter(),
           const SizedBox(height: 16.0),
           RadioFilter(
               title: '翻译',
-              controller: _translationController,
+              controller: widget.translationController,
               values: WebTranslationSource.values,
               options:
                   WebTranslationSource.values.map((e) => e.zhName).toList()),
           const SizedBox(height: 16.0),
           RadioFilter(
               title: '排序',
-              controller: _sortController,
+              controller: widget.sortController,
               values: WebNovelOrder.values,
               options: WebNovelOrder.values.map((e) => e.zhName).toList()),
         ]);
@@ -202,7 +201,7 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
             const SizedBox(height: 16.0),
             RadioFilter(
                 title: '分级',
-                controller: _levelController,
+                controller: widget.levelController,
                 values: WebNovelLevel.values,
                 options: WebNovelLevel.values.map((e) => e.zhName).toList()),
           ]
@@ -220,19 +219,5 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
         FocusScope.of(context).unfocus();
       }
     });
-  }
-
-  void _search() {
-    readWebHomeBloc(context).add(WebHomeEvent.searchWeb(
-      query: _searchController.text,
-      provider: _checkFilterController.values.map((e) => e.name).toList(),
-      type: NovelStatus.indexByZhName(_categoryController.optionName),
-      translate:
-          WebTranslationSource.indexByZhName(_translationController.optionName),
-      sort: WebNovelOrder.indexByZhName(_sortController.optionName),
-      level: isOldAss
-          ? WebNovelLevel.indexByZhName(_levelController.optionName)
-          : 1,
-    ));
   }
 }

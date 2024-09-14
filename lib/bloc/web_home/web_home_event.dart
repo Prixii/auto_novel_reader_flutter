@@ -2,9 +2,9 @@ part of 'web_home_bloc.dart';
 
 @freezed
 class WebHomeEvent with _$WebHomeEvent {
-  const factory WebHomeEvent.setLoadingState(
+  const factory WebHomeEvent.setLoadingStatus(
     Map<RequestLabel, LoadingStatus?> loadingStatusMap,
-  ) = _SetSetLoadingState;
+  ) = _SetLoadingStatus;
 
   // 首页
   const factory WebHomeEvent.setWebMostVisited(
@@ -13,6 +13,9 @@ class WebHomeEvent with _$WebHomeEvent {
   const factory WebHomeEvent.setWebFavored(
     List<WebNovelOutline> webFavored,
   ) = _SetWebFavored;
+  const factory WebHomeEvent.setWebNovelOutlines(
+    List<WebNovelOutline> webOutlines,
+  ) = _SetWebNovelOutlines;
 
   // 阅读
   const factory WebHomeEvent.toNovelDetail(String providerId, String novelId) =
@@ -31,15 +34,6 @@ class WebHomeEvent with _$WebHomeEvent {
       {@Default('default') String favoredId}) = _UnFavorNovel;
 
   // 搜搜索
-  const factory WebHomeEvent.searchWeb({
-    @Default(
-        ['kakuyomu', 'syosetu', 'novelup', 'hameln', 'pixiv', 'alphapolis'])
-    List<String> provider,
-    @Default(0) int type,
-    @Default(1) int level,
-    @Default(0) int translate,
-    @Default(0) int sort,
-    String? query,
-  }) = _SearchWeb;
+  const factory WebHomeEvent.searchWeb(WebSearchData data) = _SearchWeb;
   const factory WebHomeEvent.loadNextPageWeb() = _LoadNextPageWeb;
 }

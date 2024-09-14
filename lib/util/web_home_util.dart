@@ -27,6 +27,33 @@ Future<(List<WebNovelOutline>, int)> loadFavoredWebOutline({
   });
 }
 
+Future<List<WebNovelOutline>> loadPagedWebOutlines(WebSearchData data) async {
+  try {
+    return apiClient.webNovelService
+        .getList(
+      data.page,
+      data.pageSize,
+      provider: data.provider.join(','),
+      type: data.type,
+      level: data.level,
+      translate: data.translate,
+      sort: data.sort,
+      query: data.query,
+    )
+        .then((response) {
+      final body = response.body;
+      final webNovelOutlines = parseToWebNovelOutline(body);
+      favoredCubit.setNovelToFavoredIdMap(webOutlines: webNovelOutlines);
+
+      return webNovelOutlines;
+    });
+  } catch (e, stackTrace) {
+    errorLogger.logError(e, stackTrace);
+    rethrow;
+  }
+}
+
+@Deprecated('use loadPagedWebOutlines instead')
 Future<(List<WebNovelOutline>, int)> loadPagedWebOutline({
   int page = 0,
   int pageSize = 8,

@@ -9,3 +9,19 @@ class WenkuSearchData with _$WenkuSearchData {
     String? query,
   }) = _WenkuSearchData;
 }
+
+@freezed
+class WebSearchData with _$WebSearchData {
+  const factory WebSearchData({
+    @Default(0) int page,
+    @Default(20) int pageSize,
+    @Default(
+        ['kakuyomu', 'syosetu', 'novelup', 'hameln', 'pixiv', 'alphapolis'])
+    List<String> provider,
+    @Default(0) int type,
+    @Default(1) int level,
+    @Default(0) int translate,
+    @Default(0) int sort,
+    String? query,
+  }) = _WebSearchData;
+}
