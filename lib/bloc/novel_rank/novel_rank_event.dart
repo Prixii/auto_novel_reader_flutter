@@ -20,4 +20,8 @@ class NovelRankEvent with _$NovelRankEvent {
   const factory NovelRankEvent.updateKakuyomuGenreSearchData(
     KakuyomuGenreSearchData data,
   ) = _UpdateKakuyomuGenreSearchData;
+
+  const factory NovelRankEvent.setLoadingStatus(
+    Map<RankCategory, LoadingStatus?> loadingStatusMap,
+  ) = _SetLoadingStatus;
 }

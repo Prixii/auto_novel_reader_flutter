@@ -1,16 +1,18 @@
 import 'package:auto_novel_reader_flutter/bloc/novel_rank/novel_rank_bloc.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
+import 'package:auto_novel_reader_flutter/ui/components/universal/line_button.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/web_novel/radio_filter.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-// TODO 更新条件
-
 class SyosetuComprehensiveFilter extends StatefulWidget {
   const SyosetuComprehensiveFilter({
     super.key,
+    required this.onSearch,
   });
+
+  final Function onSearch;
 
   @override
   State<SyosetuComprehensiveFilter> createState() =>
@@ -56,6 +58,16 @@ class _SyosetuComprehensiveFilterState
                           searchData.copyWith(status: statusList[index])));
                 },
               ),
+              const SizedBox(height: 12),
+              LineButton(
+                onPressed: () {
+                  readNovelRankBloc(context).add(
+                      const NovelRankEvent.searchRankNovel(
+                          RankCategory.syosetuComprehensive));
+                  widget.onSearch();
+                },
+                text: '搜索',
+              )
             ]);
       },
     );
@@ -65,7 +77,10 @@ class _SyosetuComprehensiveFilterState
 class SyosetuGenreFilter extends StatefulWidget {
   const SyosetuGenreFilter({
     super.key,
+    required this.onSearch,
   });
+
+  final Function onSearch;
 
   @override
   State<SyosetuGenreFilter> createState() => _SyosetuGenreFilterState();
@@ -120,6 +135,16 @@ class _SyosetuGenreFilterState extends State<SyosetuGenreFilter> {
                       NovelRankEvent.updateSyosetuGenreSearchData(
                           searchData.copyWith(status: statusList[index])));
                 }),
+            const SizedBox(height: 12),
+            LineButton(
+              onPressed: () {
+                readNovelRankBloc(context).add(
+                    const NovelRankEvent.searchRankNovel(
+                        RankCategory.syosetuGenre));
+                widget.onSearch();
+              },
+              text: '搜索',
+            )
           ],
         );
       },
@@ -130,7 +155,10 @@ class _SyosetuGenreFilterState extends State<SyosetuGenreFilter> {
 class SyosetuIsekaiFilter extends StatefulWidget {
   const SyosetuIsekaiFilter({
     super.key,
+    required this.onSearch,
   });
+
+  final Function onSearch;
 
   @override
   State<SyosetuIsekaiFilter> createState() => _SyosetuIsekaiFilterState();
@@ -182,6 +210,16 @@ class _SyosetuIsekaiFilterState extends State<SyosetuIsekaiFilter> {
                         .copyWith(status: NovelStatus.values[index])));
               },
             ),
+            const SizedBox(height: 12),
+            LineButton(
+              onPressed: () {
+                readNovelRankBloc(context).add(
+                    const NovelRankEvent.searchRankNovel(
+                        RankCategory.syosetuIsekai));
+                widget.onSearch();
+              },
+              text: '搜索',
+            )
           ],
         );
       },
@@ -192,7 +230,10 @@ class _SyosetuIsekaiFilterState extends State<SyosetuIsekaiFilter> {
 class KakuyomuGenreFilters extends StatefulWidget {
   const KakuyomuGenreFilters({
     super.key,
+    required this.onSearch,
   });
+
+  final Function onSearch;
 
   @override
   State<KakuyomuGenreFilters> createState() => _KakuyomuGenreFiltersState();
@@ -234,6 +275,16 @@ class _KakuyomuGenreFiltersState extends State<KakuyomuGenreFilters> {
                         NovelRankEvent.updateKakuyomuGenreSearchData(
                             searchData.copyWith(range: ranges[index])));
                   }),
+              const SizedBox(height: 12),
+              LineButton(
+                onPressed: () {
+                  readNovelRankBloc(context).add(
+                      const NovelRankEvent.searchRankNovel(
+                          RankCategory.kakuyomuGenre));
+                  widget.onSearch();
+                },
+                text: '搜索',
+              )
             ]);
       },
     );

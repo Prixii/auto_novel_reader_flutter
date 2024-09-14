@@ -55,7 +55,7 @@ class _WenkuSearchWidgetState extends State<WenkuSearchWidget>
     );
 
     _scaleAnimation =
-        Tween<double>(begin: 0.8, end: 1.0).animate(_curvedScaleAnimation);
+        Tween<double>(begin: 0.0, end: 1.0).animate(_curvedScaleAnimation);
     _fadeAnimation =
         Tween<double>(begin: 0.0, end: 1.0).animate(_curvedFadeAnimation);
   }

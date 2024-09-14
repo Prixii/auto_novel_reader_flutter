@@ -3,8 +3,8 @@ part of 'novel_rank_bloc.dart';
 @freezed
 class NovelRankState with _$NovelRankState {
   const factory NovelRankState.initial({
+    @Default({}) Map<RankCategory, LoadingStatus?> loadingStatus,
     @Default({}) Map<RankCategory, List<WebNovelOutline>> novels,
-    @Default({}) Map<RankCategory, bool> searchingStatus,
     @Default({}) Map<RankCategory, int> maxPage,
     @Default({}) Map<RankCategory, int> currentPage,
     //

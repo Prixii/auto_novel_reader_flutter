@@ -60,7 +60,7 @@ class _NovelRankState extends State<NovelRank>
     );
 
     _scaleAnimation =
-        Tween<double>(begin: 0.8, end: 1.0).animate(_curvedScaleAnimation);
+        Tween<double>(begin: 0.0, end: 1.0).animate(_curvedScaleAnimation);
     _fadeAnimation =
         Tween<double>(begin: 0.0, end: 1.0).animate(_curvedFadeAnimation);
   }
@@ -120,10 +120,14 @@ class _NovelRankState extends State<NovelRank>
 
   Widget _buildAnimatedFilter() {
     final filterList = [
-      _buildBlurContainer(const SyosetuGenreFilter()),
-      _buildBlurContainer(const SyosetuComprehensiveFilter()),
-      _buildBlurContainer(const SyosetuIsekaiFilter()),
-      _buildBlurContainer(const KakuyomuGenreFilters()),
+      _buildBlurContainer(
+          SyosetuGenreFilter(onSearch: () => _toggleVisibility(false))),
+      _buildBlurContainer(
+          SyosetuComprehensiveFilter(onSearch: () => _toggleVisibility(false))),
+      _buildBlurContainer(
+          SyosetuIsekaiFilter(onSearch: () => _toggleVisibility(false))),
+      _buildBlurContainer(
+          KakuyomuGenreFilters(onSearch: () => _toggleVisibility(false))),
     ];
     return SizeTransition(
       sizeFactor: _scaleAnimation,
@@ -131,6 +135,7 @@ class _NovelRankState extends State<NovelRank>
         opacity: _fadeAnimation,
         child: Container(
           clipBehavior: Clip.hardEdge,
+          width: double.infinity,
           padding: const EdgeInsets.all(12.0),
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16.0),
