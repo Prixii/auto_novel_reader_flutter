@@ -1,5 +1,3 @@
-import 'package:auto_novel_reader_flutter/util/error_logger.dart';
-
 class PageLoader<T, R> {
   ///
   /// 分页加载小助手
@@ -14,6 +12,7 @@ class PageLoader<T, R> {
     required this.loader,
     required this.dataGetter,
     required this.onLoadSucceed,
+    this.onLoadFailed,
     this.initPage = 0,
     this.size = 10,
   }) {
@@ -30,43 +29,46 @@ class PageLoader<T, R> {
   final Function(int) pageSetter;
   final List<T> Function(R) dataGetter;
   final Function(List<T>) onLoadSucceed;
+  final Function(Object e, StackTrace stackTrace)? onLoadFailed;
 
   Future<void> loadMore() async {
-    pageSetter.call(currentPage);
-    if (!haveMore || isLoading) return;
-    haveMore = false;
-    isLoading = true;
-    return loader.call().then(
-      (response) {
-        try {
-          final newData = dataGetter(response);
-          currentPage += 1;
-          haveMore = (newData.length == size);
-          dataList = [...dataList, ...newData];
-          afterLoad();
-        } catch (e, stackTrace) {
-          errorLogger.logError(e, stackTrace);
-        }
-      },
-      onError: (error) {
-        haveMore = false;
-        throw error;
-      },
-    ).whenComplete(() {
-      isLoading = false;
-    });
+    try {
+      pageSetter.call(currentPage);
+      if (!haveMore || isLoading) return;
+      haveMore = false;
+      isLoading = true;
+      final response = await loader.call().whenComplete(() {
+        isLoading = false;
+      });
+      final newData = dataGetter(response);
+      currentPage += 1;
+      haveMore = (newData.length == size);
+      dataList = [...dataList, ...newData];
+      afterLoad();
+    } catch (e, stackTrace) {
+      onLoadFailed?.call(e, stackTrace);
+      rethrow;
+    }
   }
 
   Future<void> refresh() async {
-    currentPage = initPage;
-    dataList = [];
-    haveMore = true;
-    await loadMore();
+    try {
+      currentPage = initPage;
+      dataList = [];
+      haveMore = true;
+      await loadMore();
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<void> loadAll() async {
-    while (haveMore) {
-      await loadMore();
+    try {
+      while (haveMore) {
+        await loadMore();
+      }
+    } catch (e) {
+      rethrow;
     }
   }
 

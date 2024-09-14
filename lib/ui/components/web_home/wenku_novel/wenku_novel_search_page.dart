@@ -1,6 +1,7 @@
 import 'package:auto_novel_reader_flutter/bloc/wenku_home/wenku_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
+import 'package:auto_novel_reader_flutter/network/interceptor/response_interceptor.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/timeout_info_container.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/web_novel/radio_filter.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/wenku_novel/wenku_search_widget.dart';
@@ -41,19 +42,7 @@ class _WenkuNovelSearchPageState extends State<WenkuNovelSearchPage> {
               page: newPage,
               level: WenkuNovelLevel.indexByZhName(_levelController.optionName),
             ),
-        loader: () async {
-          readWenkuHomeBloc(context).add(const WenkuHomeEvent.setLoadingStatus(
-              {RequestLabel.searchWenku: LoadingStatus.loading}));
-          try {
-            searchData = searchData.copyWith(
-              query: _searchController.text,
-            );
-            return loadPagedWenkuOutlines(searchData);
-          } catch (e, stackTrace) {
-            errorLogger.logError(e, stackTrace);
-            throw Exception(e);
-          }
-        },
+        loader: () async => _search(),
         dataGetter: (result) => result,
         onLoadSucceed: (outlines) {
           final bloc = readWenkuHomeBloc(context);
@@ -64,7 +53,7 @@ class _WenkuNovelSearchPageState extends State<WenkuNovelSearchPage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (context.read<WenkuHomeBloc>().state.wenkuNovelSearchResult.isEmpty) {
-        pageLoader.refresh();
+        doRefresh();
       }
     });
   }
@@ -75,18 +64,50 @@ class _WenkuNovelSearchPageState extends State<WenkuNovelSearchPage> {
       children: [
         WenkuNovelDtoList(
           onLoadMore: () => pageLoader.loadMore(),
-          onRefresh: () => pageLoader.refresh(),
+          onRefresh: doRefresh,
         ),
         Align(
           alignment: Alignment.topCenter,
           child: WenkuSearchWidget(
-            onSearch: () => pageLoader.refresh(),
+            onSearch: () async => await doRefresh(),
             searchController: _searchController,
             levelController: _levelController,
           ),
         ),
       ],
     );
+  }
+
+  Future<List<WenkuNovelOutline>> _search() {
+    readWenkuHomeBloc(context).add(const WenkuHomeEvent.setLoadingStatus(
+        {RequestLabel.searchWenku: LoadingStatus.loading}));
+    try {
+      searchData = searchData.copyWith(
+        query: _searchController.text,
+      );
+      return loadPagedWenkuOutlines(searchData);
+    } catch (e, stackTrace) {
+      errorLogger.logError(e, stackTrace);
+      throw Exception(e);
+    }
+  }
+
+  Future<void> doRefresh() async {
+    final bloc = readWenkuHomeBloc(context);
+    try {
+      readWenkuHomeBloc(context).add(const WenkuHomeEvent.setLoadingStatus(
+          {RequestLabel.searchWenku: LoadingStatus.loading}));
+      await pageLoader.refresh();
+    } catch (e, stackTrace) {
+      errorLogger.logError(e, stackTrace);
+      bloc.add(WenkuHomeEvent.setLoadingStatus(
+        {
+          RequestLabel.searchWenku: e is ServerException
+              ? LoadingStatus.serverError
+              : LoadingStatus.failed
+        },
+      ));
+    }
   }
 }
 
@@ -134,35 +155,44 @@ class _WenkuNovelDtoListState extends State<WenkuNovelDtoList> {
         }
         return false;
       },
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 68),
-        child: BlocSelector<WenkuHomeBloc, WenkuHomeState,
-            List<WenkuNovelOutline>>(
-          selector: (state) {
-            return state.wenkuNovelSearchResult;
-          },
-          builder: (context, wenkuNovels) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                WenkuNovelList(wenkuNovels: wenkuNovels),
-                BlocSelector<WenkuHomeBloc, WenkuHomeState, LoadingStatus?>(
-                  selector: (state) {
-                    return state.loadingStatusMap[RequestLabel.searchWenku];
-                  },
-                  builder: (context, state) {
-                    return TimeoutInfoContainer(
-                      status: state,
-                      child: Container(),
-                      onRetry: () => widget.onRefresh.call(),
-                    );
-                  },
-                )
-              ],
-            );
-          },
+      child: RefreshIndicator(
+        onRefresh: () async => await widget.onRefresh(),
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 68),
+          child: BlocSelector<WenkuHomeBloc, WenkuHomeState,
+              List<WenkuNovelOutline>>(
+            selector: (state) {
+              return state.wenkuNovelSearchResult;
+            },
+            builder: (context, wenkuNovels) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  WenkuNovelList(wenkuNovels: wenkuNovels),
+                  _buildIndicator()
+                ],
+              );
+            },
+          ),
         ),
       ),
+    );
+  }
+
+  BlocSelector<WenkuHomeBloc, WenkuHomeState, LoadingStatus?>
+      _buildIndicator() {
+    return BlocSelector<WenkuHomeBloc, WenkuHomeState, LoadingStatus?>(
+      selector: (state) {
+        return state.loadingStatusMap[RequestLabel.searchWenku];
+      },
+      builder: (context, state) {
+        return TimeoutInfoContainer(
+          status: state,
+          onRetry: () => widget.onRefresh(),
+          child: Container(),
+        );
+      },
     );
   }
 }

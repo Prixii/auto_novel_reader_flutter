@@ -31,7 +31,7 @@ class _ExploreState extends State<Explore> {
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
-      onRefresh: () => refresh(context),
+      onRefresh: () async => await refresh(context),
       child: SingleChildScrollView(
         controller: ScrollController(),
         physics: const AlwaysScrollableScrollPhysics(),
