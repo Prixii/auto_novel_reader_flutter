@@ -86,11 +86,12 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
       },
       chapterDtoMap: {},
     ));
-    _updateLastReadChapterId(
-      dto.providerId,
-      dto.novelId,
-      dto.lastReadChapterId,
-    );
+    if (webCacheCubit.state.lastReadChapterMap[dto.novelKey] == null) {
+      _updateLastReadChapterId(
+        dto.novelKey,
+        dto.lastReadChapterId,
+      );
+    }
     add(const WebHomeEvent.setLoadingStatus({
       RequestLabel.loadNovelDetail: null,
     }));
@@ -102,7 +103,7 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     var targetChapterId = event.chapterId;
     targetChapterId ??= findChapterId(state.currentWebNovelDto!);
     final dto = state.currentWebNovelDto!;
-    _updateLastReadChapterId(dto.providerId, dto.novelId, targetChapterId);
+    _updateLastReadChapterId(dto.novelKey, targetChapterId);
     globalBloc.add(const GlobalEvent.setReadType(ReadType.web));
     emit(state.copyWith(loadingNovelChapter: true));
     final chapterKey = '${currentNovelKey!}-$targetChapterId';
@@ -125,6 +126,7 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     ));
     _requestUpdateReadHistory(
         currentNovelProviderId, currentNovelId, targetChapterId);
+
     var dtoMapSnapshot = <String, ChapterDto?>{
       ...state.chapterDtoMap,
       chapterKey: targetDto,
@@ -243,9 +245,8 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     ));
   }
 
-  void _updateLastReadChapterId(
-          String providerId, String novelId, String? chapterId) =>
-      webCacheCubit.updateLastReadChapter(providerId, novelId, chapterId);
+  void _updateLastReadChapterId(String novelKey, String? chapterId) =>
+      webCacheCubit.updateLastReadChapter(novelKey, chapterId);
 
   Future<WebHomeState> _favorWeb(String favoredId) async {
     final response = await apiClient.userFavoredWebService.putNovelId(

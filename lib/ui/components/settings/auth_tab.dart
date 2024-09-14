@@ -85,18 +85,21 @@ Widget buildRoundButton(void Function() onPressed) {
 }
 
 Widget buildLoadingButton() {
-  return IconButton.filled(
-      disabledColor: Colors.grey,
-      onPressed: null,
-      iconSize: 32,
-      padding: const EdgeInsets.all(16),
-      style: ButtonStyle(
-        shape: WidgetStateProperty.all(
-          const CircleBorder(),
+  return SizedBox(
+    height: 32,
+    width: 32,
+    child: IconButton.filled(
+        disabledColor: Colors.grey,
+        onPressed: null,
+        padding: const EdgeInsets.all(16),
+        style: ButtonStyle(
+          shape: WidgetStateProperty.all(
+            const CircleBorder(),
+          ),
         ),
-      ),
-      icon: const SizedBox(
-          height: 20, width: 20, child: CircularProgressIndicator()));
+        icon: const SizedBox(
+            height: 20, width: 20, child: CircularProgressIndicator())),
+  );
 }
 
 RegExp get emailRegex =>
