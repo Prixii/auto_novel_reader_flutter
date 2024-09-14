@@ -1,6 +1,5 @@
 import 'package:auto_novel_reader_flutter/ui/components/settings/login_form.dart';
 import 'package:auto_novel_reader_flutter/ui/components/settings/register_form.dart';
-import 'package:auto_novel_reader_flutter/ui/components/settings/reset_password_form.dart';
 import 'package:flutter/material.dart';
 import 'package:unicons/unicons.dart';
 
@@ -83,6 +82,21 @@ Widget buildRoundButton(void Function() onPressed) {
       UniconsLine.arrow_right,
     ),
   );
+}
+
+Widget buildLoadingButton() {
+  return IconButton.filled(
+      disabledColor: Colors.grey,
+      onPressed: null,
+      iconSize: 32,
+      padding: const EdgeInsets.all(16),
+      style: ButtonStyle(
+        shape: WidgetStateProperty.all(
+          const CircleBorder(),
+        ),
+      ),
+      icon: const SizedBox(
+          height: 20, width: 20, child: CircularProgressIndicator()));
 }
 
 RegExp get emailRegex =>
