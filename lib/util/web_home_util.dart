@@ -417,3 +417,18 @@ List<Comment> parseCommentList(body) {
   }
   return list;
 }
+
+Future<List<WebNovelOutline>> requestHistory(HistorySearchData data) async {
+  try {
+    final response = await apiClient.userReadHistoryWebService.getList(
+      page: data.page,
+      pageSize: data.pageSize,
+    );
+    final body = response!.body;
+    final newDtoList = parseToWebNovelOutline(body);
+    return newDtoList;
+  } catch (e, stackTrace) {
+    errorLogger.logError(e, stackTrace);
+    rethrow;
+  }
+}

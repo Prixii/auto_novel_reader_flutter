@@ -491,4 +491,6 @@ enum RequestLabel {
   searchWenku,
   searchWeb,
   searchRank,
+  //
+  loadHistory,
 }

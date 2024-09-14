@@ -104,7 +104,8 @@ class _WebNovelSearchPageState extends State<WebNovelSearchPage> {
   }
 
   Future<List<WebNovelOutline>> _search() {
-    readWebHomeBloc(context).add(const WebHomeEvent.setLoadingStatus(
+    final bloc = readWebHomeBloc(context);
+    bloc.add(const WebHomeEvent.setLoadingStatus(
         {RequestLabel.searchWeb: LoadingStatus.loading}));
     try {
       searchData = searchData.copyWith(
@@ -113,7 +114,14 @@ class _WebNovelSearchPageState extends State<WebNovelSearchPage> {
       return loadPagedWebOutlines(searchData);
     } catch (e, stackTrace) {
       errorLogger.logError(e, stackTrace);
-      throw Exception(e);
+      bloc.add(WebHomeEvent.setLoadingStatus(
+        {
+          RequestLabel.searchWeb: e is ServerException
+              ? LoadingStatus.serverError
+              : LoadingStatus.failed
+        },
+      ));
+      return Future.value([]);
     }
   }
 

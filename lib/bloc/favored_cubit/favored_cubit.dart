@@ -514,4 +514,11 @@ class FavoredCubit extends Cubit<FavoredState> {
       return false;
     }
   }
+
+  onSetLoadingStatus(Map<RequestLabel, LoadingStatus?> newStatusMap) {
+    emit(state.copyWith(loadingStatusMap: {
+      ...state.loadingStatusMap,
+      ...newStatusMap,
+    }));
+  }
 }

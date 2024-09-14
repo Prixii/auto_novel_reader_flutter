@@ -25,3 +25,11 @@ class WebSearchData with _$WebSearchData {
     String? query,
   }) = _WebSearchData;
 }
+
+@freezed
+class HistorySearchData with _$HistorySearchData {
+  const factory HistorySearchData({
+    @Default(0) int page,
+    @Default(16) int pageSize,
+  }) = _HistorySearchData;
+}

@@ -21,7 +21,7 @@ class ResponseInterceptor implements Interceptor {
       talker.info('${response.body}\n ${response.error}');
     }
     if (response.isSuccessful) return response;
-    if (response.statusCode / 100 == 5) {
+    if (response.statusCode ~/ 100 == 5) {
       errorLogger.logError(e, StackTrace.current,
           extra: '${response.statusCode}:${response.error}');
       throw ServerException('${response.error}');
@@ -30,7 +30,6 @@ class ResponseInterceptor implements Interceptor {
           extra: '${response.statusCode}:${response.error}');
       showErrorToast('${response.statusCode}, ${response.error}');
       return response;
-      // throw Exception([response.statusCode, response.error]);
     }
   }
 }

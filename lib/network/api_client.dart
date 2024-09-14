@@ -76,5 +76,9 @@ Future<Response?> tokenRequest<T>(
 ) async {
   final token = userCubit.state.token;
   if (token == null) return null;
-  return await body.call();
+  try {
+    return await body.call();
+  } catch (e) {
+    rethrow;
+  }
 }
