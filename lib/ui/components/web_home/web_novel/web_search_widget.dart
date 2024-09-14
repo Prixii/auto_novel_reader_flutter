@@ -1,29 +1,24 @@
 import 'dart:ui';
 
+import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
+import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/web_novel/check_filter.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/web_novel/radio_filter.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class WebSearchWidget extends StatefulWidget {
   const WebSearchWidget({
     super.key,
     required this.searchController,
     required this.checkFilterController,
-    required this.categoryController,
-    required this.translationController,
-    required this.sortController,
-    required this.levelController,
     required this.onSearch,
   });
   final TextEditingController searchController;
   final CheckFilterController<NovelProvider> checkFilterController;
-  final RadioFilterController categoryController,
-      translationController,
-      sortController,
-      levelController;
   final Function onSearch;
   @override
   State<WebSearchWidget> createState() => _WebSearchWidgetState();
@@ -162,50 +157,84 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
     );
   }
 
-  Column _buildFilters() {
-    return Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CheckFilter<NovelProvider>(
-              title: '来源',
-              controller: widget.checkFilterController,
-              optionsValue: NovelProvider.values,
-              options: NovelProvider.values.map((e) => e.zhName).toList()),
-          const SizedBox(height: 16.0),
-          RadioFilter(
-              title: '类型',
-              controller: widget.categoryController,
-              values: NovelStatus.values,
-              options: NovelStatus.values.map((e) => e.zhName).toList()),
-          ..._buildLevelFilter(),
-          const SizedBox(height: 16.0),
-          RadioFilter(
-              title: '翻译',
-              controller: widget.translationController,
-              values: WebTranslationSource.values,
-              options:
-                  WebTranslationSource.values.map((e) => e.zhName).toList()),
-          const SizedBox(height: 16.0),
-          RadioFilter(
-              title: '排序',
-              controller: widget.sortController,
-              values: WebNovelOrder.values,
-              options: WebNovelOrder.values.map((e) => e.zhName).toList()),
-        ]);
-  }
-
-  List<Widget> _buildLevelFilter() {
-    return isOldAss
-        ? [
-            const SizedBox(height: 16.0),
-            RadioFilter(
-                title: '分级',
-                controller: widget.levelController,
-                values: WebNovelLevel.values,
-                options: WebNovelLevel.values.map((e) => e.zhName).toList()),
-          ]
-        : [];
+  Widget _buildFilters() {
+    return BlocSelector<WebHomeBloc, WebHomeState, WebSearchData>(
+      selector: (state) {
+        return state.webSearchData;
+      },
+      builder: (context, searchData) {
+        const providers = NovelProvider.values;
+        const statusList = NovelStatus.values;
+        const levels = WebNovelLevel.values;
+        const translations = WebTranslationSource.values;
+        const order = WebNovelOrder.values;
+        return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CheckFilter<NovelProvider>(
+                  title: '来源',
+                  controller: widget.checkFilterController,
+                  optionsValue: providers,
+                  options: providers.map((e) => e.zhName).toList()),
+              const SizedBox(height: 16.0),
+              RadioFilter(
+                title: '类型',
+                values: statusList,
+                options: statusList.map((e) => e.zhName).toList(),
+                selectedOption: searchData.type.zhName,
+                onChanged: (index) {
+                  readWebHomeBloc(context)
+                      .add(WebHomeEvent.setSearchData(searchData.copyWith(
+                    type: statusList[index],
+                  )));
+                },
+              ),
+              ...(isOldAss
+                  ? [
+                      const SizedBox(height: 16.0),
+                      RadioFilter(
+                          title: '分级',
+                          values: levels,
+                          options: levels.map((e) => e.zhName).toList(),
+                          selectedOption: searchData.level.zhName,
+                          onChanged: (index) {
+                            readWebHomeBloc(context).add(
+                                WebHomeEvent.setSearchData(searchData.copyWith(
+                              level: levels[index],
+                            )));
+                          }),
+                    ]
+                  : []),
+              const SizedBox(height: 16.0),
+              RadioFilter(
+                title: '翻译',
+                values: translations,
+                options: translations.map((e) => e.zhName).toList(),
+                selectedOption: searchData.translate.zhName,
+                onChanged: (index) {
+                  readWebHomeBloc(context)
+                      .add(WebHomeEvent.setSearchData(searchData.copyWith(
+                    translate: translations[index],
+                  )));
+                },
+              ),
+              const SizedBox(height: 16.0),
+              RadioFilter(
+                title: '排序',
+                values: WebNovelOrder.values,
+                options: order.map((e) => e.zhName).toList(),
+                selectedOption: searchData.sort.zhName,
+                onChanged: (index) {
+                  readWebHomeBloc(context)
+                      .add(WebHomeEvent.setSearchData(searchData.copyWith(
+                    sort: order[index],
+                  )));
+                },
+              ),
+            ]);
+      },
+    );
   }
 
   void _toggleVisibility(bool value) {

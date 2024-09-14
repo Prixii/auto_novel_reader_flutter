@@ -86,6 +86,12 @@ class _NovelRankState extends State<NovelRank>
               .map((e) => RankNovelList(rankCategory: e))
               .toList(),
         ),
+        Visibility(
+            visible: _isFilterVisible,
+            child: GestureDetector(
+                excludeFromSemantics: true,
+                onTap: () => _toggleVisibility(false),
+                child: Container(color: Colors.transparent))),
         SizedBox(
           height: 60,
           child: Row(
@@ -97,7 +103,7 @@ class _NovelRankState extends State<NovelRank>
                     tabs: RankCategory.values.map((e) => e.zhName).toList()),
               ),
               IconButton(
-                  onPressed: _toggleVisibility,
+                  onPressed: () => _toggleVisibility(true),
                   icon: Icon(UniconsLine.sort_amount_down,
                       color: styleManager
                           .colorScheme(context)
@@ -106,10 +112,8 @@ class _NovelRankState extends State<NovelRank>
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(top: 68, left: 16, right: 16),
-          child: Visibility(
-              visible: _isFilterVisible, child: _buildAnimatedFilter()),
-        ),
+            padding: const EdgeInsets.only(top: 68, left: 16, right: 16),
+            child: _buildAnimatedFilter()),
       ],
     );
   }
@@ -121,8 +125,8 @@ class _NovelRankState extends State<NovelRank>
       _buildBlurContainer(const SyosetuIsekaiFilter()),
       _buildBlurContainer(const KakuyomuGenreFilters()),
     ];
-    return ScaleTransition(
-      scale: _scaleAnimation,
+    return SizeTransition(
+      sizeFactor: _scaleAnimation,
       child: FadeTransition(
         opacity: _fadeAnimation,
         child: Container(
@@ -146,9 +150,9 @@ class _NovelRankState extends State<NovelRank>
     );
   }
 
-  void _toggleVisibility() {
+  void _toggleVisibility(bool value) {
     setState(() {
-      _isFilterVisible = !_isFilterVisible;
+      _isFilterVisible = value;
       if (_isFilterVisible) {
         _animationController.forward();
       } else {

@@ -69,41 +69,27 @@ class NovelRankBloc extends Bloc<NovelRankEvent, NovelRankState> {
 
   _onUpdateSyosetuGenreSearchData(
       _UpdateSyosetuGenreSearchData event, Emitter<NovelRankState> emit) async {
-    emit(state.copyWith(
-      syosetuGenreSearchData: state.syosetuGenreSearchData.copyWith(
-        genre: event.genre,
-        range: event.range,
-        status: event.status,
-      ),
-    ));
+    emit(state.copyWith(syosetuGenreSearchData: event.data));
     add(const NovelRankEvent.searchRankNovel(RankCategory.syosetuGenre));
   }
 
   _onUpdateSyosetuComprehensiveSearchData(
       _UpdateSyosetuComprehensiveSearchData event,
       Emitter<NovelRankState> emit) async {
-    emit(state.copyWith(
-        syosetuComprehensiveSearchData: state.syosetuComprehensiveSearchData
-            .copyWith(range: event.range, status: event.status)));
+    emit(state.copyWith(syosetuComprehensiveSearchData: event.data));
     add(const NovelRankEvent.searchRankNovel(
         RankCategory.syosetuComprehensive));
   }
 
   _onUpdateSyosetuIsekaiSearchData(_UpdateSyosetuIsekaiSearchData event,
       Emitter<NovelRankState> emit) async {
-    emit(state.copyWith(
-        syosetuIsekaiSearchData: state.syosetuIsekaiSearchData.copyWith(
-            genre: event.genre, range: event.range, status: event.status)));
+    emit(state.copyWith(syosetuIsekaiSearchData: event.data));
     add(const NovelRankEvent.searchRankNovel(RankCategory.syosetuIsekai));
   }
 
   _onUpdateKakuyomuGenreSearchData(_UpdateKakuyomuGenreSearchData event,
       Emitter<NovelRankState> emit) async {
-    emit(state.copyWith(
-        kakuyomuGenreSearchData: state.kakuyomuGenreSearchData.copyWith(
-      genre: event.genre,
-      range: event.range,
-    )));
+    emit(state.copyWith(kakuyomuGenreSearchData: event.data));
     add(const NovelRankEvent.searchRankNovel(RankCategory.kakuyomuGenre));
   }
 

@@ -9,21 +9,15 @@ class NovelRankEvent with _$NovelRankEvent {
     RankCategory rankCategory,
   ) = _LoadNextPageRankNovel;
   const factory NovelRankEvent.updateSyosetuGenreSearchData(
-    SyosetuGenre genre,
-    SyosetuNovelRange range,
-    NovelStatus status,
+    SyosetuGenreSearchData data,
   ) = _UpdateSyosetuGenreSearchData;
   const factory NovelRankEvent.updateSyosetuComprehensiveSearchData(
-    SyosetuNovelRange range,
-    NovelStatus status,
-  ) = _UpdateSyosetuComprehensiveSearchData;
+          SyosetuComprehensiveSearchData data) =
+      _UpdateSyosetuComprehensiveSearchData;
   const factory NovelRankEvent.updateSyosetuIsekaiSearchData(
-    SyosetuIsekaiGenre genre,
-    SyosetuNovelRange range,
-    NovelStatus status,
+    SyosetuIsekaiSearchData data,
   ) = _UpdateSyosetuIsekaiSearchData;
   const factory NovelRankEvent.updateKakuyomuGenreSearchData(
-    KakuyomuGenre genre,
-    NovelRange range,
+    KakuyomuGenreSearchData data,
   ) = _UpdateKakuyomuGenreSearchData;
 }

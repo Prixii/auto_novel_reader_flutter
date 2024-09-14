@@ -17,6 +17,7 @@ class WebHomeState with _$WebHomeState {
     @Default({}) Map<String, ChapterDto?> chapterDtoMap,
     ChapterDto? currentChapterDto,
     // 搜索 web
+    @Default(WebSearchData()) WebSearchData webSearchData,
     @Default(false) bool searchingWeb,
     @Default([]) List<WebNovelOutline> webNovelSearchResult,
     @Default(0) int currentWebSearchPage,

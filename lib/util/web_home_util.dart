@@ -1,3 +1,4 @@
+import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
@@ -33,11 +34,11 @@ Future<List<WebNovelOutline>> loadPagedWebOutlines(WebSearchData data) async {
         .getList(
       data.page,
       data.pageSize,
-      provider: data.provider.join(','),
-      type: data.type,
-      level: data.level,
-      translate: data.translate,
-      sort: data.sort,
+      provider: data.provider.map((e) => e.name).join(','),
+      type: NovelStatus.indexByZhName(data.type.zhName),
+      level: WebNovelLevel.indexByZhName(data.level.zhName),
+      translate: WebTranslationSource.indexByZhName(data.translate.zhName),
+      sort: WebNovelOrder.indexByZhName(data.sort.zhName),
       query: data.query,
     )
         .then((response) {
@@ -90,7 +91,7 @@ Future<List<WenkuNovelOutline>> loadPagedWenkuOutlines(
     final response = await apiClient.wenkuNovelService.getList(
       data.page,
       data.pageSize,
-      level: data.level,
+      level: WenkuNovelLevel.indexByZhName(data.level.zhName),
       query: data.query,
     );
     final body = response.body;

@@ -3,7 +3,6 @@ import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/network/interceptor/response_interceptor.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/timeout_info_container.dart';
-import 'package:auto_novel_reader_flutter/ui/components/web_home/web_novel/radio_filter.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/wenku_novel/wenku_search_widget.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/wenku_novel_tile.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
@@ -23,25 +22,20 @@ class WenkuNovelSearchPage extends StatefulWidget {
 
 class _WenkuNovelSearchPageState extends State<WenkuNovelSearchPage> {
   late TextEditingController _searchController;
-  late RadioFilterController _levelController;
   late PageLoader<WenkuNovelOutline, List<WenkuNovelOutline>> pageLoader;
-
-  var searchData = const WenkuSearchData();
 
   @override
   void initState() {
     super.initState();
     _searchController = TextEditingController();
-    _levelController = RadioFilterController(
-      defaultOptionName: WenkuNovelLevel.values.first.zhName,
-    );
+    final bloc = readWenkuHomeBloc(context);
     pageLoader = PageLoader(
-        size: searchData.pageSize,
+        size: bloc.searchData.pageSize,
         initPage: 0,
-        pageSetter: (newPage) => searchData = searchData.copyWith(
-              page: newPage,
-              level: WenkuNovelLevel.indexByZhName(_levelController.optionName),
-            ),
+        pageSetter: (newPage) {
+          final searchData = bloc.searchData.copyWith(page: newPage);
+          bloc.add(WenkuHomeEvent.setSearchData(searchData));
+        },
         loader: () async => _search(),
         dataGetter: (result) => result,
         onLoadSucceed: (outlines) {
@@ -71,7 +65,6 @@ class _WenkuNovelSearchPageState extends State<WenkuNovelSearchPage> {
           child: WenkuSearchWidget(
             onSearch: () async => await doRefresh(),
             searchController: _searchController,
-            levelController: _levelController,
           ),
         ),
       ],
@@ -79,10 +72,11 @@ class _WenkuNovelSearchPageState extends State<WenkuNovelSearchPage> {
   }
 
   Future<List<WenkuNovelOutline>> _search() {
-    readWenkuHomeBloc(context).add(const WenkuHomeEvent.setLoadingStatus(
+    final bloc = readWenkuHomeBloc(context);
+    bloc.add(const WenkuHomeEvent.setLoadingStatus(
         {RequestLabel.searchWenku: LoadingStatus.loading}));
     try {
-      searchData = searchData.copyWith(
+      final searchData = bloc.searchData.copyWith(
         query: _searchController.text,
       );
       return loadPagedWenkuOutlines(searchData);

@@ -18,9 +18,6 @@ class WenkuHomeEvent with _$WenkuHomeEvent {
     required String novelId,
     @Default('default') String favoredId,
   }) = _UnFavorNovel;
-  const factory WenkuHomeEvent.searchWenku({
-    @Default(1) int level,
-    String? query,
-  }) = _SearchWenku;
-  const factory WenkuHomeEvent.loadNextPageWenku() = _LoadNextPageWenku;
+  const factory WenkuHomeEvent.setSearchData(WenkuSearchData data) =
+      _SetSearchData;
 }

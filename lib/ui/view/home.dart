@@ -97,7 +97,8 @@ class HomeView extends StatelessWidget {
       builder: (BuildContext context) {
         return ReleaseAlertDialog(data: data);
       },
-    );
+    ).then((_) =>
+        readGlobalBloc(context).add(const GlobalEvent.closeReleaseDialog()));
   }
 }
 
@@ -114,7 +115,6 @@ class ReleaseAlertDialog extends StatelessWidget {
           child: const Text('算了吧'),
           onPressed: () {
             Navigator.of(context).pop();
-            readGlobalBloc(context).add(const GlobalEvent.closeReleaseDialog());
           },
         ),
         TextButton(

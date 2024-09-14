@@ -32,6 +32,7 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
         leaveDetail: (event) async => await _onLeaveDetail(event, emit),
         favorNovel: (event) async => await _onFavorNovel(event, emit),
         unFavorNovel: (event) async => await _onUnFavorNovel(event, emit),
+        setSearchData: (event) async => await _onSetSearchData(event, emit),
         searchWeb: (event) async => await _onSearchWeb(event, emit),
         loadNextPageWeb: (event) async => await _onLoadNextPageWeb(event, emit),
       );
@@ -99,7 +100,6 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
 
   _onReadChapter(_ReadChapter event, Emitter<WebHomeState> emit) async {
     if (loadingChapter) return;
-    // BUG 打开时章节有误
     var targetChapterId = event.chapterId;
     targetChapterId ??= findChapterId(state.currentWebNovelDto!);
     final dto = state.currentWebNovelDto!;
@@ -182,18 +182,22 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     }
   }
 
+  _onSetSearchData(_SetSearchData event, Emitter<WebHomeState> emit) {
+    emit(state.copyWith(webSearchData: event.data));
+  }
+
   _onSearchWeb(_SearchWeb event, Emitter<WebHomeState> emit) async {
     if (state.searchingWeb) return;
-    final data = event.data;
+    final data = state.webSearchData;
     emit(state.copyWith(
       searchingWeb: true,
       webNovelSearchResult: [],
       currentWebSearchPage: 0,
-      webProvider: data.provider,
-      webType: data.type,
-      webLevel: data.level,
-      webTranslate: data.translate,
-      webSort: data.sort,
+      webProvider: data.provider.map((e) => e.name).toList(),
+      webType: NovelStatus.indexByZhName(data.type.zhName),
+      webLevel: WebNovelLevel.indexByZhName(data.level.zhName),
+      webTranslate: WebTranslationSource.indexByZhName(data.translate.zhName),
+      webSort: WebNovelOrder.indexByZhName(data.sort.zhName),
       webQuery: data.query,
     ));
     await _loadPagedWebNovel(emit);
@@ -292,11 +296,6 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
         .putNovelId(providerId, novelId, chapterId);
   }
 
-  bool get loadingChapter => state.loadingNovelChapter;
-  String get currentNovelId => state.currentWebNovelDto!.novelId;
-  String get currentNovelProviderId => state.currentWebNovelDto!.providerId;
-  String? get currentNovelKey => state.currentWebNovelDto?.novelKey;
-
   _onSetLoadingStatus(_SetLoadingStatus event, Emitter<WebHomeState> emit) {
     emit(state.copyWith(loadingStatusMap: {
       ...state.loadingStatusMap,
@@ -310,4 +309,11 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
       webNovelSearchResult: event.webOutlines,
     ));
   }
+
+  bool get loadingChapter => state.loadingNovelChapter;
+  String get currentNovelId => state.currentWebNovelDto!.novelId;
+  String get currentNovelProviderId => state.currentWebNovelDto!.providerId;
+  String? get currentNovelKey => state.currentWebNovelDto?.novelKey;
+
+  WebSearchData get searchData => state.webSearchData;
 }

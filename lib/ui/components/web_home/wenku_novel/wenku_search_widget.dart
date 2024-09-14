@@ -1,20 +1,21 @@
 import 'dart:ui';
 
+import 'package:auto_novel_reader_flutter/bloc/wenku_home/wenku_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
+import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/web_novel/radio_filter.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class WenkuSearchWidget extends StatefulWidget {
   const WenkuSearchWidget({
     super.key,
     required this.searchController,
-    required this.levelController,
     required this.onSearch,
   });
   final TextEditingController searchController;
-  final RadioFilterController levelController;
   final Function onSearch;
   @override
   State<WenkuSearchWidget> createState() => _WenkuSearchWidgetState();
@@ -150,11 +151,25 @@ class _WenkuSearchWidgetState extends State<WenkuSearchWidget>
     return Column(mainAxisSize: MainAxisSize.min, children: [
       SizedBox(
         width: double.infinity,
-        child: RadioFilter(
-            title: '分级',
-            controller: widget.levelController,
-            values: levelList,
-            options: levelList.map((e) => e.zhName).toList()),
+        child: BlocSelector<WenkuHomeBloc, WenkuHomeState, WenkuSearchData>(
+          selector: (state) {
+            return state.wenkuSearchData;
+          },
+          builder: (context, state) {
+            return RadioFilter(
+              selectedOption: state.level.zhName,
+              title: '分级',
+              values: levelList,
+              options: levelList.map((e) => e.zhName).toList(),
+              onChanged: (index) {
+                readWenkuHomeBloc(context)
+                    .add(WenkuHomeEvent.setSearchData(state.copyWith(
+                  level: levelList[index],
+                )));
+              },
+            );
+          },
+        ),
       ),
     ]);
   }

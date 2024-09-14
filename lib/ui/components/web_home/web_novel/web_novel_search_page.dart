@@ -4,7 +4,6 @@ import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/network/interceptor/response_interceptor.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/timeout_info_container.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/web_novel/check_filter.dart';
-import 'package:auto_novel_reader_flutter/ui/components/web_home/web_novel/radio_filter.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/web_novel/web_search_widget.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/web_novel_tile.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
@@ -24,45 +23,33 @@ class WebNovelSearchPage extends StatefulWidget {
 
 class _WebNovelSearchPageState extends State<WebNovelSearchPage> {
   late CheckFilterController<NovelProvider> _checkFilterController;
-  late RadioFilterController _categoryController,
-      _translationController,
-      _sortController,
-      _levelController;
   late TextEditingController _searchController;
   late PageLoader<WebNovelOutline, List<WebNovelOutline>> pageLoader;
 
-  var searchData = const WebSearchData();
   @override
   void initState() {
     super.initState();
     _checkFilterController = CheckFilterController();
-    _categoryController = RadioFilterController();
-    _translationController = RadioFilterController();
-    _sortController = RadioFilterController();
-    _levelController = RadioFilterController();
     _searchController = TextEditingController();
 
+    final bloc = readWebHomeBloc(context);
     final isOldAss = readUserCubit(context).isOldAss;
     if (isOldAss) {
-      searchData = searchData.copyWith(level: 0);
+      bloc.add(WebHomeEvent.setSearchData(
+          bloc.searchData.copyWith(level: WebNovelLevel.all)));
     }
 
     pageLoader = PageLoader(
-        size: searchData.pageSize,
+        size: bloc.searchData.pageSize,
         initPage: 0,
-        pageSetter: (newPage) => searchData = searchData.copyWith(
+        pageSetter: (newPage) {
+          bloc.add(WebHomeEvent.setSearchData(
+            bloc.searchData.copyWith(
               page: newPage,
               query: _searchController.text,
-              provider:
-                  _checkFilterController.values.map((e) => e.name).toList(),
-              type: NovelStatus.indexByZhName(_categoryController.optionName),
-              translate: WebTranslationSource.indexByZhName(
-                  _translationController.optionName),
-              sort: WebNovelOrder.indexByZhName(_sortController.optionName),
-              level: isOldAss
-                  ? WebNovelLevel.indexByZhName(_levelController.optionName)
-                  : 1,
             ),
+          ));
+        },
         loader: () async => _search(),
         dataGetter: (result) => result,
         onLoadSucceed: (outlines) {
@@ -92,10 +79,6 @@ class _WebNovelSearchPageState extends State<WebNovelSearchPage> {
           child: WebSearchWidget(
             searchController: _searchController,
             checkFilterController: _checkFilterController,
-            categoryController: _categoryController,
-            translationController: _translationController,
-            sortController: _sortController,
-            levelController: _levelController,
             onSearch: () async => await doRefresh(),
           ),
         ),
@@ -108,9 +91,10 @@ class _WebNovelSearchPageState extends State<WebNovelSearchPage> {
     bloc.add(const WebHomeEvent.setLoadingStatus(
         {RequestLabel.searchWeb: LoadingStatus.loading}));
     try {
-      searchData = searchData.copyWith(
+      final searchData = bloc.searchData.copyWith(
         query: _searchController.text,
       );
+      bloc.add(WebHomeEvent.setSearchData(searchData));
       return loadPagedWebOutlines(searchData);
     } catch (e, stackTrace) {
       errorLogger.logError(e, stackTrace);

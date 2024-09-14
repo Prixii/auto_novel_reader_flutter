@@ -33,7 +33,8 @@ class WebHomeEvent with _$WebHomeEvent {
   const factory WebHomeEvent.unFavorNovel(NovelType type,
       {@Default('default') String favoredId}) = _UnFavorNovel;
 
-  // 搜搜索
-  const factory WebHomeEvent.searchWeb(WebSearchData data) = _SearchWeb;
+  // 搜索
+  const factory WebHomeEvent.setSearchData(WebSearchData data) = _SetSearchData;
+  const factory WebHomeEvent.searchWeb() = _SearchWeb;
   const factory WebHomeEvent.loadNextPageWeb() = _LoadNextPageWeb;
 }

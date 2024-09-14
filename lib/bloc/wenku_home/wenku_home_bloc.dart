@@ -3,7 +3,6 @@ import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:auto_novel_reader_flutter/network/interceptor/response_interceptor.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
-import 'package:auto_novel_reader_flutter/util/error_logger.dart';
 import 'package:auto_novel_reader_flutter/util/web_home_util.dart';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -25,9 +24,7 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
         toWenkuDetail: (event) async => await _onToWenkuDetail(event, emit),
         favorNovel: (event) async => await _onFavorNovel(event, emit),
         unFavorNovel: (event) async => await _onUnFavorNovel(event, emit),
-        searchWenku: (event) async => await _onSearchWenku(event, emit),
-        loadNextPageWenku: (event) async =>
-            await _onLoadNextPageWenku(event, emit),
+        setSearchData: (event) async => await _onSetSearchData(event, emit),
       );
     });
   }
@@ -159,74 +156,8 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
     showSucceedToast('取消收藏成功');
   }
 
-  @Deprecated('no longer use')
-  _onSearchWenku(_SearchWenku event, Emitter<WenkuHomeState> emit) async {
-    if (isSearchingWenku) return;
-    emit(state.copyWith(
-      wenkuNovelSearchResult: [],
-      currentWenkuSearchPage: 0,
-      wenkuLevel: event.level,
-      wenkuQuery: event.query,
-    ));
-    add(const WenkuHomeEvent.setLoadingStatus({
-      RequestLabel.searchWenku: LoadingStatus.loading,
-    }));
-
-    await _loadPagedWenkuNovel(emit);
-  }
-
-  _onLoadNextPageWenku(
-      _LoadNextPageWenku event, Emitter<WenkuHomeState> emit) async {
-    if (isSearchingWenku) return;
-    if (state.currentWenkuSearchPage == state.maxPage) {
-      showWarnToast('一点都没有啦~');
-      return;
-    }
-    if (state.currentWenkuSearchPage >= state.maxPage) return;
-    emit(state.copyWith(
-      currentWenkuSearchPage: state.currentWenkuSearchPage + 1,
-    ));
-    await _loadPagedWenkuNovel(emit);
-  }
-
-  Future<void> _loadPagedWenkuNovel(Emitter<WenkuHomeState> emit) async {
-    try {
-      final (newNovelList, pageNumber) = await loadPagedWenkuOutline(
-        page: state.currentWenkuSearchPage,
-        pageSize: 21,
-        level: state.wenkuLevel,
-        query: state.wenkuQuery,
-      );
-      var newWenkuNovelOutlineMap = {...state.wenkuNovelOutlineMap};
-      for (var newNovel in newNovelList) {
-        newWenkuNovelOutlineMap[newNovel.id] = newNovel;
-      }
-      emit(state.copyWith(
-          wenkuNovelSearchResult: [
-            ...state.wenkuNovelSearchResult,
-            ...newNovelList
-          ],
-          maxPage: pageNumber,
-          wenkuNovelOutlineMap: {
-            ...state.wenkuNovelOutlineMap,
-            ...newWenkuNovelOutlineMap,
-          }));
-      add(const WenkuHomeEvent.setLoadingStatus({
-        RequestLabel.searchWenku: null,
-      }));
-    } catch (e, stackTrace) {
-      errorLogger.logError(e, stackTrace);
-      add(WenkuHomeEvent.setLoadingStatus({
-        RequestLabel.searchWenku: (e is ServerException)
-            ? LoadingStatus.serverError
-            : LoadingStatus.failed,
-      }));
-    }
-  }
-
   bool currentNovelFavored(String novelId) =>
       favoredCubit.state.novelToFavoredIdMap[novelId] != null;
-  String get currentNovelId => state.currentWenkuNovelDto?.id ?? '';
 
   _onSetLoadingStatus(
       _SetSetLoadingStatus event, Emitter<WenkuHomeState> emit) {
@@ -236,6 +167,14 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
     }));
   }
 
+  _onSetSearchData(_SetSearchData event, Emitter<WenkuHomeState> emit) {
+    emit(state.copyWith(wenkuSearchData: event.data));
+  }
+
+  String get currentNovelId => state.currentWenkuNovelDto?.id ?? '';
+
   bool get isSearchingWenku =>
       state.loadingStatusMap[RequestLabel.searchWenku] == LoadingStatus.loading;
+
+  WenkuSearchData get searchData => state.wenkuSearchData;
 }
