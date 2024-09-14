@@ -127,7 +127,9 @@ class _EpubWebviewState extends State<EpubWebview> {
   }
 
   Map<String, String> _buildStylesMap(String style) {
-    final isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
+    final isDark =
+        MediaQuery.of(context).platformBrightness == Brightness.dark ||
+            configCubit.state.themeMode == ThemeMode.dark;
     final styles = style.split(RegExp(r';|:'));
     var stylesMap = <String, String>{};
     for (int i = 0; i < styles.length; i += 2) {
@@ -140,7 +142,7 @@ class _EpubWebviewState extends State<EpubWebview> {
       stylesMap['color'] = isDark ? 'grey' : 'lightgrey';
     } else {
       if (isDark) {
-        final color = styleManager.colorScheme(context).primary;
+        final color = styleManager.colorScheme(context).onSurface;
         stylesMap['color'] = 'rgb(${color.red},${color.green},${color.blue})';
       }
     }

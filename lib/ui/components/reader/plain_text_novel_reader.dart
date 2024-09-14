@@ -473,9 +473,8 @@ class NovelRender extends StatelessWidget {
       TextSpan(
         text: trimmedText + (wrap ? '\n' : ''),
         style: TextStyle(
-          color: grey
-              ? Colors.grey
-              : styleManager.colorScheme(context).onPrimaryContainer,
+          color:
+              grey ? Colors.grey : styleManager.colorScheme(context).onSurface,
           fontSize: config.fontSize.toDouble(),
           fontWeight: config.boldFont ? FontWeight.bold : FontWeight.normal,
         ),
