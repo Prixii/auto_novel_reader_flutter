@@ -86,8 +86,8 @@ Widget buildRoundButton(void Function() onPressed) {
 
 Widget buildLoadingButton() {
   return SizedBox(
-    height: 32,
-    width: 32,
+    height: 64,
+    width: 64,
     child: IconButton.filled(
         disabledColor: Colors.grey,
         onPressed: null,

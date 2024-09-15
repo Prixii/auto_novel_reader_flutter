@@ -19,21 +19,29 @@ class UserCubit extends HydratedCubit<UserState> {
     String password, {
     bool autoSignIn = true,
   }) async {
-    final signInResponse = await apiClient.authService.postSignIn({
-      'emailOrUsername': emailOrUsername,
-      'password': password,
-    });
-    if (signInResponse.statusCode == 502) {
-      Fluttertoast.showToast(msg: '服务器维护中');
+    try {
+      final signInResponse = await apiClient.authService.postSignIn({
+        'emailOrUsername': emailOrUsername,
+        'password': password,
+      });
+      if (signInResponse.statusCode == 502) {
+        Fluttertoast.showToast(msg: '服务器维护中');
+        return false;
+      }
+      if (signInResponse.statusCode != 200) {
+        showErrorToast('登录失败, ${signInResponse.statusCode}');
+        return false;
+      }
+      final token = signInResponse.body;
+      return afterLogin(
+          token: token, emailOrUsername: emailOrUsername, password: password);
+    } catch (e, stackTrace) {
+      errorLogger.logError(e, stackTrace);
+      showErrorToast(
+        '登录失败$e',
+      );
       return false;
     }
-    if (signInResponse.statusCode != 200) {
-      showErrorToast('登录失败, ${signInResponse.statusCode}');
-      return false;
-    }
-    final token = signInResponse.body;
-    return afterLogin(
-        token: token, emailOrUsername: emailOrUsername, password: password);
   }
 
   Future<bool> signUp({
@@ -42,25 +50,25 @@ class UserCubit extends HydratedCubit<UserState> {
     required String password,
     required String emailCode,
   }) async {
-    final response = await apiClient.authService.postSignUp({
-      'email': email,
-      'username': username,
-      'password': password,
-      'emailCode': emailCode,
-    });
-    if (response.statusCode == 502) {
-      Fluttertoast.showToast(msg: '服务器维护中');
+    try {
+      final response = await apiClient.authService.postSignUp({
+        'email': email,
+        'username': username,
+        'password': password,
+        'emailCode': emailCode,
+      });
+      return afterLogin(
+        token: response.body,
+        emailOrUsername: email,
+        password: password,
+      );
+    } catch (e, stackTrace) {
+      errorLogger.logError(e, stackTrace);
+      showErrorToast(
+        '注册失败$e',
+      );
       return false;
     }
-    if (response.statusCode != 200) {
-      showErrorToast('注册失败, ${response.statusCode}');
-      return false;
-    }
-    return afterLogin(
-      token: response.body,
-      emailOrUsername: email,
-      password: password,
-    );
   }
 
   bool afterLogin({
