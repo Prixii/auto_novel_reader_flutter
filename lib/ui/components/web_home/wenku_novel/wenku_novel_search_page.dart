@@ -71,10 +71,12 @@ class _WenkuNovelSearchPageState extends State<WenkuNovelSearchPage> {
     );
   }
 
-  Future<List<WenkuNovelOutline>> _search() {
+  Future<List<WenkuNovelOutline>> _search() async {
     final bloc = readWenkuHomeBloc(context);
     bloc.add(const WenkuHomeEvent.setLoadingStatus(
         {RequestLabel.searchWenku: LoadingStatus.loading}));
+    // HACK 和 bloc 数据不同步
+    await Future.delayed(const Duration(milliseconds: 100), () {});
     try {
       final searchData = bloc.searchData.copyWith(
         query: _searchController.text,
@@ -133,7 +135,6 @@ class _WenkuNovelDtoListState extends State<WenkuNovelDtoList> {
           if (metrics.pixels > metrics.maxScrollExtent - 60) {
             if (shouldLoadMore && scrollDirection == ScrollDirection.forward) {
               shouldLoadMore = false;
-
               widget.onLoadMore.call();
             }
           } else {

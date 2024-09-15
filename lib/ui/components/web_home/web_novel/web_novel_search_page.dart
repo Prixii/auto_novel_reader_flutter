@@ -86,11 +86,13 @@ class _WebNovelSearchPageState extends State<WebNovelSearchPage> {
     );
   }
 
-  Future<List<WebNovelOutline>> _search() {
+  Future<List<WebNovelOutline>> _search() async {
     final bloc = readWebHomeBloc(context);
     bloc.add(const WebHomeEvent.setLoadingStatus(
         {RequestLabel.searchWeb: LoadingStatus.loading}));
     try {
+      // HACK 和 bloc 数据不同步
+      await Future.delayed(const Duration(milliseconds: 100), () {});
       final searchData = bloc.searchData.copyWith(
         query: _searchController.text,
       );
