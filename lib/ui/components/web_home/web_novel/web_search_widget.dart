@@ -143,6 +143,7 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
           clipBehavior: Clip.hardEdge,
           width: double.infinity,
           padding: const EdgeInsets.all(12.0),
+          constraints: BoxConstraints(maxHeight: 260),
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16.0),
               boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15))],
@@ -168,71 +169,81 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
         const levels = WebNovelLevel.values;
         const translations = WebTranslationSource.values;
         const order = WebNovelOrder.values;
-        return Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CheckFilter<NovelProvider>(
-                  title: '来源',
-                  controller: widget.checkFilterController,
-                  optionsValue: providers,
-                  options: providers.map((e) => e.zhName).toList()),
-              const SizedBox(height: 16.0),
-              RadioFilter(
-                title: '类型',
-                values: statusList,
-                options: statusList.map((e) => e.zhName).toList(),
-                selectedOption: searchData.type.zhName,
-                onChanged: (index) {
-                  readWebHomeBloc(context)
-                      .add(WebHomeEvent.setSearchData(searchData.copyWith(
-                    type: statusList[index],
-                  )));
-                },
-              ),
-              ...(isOldAss
-                  ? [
-                      const SizedBox(height: 16.0),
-                      RadioFilter(
-                          title: '分级',
-                          values: levels,
-                          options: levels.map((e) => e.zhName).toList(),
-                          selectedOption: searchData.level.zhName,
-                          onChanged: (index) {
-                            readWebHomeBloc(context).add(
-                                WebHomeEvent.setSearchData(searchData.copyWith(
-                              level: levels[index],
-                            )));
-                          }),
-                    ]
-                  : []),
-              const SizedBox(height: 16.0),
-              RadioFilter(
-                title: '翻译',
-                values: translations,
-                options: translations.map((e) => e.zhName).toList(),
-                selectedOption: searchData.translate.zhName,
-                onChanged: (index) {
-                  readWebHomeBloc(context)
-                      .add(WebHomeEvent.setSearchData(searchData.copyWith(
-                    translate: translations[index],
-                  )));
-                },
-              ),
-              const SizedBox(height: 16.0),
-              RadioFilter(
-                title: '排序',
-                values: WebNovelOrder.values,
-                options: order.map((e) => e.zhName).toList(),
-                selectedOption: searchData.sort.zhName,
-                onChanged: (index) {
-                  readWebHomeBloc(context)
-                      .add(WebHomeEvent.setSearchData(searchData.copyWith(
-                    sort: order[index],
-                  )));
-                },
-              ),
-            ]);
+        return Scrollbar(
+          thickness: 4,
+          radius: const Radius.circular(10),
+          thumbVisibility: true,
+          controller: ScrollController(),
+          // trackVisibility: true,
+          child: SingleChildScrollView(
+            child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CheckFilter<NovelProvider>(
+                      title: '来源',
+                      controller: widget.checkFilterController,
+                      optionsValue: providers,
+                      options: providers.map((e) => e.zhName).toList()),
+                  const SizedBox(height: 16.0),
+                  RadioFilter(
+                    title: '类型',
+                    values: statusList,
+                    options: statusList.map((e) => e.zhName).toList(),
+                    selectedOption: searchData.type.zhName,
+                    onChanged: (index) {
+                      readWebHomeBloc(context)
+                          .add(WebHomeEvent.setSearchData(searchData.copyWith(
+                        type: statusList[index],
+                      )));
+                    },
+                  ),
+                  ...(isOldAss
+                      ? [
+                          const SizedBox(height: 16.0),
+                          RadioFilter(
+                              title: '分级',
+                              values: levels,
+                              options: levels.map((e) => e.zhName).toList(),
+                              selectedOption: searchData.level.zhName,
+                              onChanged: (index) {
+                                readWebHomeBloc(context).add(
+                                    WebHomeEvent.setSearchData(
+                                        searchData.copyWith(
+                                  level: levels[index],
+                                )));
+                              }),
+                        ]
+                      : []),
+                  const SizedBox(height: 16.0),
+                  RadioFilter(
+                    title: '翻译',
+                    values: translations,
+                    options: translations.map((e) => e.zhName).toList(),
+                    selectedOption: searchData.translate.zhName,
+                    onChanged: (index) {
+                      readWebHomeBloc(context)
+                          .add(WebHomeEvent.setSearchData(searchData.copyWith(
+                        translate: translations[index],
+                      )));
+                    },
+                  ),
+                  const SizedBox(height: 16.0),
+                  RadioFilter(
+                    title: '排序',
+                    values: WebNovelOrder.values,
+                    options: order.map((e) => e.zhName).toList(),
+                    selectedOption: searchData.sort.zhName,
+                    onChanged: (index) {
+                      readWebHomeBloc(context)
+                          .add(WebHomeEvent.setSearchData(searchData.copyWith(
+                        sort: order[index],
+                      )));
+                    },
+                  ),
+                ]),
+          ),
+        );
       },
     );
   }
