@@ -5,6 +5,7 @@ import 'package:auto_novel_reader_flutter/network/interceptor/request_intercepto
 import 'package:auto_novel_reader_flutter/network/service/service.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:chopper/chopper.dart';
+
 import 'package:http/io_client.dart' as http;
 
 typedef JsonBody = Map<String, dynamic>;
@@ -31,7 +32,7 @@ class _ApiClient {
   void createChopper() {
     chopper = ChopperClient(
       client: http.IOClient(
-        HttpClient()..connectionTimeout = const Duration(seconds: 10),
+        HttpClient()..connectionTimeout = const Duration(seconds: 5),
       ),
       baseUrl: Uri.parse('https://${configCubit.state.host}/api'),
       interceptors: [
@@ -75,5 +76,9 @@ Future<Response?> tokenRequest<T>(
 ) async {
   final token = userCubit.state.token;
   if (token == null) return null;
-  return await body.call();
+  try {
+    return await body.call();
+  } catch (e) {
+    rethrow;
+  }
 }

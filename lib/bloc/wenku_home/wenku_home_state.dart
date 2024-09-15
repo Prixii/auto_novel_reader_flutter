@@ -3,6 +3,7 @@ part of 'wenku_home_bloc.dart';
 @freezed
 class WenkuHomeState with _$WenkuHomeState {
   const factory WenkuHomeState.initial({
+    @Default({}) Map<RequestLabel, LoadingStatus?> loadingStatusMap,
     List<WenkuNovelOutline>? wenkuLatestUpdate,
     // 缓存
     @Default({}) Map<String, WenkuNovelDto> wenkuNovelDtoMap,
@@ -11,7 +12,6 @@ class WenkuHomeState with _$WenkuHomeState {
     @Default({}) Map<String, WenkuNovelOutline> wenkuNovelOutlineMap,
 
     // 详情
-    @Default(false) bool loadingDetail,
     @Default(Language.zhJp) Language language,
     @Default(TranslationMode.priority) TranslationMode translationMode,
     @Default([
@@ -24,11 +24,8 @@ class WenkuHomeState with _$WenkuHomeState {
     WenkuNovelDto? currentWenkuNovelDto,
 
     // 搜索
-    @Default(false) bool searchingWenku,
     @Default(0) int currentWenkuSearchPage,
-    @Default(-1) int maxPage,
+    @Default(WenkuSearchData()) WenkuSearchData wenkuSearchData,
     @Default([]) List<WenkuNovelOutline> wenkuNovelSearchResult,
-    @Default(0) int wenkuLevel,
-    String? wenkuQuery,
   }) = _Initial;
 }

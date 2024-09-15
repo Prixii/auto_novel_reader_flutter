@@ -53,7 +53,6 @@ class DownloadCubit extends HydratedCubit<DownloadState> {
         showWarnToast('请勿重复创建');
         return;
     }
-    // NEED TEST 重新创建下载任务
     emit(state.copyWith(taskProgress: {
       ...state.taskProgress,
       filename: 0.0,

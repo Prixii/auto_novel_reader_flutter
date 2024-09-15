@@ -25,13 +25,15 @@ class NovelRankBloc extends Bloc<NovelRankEvent, NovelRankState> {
             await _onUpdateSyosetuIsekaiSearchData(event, emit),
         updateKakuyomuGenreSearchData: (event) async =>
             await _onUpdateKakuyomuGenreSearchData(event, emit),
+        setLoadingStatus: (event) async =>
+            await _onSetLoadingStatus(event, emit),
       );
     });
   }
 
   _onSearchRankNovel(
       _SearchRankNovel event, Emitter<NovelRankState> emit) async {
-    if (state.searchingStatus[event.rankCategory] == true) {
+    if (state.loadingStatus[event.rankCategory] == LoadingStatus.loading) {
       showWarnToast('已经在搜了啦!');
       return;
     }
@@ -47,9 +49,6 @@ class NovelRankBloc extends Bloc<NovelRankEvent, NovelRankState> {
       await _requestByRankCategory(event.rankCategory, emit);
     } catch (e, stackTrace) {
       errorLogger.logError(e, stackTrace);
-      emit(state.copyWith(
-        searchingStatus: {...state.searchingStatus, event.rankCategory: false},
-      ));
     }
   }
 
@@ -69,72 +68,54 @@ class NovelRankBloc extends Bloc<NovelRankEvent, NovelRankState> {
 
   _onUpdateSyosetuGenreSearchData(
       _UpdateSyosetuGenreSearchData event, Emitter<NovelRankState> emit) async {
-    emit(state.copyWith(
-      syosetuGenreSearchData: state.syosetuGenreSearchData.copyWith(
-        genre: event.genre,
-        range: event.range,
-        status: event.status,
-      ),
-    ));
-    add(const NovelRankEvent.searchRankNovel(RankCategory.syosetuGenre));
+    emit(state.copyWith(syosetuGenreSearchData: event.data));
   }
 
   _onUpdateSyosetuComprehensiveSearchData(
       _UpdateSyosetuComprehensiveSearchData event,
       Emitter<NovelRankState> emit) async {
-    emit(state.copyWith(
-        syosetuComprehensiveSearchData: state.syosetuComprehensiveSearchData
-            .copyWith(range: event.range, status: event.status)));
-    add(const NovelRankEvent.searchRankNovel(
-        RankCategory.syosetuComprehensive));
+    emit(state.copyWith(syosetuComprehensiveSearchData: event.data));
   }
 
   _onUpdateSyosetuIsekaiSearchData(_UpdateSyosetuIsekaiSearchData event,
       Emitter<NovelRankState> emit) async {
-    emit(state.copyWith(
-        syosetuIsekaiSearchData: state.syosetuIsekaiSearchData.copyWith(
-            genre: event.genre, range: event.range, status: event.status)));
-    add(const NovelRankEvent.searchRankNovel(RankCategory.syosetuIsekai));
+    emit(state.copyWith(syosetuIsekaiSearchData: event.data));
   }
 
   _onUpdateKakuyomuGenreSearchData(_UpdateKakuyomuGenreSearchData event,
       Emitter<NovelRankState> emit) async {
-    emit(state.copyWith(
-        kakuyomuGenreSearchData: state.kakuyomuGenreSearchData.copyWith(
-      genre: event.genre,
-      range: event.range,
-    )));
-    add(const NovelRankEvent.searchRankNovel(RankCategory.kakuyomuGenre));
+    emit(state.copyWith(kakuyomuGenreSearchData: event.data));
   }
 
   Future<void> _requestByRankCategory(
       RankCategory rankCategory, Emitter<NovelRankState> emit) async {
-    switch (rankCategory) {
-      case RankCategory.syosetuGenre:
-        await _loadSyosetuGenre(state.syosetuGenreSearchData.query, emit);
-        break;
-      case RankCategory.syosetuComprehensive:
-        await _loadSyosetuComprehensive(
-            state.syosetuComprehensiveSearchData.query, emit);
-        break;
-      case RankCategory.syosetuIsekai:
-        await _loadSyosetuIsekai(state.syosetuIsekaiSearchData.query, emit);
-        break;
-      case RankCategory.kakuyomuGenre:
-        await _loadKakuyomuGenre(state.kakuyomuGenreSearchData.query, emit);
-        break;
-      default:
+    add(NovelRankEvent.setLoadingStatus({rankCategory: LoadingStatus.loading}));
+    try {
+      switch (rankCategory) {
+        case RankCategory.syosetuGenre:
+          await _loadSyosetuGenre(state.syosetuGenreSearchData.query, emit);
+          break;
+        case RankCategory.syosetuComprehensive:
+          await _loadSyosetuComprehensive(
+              state.syosetuComprehensiveSearchData.query, emit);
+          break;
+        case RankCategory.syosetuIsekai:
+          await _loadSyosetuIsekai(state.syosetuIsekaiSearchData.query, emit);
+          break;
+        case RankCategory.kakuyomuGenre:
+          await _loadKakuyomuGenre(state.kakuyomuGenreSearchData.query, emit);
+          break;
+        default:
+      }
+    } catch (e, stackTrace) {
+      errorLogger.logError(e, stackTrace);
+      add(NovelRankEvent.setLoadingStatus(
+          {rankCategory: LoadingStatus.failed}));
     }
   }
 
   Future<void> _loadSyosetuGenre(
       Map<String, String> query, Emitter<NovelRankState> emit) async {
-    emit(state.copyWith(
-      searchingStatus: {
-        ...state.searchingStatus,
-        RankCategory.syosetuGenre: true
-      },
-    ));
     final response = await apiClient.webNovelService.getRank(
       'syosetu',
       {
@@ -150,12 +131,6 @@ class NovelRankBloc extends Bloc<NovelRankEvent, NovelRankState> {
 
   Future<void> _loadSyosetuComprehensive(
       Map<String, String> query, Emitter<NovelRankState> emit) async {
-    emit(state.copyWith(
-      searchingStatus: {
-        ...state.searchingStatus,
-        RankCategory.syosetuComprehensive: true
-      },
-    ));
     final response = await apiClient.webNovelService.getRank(
       'syosetu',
       {
@@ -173,12 +148,6 @@ class NovelRankBloc extends Bloc<NovelRankEvent, NovelRankState> {
 
   Future<void> _loadSyosetuIsekai(
       Map<String, String> query, Emitter<NovelRankState> emit) async {
-    emit(state.copyWith(
-      searchingStatus: {
-        ...state.searchingStatus,
-        RankCategory.syosetuIsekai: true
-      },
-    ));
     final response = await apiClient.webNovelService.getRank(
       'syosetu',
       {
@@ -194,12 +163,6 @@ class NovelRankBloc extends Bloc<NovelRankEvent, NovelRankState> {
 
   Future<void> _loadKakuyomuGenre(
       Map<String, String> query, Emitter<NovelRankState> emit) async {
-    emit(state.copyWith(
-      searchingStatus: {
-        ...state.searchingStatus,
-        RankCategory.kakuyomuGenre: true
-      },
-    ));
     final response = await apiClient.webNovelService.getRank(
       'kakuyomu',
       {
@@ -224,8 +187,14 @@ class NovelRankBloc extends Bloc<NovelRankEvent, NovelRankState> {
     ];
     emit(state.copyWith(
       novels: {...state.novels, rankCategory: dtoList},
-      searchingStatus: {...state.searchingStatus, rankCategory: false},
       maxPage: {...state.maxPage, rankCategory: maxPage},
+    ));
+    add(NovelRankEvent.setLoadingStatus({rankCategory: null}));
+  }
+
+  _onSetLoadingStatus(_SetLoadingStatus event, Emitter<NovelRankState> emit) {
+    emit(state.copyWith(
+      loadingStatus: {...state.loadingStatus, ...event.loadingStatusMap},
     ));
   }
 }

@@ -26,7 +26,7 @@ class _LogPageState extends State<LogPage> {
     if (!errorLogger.logFile.existsSync()) return;
     currentLogFile = errorLogger.logFile;
     List<String> logData = _readLog();
-    logPathList = pathManager.getLogPathList();
+    logPathList = pathManager.getLogPathList().reversed.toList();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       setState(() {
         logs = logData;
@@ -43,16 +43,18 @@ class _LogPageState extends State<LogPage> {
         backgroundColor: styleManager.colorScheme(context).secondaryContainer,
         title: const Text('日志管理'),
       ),
-      body: SingleChildScrollView(
-        child: ListView.builder(
-          padding: const EdgeInsets.all(16.0),
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemBuilder: (context, index) =>
-              LogCard(log: logs[index], index: index),
-          itemCount: logs.length,
-        ),
-      ),
+      body: logs.isEmpty
+          ? const Center(child: Text('很好, 一点错误也没有!'))
+          : SingleChildScrollView(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16.0),
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) =>
+                    LogCard(log: logs[index], index: index),
+                itemCount: logs.length,
+              ),
+            ),
       drawer: Drawer(
         child: ListView.builder(
           itemBuilder: (context, index) {

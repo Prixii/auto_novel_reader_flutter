@@ -9,16 +9,12 @@ class WebCacheCubit extends HydratedCubit<WebCacheState> {
   WebCacheCubit() : super(const WebCacheState.initial());
 
   Future<void> updateLastReadChapter(
-    String providerId,
-    String novelId,
+    String novelKey,
     String? chapterId,
   ) async {
     if (chapterId == null) return;
     emit(state.copyWith(
-      lastReadChapterMap: {
-        ...state.lastReadChapterMap,
-        '$providerId-$novelId': chapterId
-      },
+      lastReadChapterMap: {...state.lastReadChapterMap, novelKey: chapterId},
     ));
   }
 

@@ -13,6 +13,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:unicons/unicons.dart';
 
+const standardSwitchPageVelocity = 100.0;
+
 class PlainTextNovelReaderContainer extends StatelessWidget {
   const PlainTextNovelReaderContainer({super.key});
 
@@ -58,9 +60,9 @@ class PlainTextNovelReaderContainer extends StatelessWidget {
 
   List<Widget> _buildActions(BuildContext context) {
     return [
+      //  TODO 编辑
       // IconButton(
       //   onPressed: () {
-      //     // TODO 编辑
       //     Fluttertoast.showToast(msg: '这个功能还没有做呢');
       //   },
       //   icon: const Icon(UniconsLine.edit),
@@ -116,16 +118,16 @@ class _PlainTextNovelReaderState extends State<PlainTextNovelReader>
         Tween(begin: 0.0, end: 1.0).animate(_maskAnimationController);
     _scrollController = ScrollController();
 
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      final resultText = ReaderUtil.pagingText(
-        widget.dto.youdaoParagraphs?.join('\n') ?? '',
-        size,
-        style!,
-      );
-      setState(() {
-        result = resultText;
-      });
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    //   final resultText = ReaderUtil.pagingText(
+    //     widget.dto.youdaoParagraphs?.join('\n') ?? '',
+    //     size,
+    //     style!,
+    //   );
+    //   setState(() {
+    //     result = resultText;
+    //   });
+    // });
   }
 
   @override
@@ -175,25 +177,37 @@ class _PlainTextNovelReaderState extends State<PlainTextNovelReader>
       builder: (context, isLoading) {
         return AbsorbPointer(
           absorbing: isLoading,
-          child: SingleChildScrollView(
-            controller: _scrollController,
-            padding:
-                const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-            child: Column(
-              children: [
-                Text(
-                  widget.dto.titleJp ?? '',
-                  style: styleManager.primaryColorTitleLarge(context),
-                ),
-                Text(
-                  widget.dto.titleZh ?? '',
-                  style: styleManager.titleSmall(context),
-                ),
-                const Divider(),
-                NovelRender(
-                  chapterDto: widget.dto,
-                )
-              ],
+          child: GestureDetector(
+            onHorizontalDragEnd: (detail) {
+              if (detail.velocity.pixelsPerSecond.dx <
+                  -standardSwitchPageVelocity) {
+                if (readConfigCubit(context).state.slideShift) nextPage();
+              } else if (detail.velocity.pixelsPerSecond.dx >
+                  standardSwitchPageVelocity) {
+                if (readConfigCubit(context).state.slideShift) previousPage();
+              }
+            },
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+              child: Column(
+                children: [
+                  Text(
+                    widget.dto.titleJp ?? '',
+                    style: styleManager.primaryColorTitleLarge(context),
+                  ),
+                  Text(
+                    widget.dto.titleZh ?? '',
+                    style: styleManager.titleSmall(context),
+                  ),
+                  const Divider(),
+                  NovelRender(
+                    chapterDto: widget.dto,
+                  ),
+                  _buildBottomPageSwitcher(),
+                ],
+              ),
             ),
           ),
         );
@@ -226,6 +240,24 @@ class _PlainTextNovelReaderState extends State<PlainTextNovelReader>
             child: const Center(child: CircularProgressIndicator()),
           ),
         ));
+  }
+
+  Widget _buildBottomPageSwitcher() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        TextButton(onPressed: previousPage, child: const Text('上一章')),
+        TextButton(onPressed: nextPage, child: const Text('下一章'))
+      ],
+    );
+  }
+
+  void nextPage() {
+    readWebHomeBloc(context).add(const WebHomeEvent.nextChapter());
+  }
+
+  void previousPage() {
+    readWebHomeBloc(context).add(const WebHomeEvent.previousChapter());
   }
 }
 
@@ -441,9 +473,8 @@ class NovelRender extends StatelessWidget {
       TextSpan(
         text: trimmedText + (wrap ? '\n' : ''),
         style: TextStyle(
-          color: grey
-              ? Colors.grey
-              : styleManager.colorScheme(context).onPrimaryContainer,
+          color:
+              grey ? Colors.grey : styleManager.colorScheme(context).onSurface,
           fontSize: config.fontSize.toDouble(),
           fontWeight: config.boldFont ? FontWeight.bold : FontWeight.normal,
         ),

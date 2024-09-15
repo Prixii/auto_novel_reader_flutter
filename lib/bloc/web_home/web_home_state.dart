@@ -3,7 +3,7 @@ part of 'web_home_bloc.dart';
 @freezed
 class WebHomeState with _$WebHomeState {
   const factory WebHomeState.initial({
-    @Default(false) bool inInit,
+    @Default({}) Map<RequestLabel, LoadingStatus?> loadingStatusMap,
     List<WebNovelOutline>? webMostVisited,
     @Default({}) Map<String, WebNovelOutline> favoredWebMap,
     // 小说大纲缓存
@@ -12,12 +12,12 @@ class WebHomeState with _$WebHomeState {
     // 小说详情
     WebNovelDto? currentWebNovelDto,
     @Default({}) Map<String, WebNovelDto?> webNovelDtoMap,
-    @Default(false) bool loadingNovelDetail,
     // 小说正文
     @Default(false) bool loadingNovelChapter,
     @Default({}) Map<String, ChapterDto?> chapterDtoMap,
     ChapterDto? currentChapterDto,
     // 搜索 web
+    @Default(WebSearchData()) WebSearchData webSearchData,
     @Default(false) bool searchingWeb,
     @Default([]) List<WebNovelOutline> webNovelSearchResult,
     @Default(0) int currentWebSearchPage,

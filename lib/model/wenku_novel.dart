@@ -6,7 +6,7 @@ class WenkuNovel with _$WenkuNovel {
     String id,
     String title,
     String titleZh,
-    String cover, {
+    String? cover, {
     String? favored,
   }) = WenkuNovelOutline;
 

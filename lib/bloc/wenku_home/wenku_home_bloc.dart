@@ -1,6 +1,7 @@
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
+import 'package:auto_novel_reader_flutter/network/interceptor/response_interceptor.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/web_home_util.dart';
 import 'package:bloc/bloc.dart';
@@ -14,44 +15,81 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
   WenkuHomeBloc() : super(const _Initial()) {
     on<WenkuHomeEvent>((event, emit) async {
       await event.map(
-        init: (event) async => await _onInit(event, emit),
-        toWenkuDetail: (event) async => await _onToDetail(event, emit),
+        setWenkuLatestUpdate: (event) async =>
+            await _onSetWenkuLatestUpdate(event, emit),
+        setWenkuNovelOutlines: (event) async =>
+            await _onSetWenkuNovelOutlines(event, emit),
+        setLoadingStatus: (event) async =>
+            await _onSetLoadingStatus(event, emit),
+        toWenkuDetail: (event) async => await _onToWenkuDetail(event, emit),
         favorNovel: (event) async => await _onFavorNovel(event, emit),
         unFavorNovel: (event) async => await _onUnFavorNovel(event, emit),
-        searchWenku: (event) async => await _onSearchWenku(event, emit),
-        loadNextPageWenku: (event) async =>
-            await _onLoadNextPageWenku(event, emit),
+        setSearchData: (event) async => await _onSetSearchData(event, emit),
       );
     });
   }
 
-  _onInit(_Init event, Emitter<WenkuHomeState> emit) async {
-    await loadPagedWenkuOutline(level: 1).then((wenkuNovelOutlinesResult) {
-      emit(
-        state.copyWith(wenkuLatestUpdate: wenkuNovelOutlinesResult.$1),
-      );
-      var favoredMap = <String, WenkuNovelOutline>{};
-      for (var outline in wenkuNovelOutlinesResult.$1) {
-        if (outline.favored != null) {
-          favoredMap[outline.favored!] = outline;
-        }
+  _onSetWenkuLatestUpdate(
+      _SetWenkuLatestUpdate event, Emitter<WenkuHomeState> emit) async {
+    final wenkuList = event.wenkuNovelOutlines;
+    emit(
+      state.copyWith(wenkuLatestUpdate: wenkuList),
+    );
+    // TODO 移动到 Favored Cubit
+    var favoredMap = <String, WenkuNovelOutline>{};
+    for (var outline in wenkuList) {
+      if (outline.favored != null) {
+        favoredMap[outline.favored!] = outline;
       }
-    });
+    }
   }
 
-  _onToDetail(_ToWenkuDetail event, Emitter<WenkuHomeState> emit) async {
-    emit(state.copyWith(loadingDetail: true));
+  _onSetWenkuNovelOutlines(
+      _SetWenkuNovelOutlines event, Emitter<WenkuHomeState> emit) async {
+    final wenkuList = event.wenkuNovelOutlines;
+    var outlineMap = <String, WenkuNovelOutline>{};
+    for (var outline in wenkuList) {
+      outlineMap[outline.id] = outline;
+    }
+    emit(
+      state.copyWith(
+          wenkuNovelSearchResult: wenkuList,
+          wenkuNovelOutlineMap: {...state.wenkuNovelOutlineMap, ...outlineMap}),
+    );
+    // TODO 移动到 Favored Cubit
+    var favoredMap = <String, WenkuNovelOutline>{};
+    for (var outline in wenkuList) {
+      if (outline.favored != null) {
+        favoredMap[outline.favored!] = outline;
+      }
+    }
+  }
+
+  _onToWenkuDetail(_ToWenkuDetail event, Emitter<WenkuHomeState> emit) async {
+    add(const WenkuHomeEvent.setLoadingStatus({
+      RequestLabel.loadNovelDetail: LoadingStatus.loading,
+    }));
     var novelId = event.wenkuId;
-    final novelDto = await loadWenkuNovelDto(novelId);
-    if (novelDto == null) return;
-    emit(state.copyWith(
-      wenkuNovelDtoMap: {
-        ...state.wenkuNovelDtoMap,
-        novelId: novelDto,
-      },
-      loadingDetail: false,
-      currentWenkuNovelDto: novelDto,
-    ));
+    late final WenkuNovelDto novelDto;
+    try {
+      novelDto = await loadWenkuNovelDto(novelId) as WenkuNovelDto;
+      emit(state.copyWith(
+        wenkuNovelDtoMap: {
+          ...state.wenkuNovelDtoMap,
+          novelId: novelDto,
+        },
+        currentWenkuNovelDto: novelDto,
+      ));
+      add(const WenkuHomeEvent.setLoadingStatus({
+        RequestLabel.loadNovelDetail: null,
+      }));
+    } catch (e) {
+      add(WenkuHomeEvent.setLoadingStatus({
+        RequestLabel.loadNovelDetail: (e is ServerException)
+            ? LoadingStatus.serverError
+            : LoadingStatus.failed,
+      }));
+    }
   }
 
   _onFavorNovel(_FavorNovel event, Emitter<WenkuHomeState> emit) async {
@@ -118,58 +156,25 @@ class WenkuHomeBloc extends Bloc<WenkuHomeEvent, WenkuHomeState> {
     showSucceedToast('取消收藏成功');
   }
 
-  _onSearchWenku(_SearchWenku event, Emitter<WenkuHomeState> emit) async {
-    if (state.searchingWenku) return;
-    emit(state.copyWith(
-      searchingWenku: true,
-      wenkuNovelSearchResult: [],
-      currentWenkuSearchPage: 0,
-      wenkuLevel: event.level,
-      wenkuQuery: event.query,
-    ));
-    await _loadPagedWenkuNovel(emit);
-  }
-
-  _onLoadNextPageWenku(
-      _LoadNextPageWenku event, Emitter<WenkuHomeState> emit) async {
-    if (state.searchingWenku) return;
-    if (state.currentWenkuSearchPage == state.maxPage) {
-      showWarnToast('一点都没有啦~');
-      return;
-    }
-    if (state.currentWenkuSearchPage >= state.maxPage) return;
-    emit(state.copyWith(
-      currentWenkuSearchPage: state.currentWenkuSearchPage + 1,
-      searchingWenku: true,
-    ));
-    await _loadPagedWenkuNovel(emit);
-  }
-
-  Future<void> _loadPagedWenkuNovel(Emitter<WenkuHomeState> emit) async {
-    final (newNovelList, pageNumber) = await loadPagedWenkuOutline(
-      page: state.currentWenkuSearchPage,
-      pageSize: 21,
-      level: state.wenkuLevel,
-      query: state.wenkuQuery,
-    );
-    var newWenkuNovelOutlineMap = {...state.wenkuNovelOutlineMap};
-    for (var newNovel in newNovelList) {
-      newWenkuNovelOutlineMap[newNovel.id] = newNovel;
-    }
-    emit(state.copyWith(
-        wenkuNovelSearchResult: [
-          ...state.wenkuNovelSearchResult,
-          ...newNovelList
-        ],
-        searchingWenku: false,
-        maxPage: pageNumber,
-        wenkuNovelOutlineMap: {
-          ...state.wenkuNovelOutlineMap,
-          ...newWenkuNovelOutlineMap,
-        }));
-  }
-
   bool currentNovelFavored(String novelId) =>
       favoredCubit.state.novelToFavoredIdMap[novelId] != null;
+
+  _onSetLoadingStatus(
+      _SetSetLoadingStatus event, Emitter<WenkuHomeState> emit) {
+    emit(state.copyWith(loadingStatusMap: {
+      ...state.loadingStatusMap,
+      ...event.loadingStatusMap,
+    }));
+  }
+
+  _onSetSearchData(_SetSearchData event, Emitter<WenkuHomeState> emit) {
+    emit(state.copyWith(wenkuSearchData: event.data));
+  }
+
   String get currentNovelId => state.currentWenkuNovelDto?.id ?? '';
+
+  bool get isSearchingWenku =>
+      state.loadingStatusMap[RequestLabel.searchWenku] == LoadingStatus.loading;
+
+  WenkuSearchData get searchData => state.wenkuSearchData;
 }

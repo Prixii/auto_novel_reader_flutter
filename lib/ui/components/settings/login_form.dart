@@ -61,42 +61,28 @@ class _LoginFormState extends State<LoginForm> {
             FilteringTextInputFormatter.deny(RegExp(r"\s")),
           ]),
           space,
-          // _buildRememberCheckBok(),
-          // space,
-          buildRoundButton(() => _doSignIn(context)),
+          requesting
+              ? buildLoadingButton()
+              : buildRoundButton(() => _doSignIn(context)),
         ],
       ),
     );
   }
 
-  // Row _buildRememberCheckBok() {
-  //   return Row(
-  //     children: [
-  //       Checkbox(
-  //         value: isRememberMeChecked,
-  //         onChanged: (value) =>
-  //             {if (value != null) setState(() => isRememberMeChecked = value)},
-  //         visualDensity: VisualDensity.compact,
-  //       ),
-  //       const Text(
-  //         '记住我',
-  //         style: TextStyle(color: Colors.black87, fontSize: 14),
-  //       ),
-  //       Expanded(child: Container()),
-  //     ],
-  //   );
-  // }
-
   void _doSignIn(BuildContext context) async {
     if (requesting) return;
     if (_formKey.currentState!.validate()) {
-      requesting = true;
+      setState(() {
+        requesting = true;
+      });
       final isSignInSucceed = await readUserCubit(context).signIn(
         _emailOrUsernameController.text,
         _passwordController.text,
         autoSignIn: isRememberMeChecked,
       );
-      requesting = false;
+      setState(() {
+        requesting = false;
+      });
       if (isSignInSucceed && context.mounted) {
         Navigator.pop(context);
       }

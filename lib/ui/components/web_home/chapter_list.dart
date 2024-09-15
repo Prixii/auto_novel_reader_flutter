@@ -136,7 +136,6 @@ class ChapterListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // NEED TEST 当前 Chapter 定位
     final isCurrent = ((currentChapterId == chapterId) && (chapterId != null));
     return InkWell(
       borderRadius: const BorderRadius.only(

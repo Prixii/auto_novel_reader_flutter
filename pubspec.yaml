@@ -1,7 +1,7 @@
 name: auto_novel_reader_flutter
 description: "A new Flutter project."
 publish_to: 'none'
-version: 0.1.0
+version: 0.1.1
 
 environment:
   sdk: '>=3.4.3 <4.0.0'
@@ -52,6 +52,7 @@ dependencies:
   dart_jsonwebtoken: ^2.14.0
   # url_launcher
   url_launcher: ^6.3.0
+  package_info_plus: ^8.0.2
   
 dev_dependencies:
   flutter_test:

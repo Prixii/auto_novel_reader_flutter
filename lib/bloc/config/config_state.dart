@@ -13,6 +13,7 @@ class ConfigState with _$ConfigState {
     @Default(ThemeMode.system) ThemeMode themeMode,
     @Default(NovelAppearanceConfig())
     NovelAppearanceConfig novelAppearanceConfig,
+    @Default(true) bool autoCheckUpdate, // 自动检查更新
   }) = _Initial;
 
   factory ConfigState.fromJson(Map<String, dynamic> json) =>

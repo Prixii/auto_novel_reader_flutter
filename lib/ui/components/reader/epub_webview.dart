@@ -127,7 +127,9 @@ class _EpubWebviewState extends State<EpubWebview> {
   }
 
   Map<String, String> _buildStylesMap(String style) {
-    final isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
+    final isDark =
+        MediaQuery.of(context).platformBrightness == Brightness.dark ||
+            configCubit.state.themeMode == ThemeMode.dark;
     final styles = style.split(RegExp(r';|:'));
     var stylesMap = <String, String>{};
     for (int i = 0; i < styles.length; i += 2) {
@@ -140,7 +142,7 @@ class _EpubWebviewState extends State<EpubWebview> {
       stylesMap['color'] = isDark ? 'grey' : 'lightgrey';
     } else {
       if (isDark) {
-        final color = styleManager.colorScheme(context).primary;
+        final color = styleManager.colorScheme(context).onSurface;
         stylesMap['color'] = 'rgb(${color.red},${color.green},${color.blue})';
       }
     }
@@ -151,20 +153,18 @@ class _EpubWebviewState extends State<EpubWebview> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        TextButton(onPressed: previousPage, child: const Text('上一页')),
-        TextButton(onPressed: nextPage, child: const Text('下一页'))
+        TextButton(onPressed: previousPage, child: const Text('上一章')),
+        TextButton(onPressed: nextPage, child: const Text('下一章'))
       ],
     );
   }
 
   void nextPage() {
-    talker.debug('nextPage!');
     readProgress = 0.0;
     readEpubViewerBloc(context).add(const EpubViewerEvent.nextChapter());
   }
 
   void previousPage() {
-    talker.debug('previousPage!');
     readProgress = 0.0;
     readEpubViewerBloc(context).add(const EpubViewerEvent.previousChapter());
   }

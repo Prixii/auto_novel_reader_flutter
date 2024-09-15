@@ -58,6 +58,9 @@ class _SplashViewState extends State<SplashView> {
   Future<void> _startInit() async {
     localFileManager.init();
     initKeyDownChannel();
+    if (configCubit.state.autoCheckUpdate) {
+      globalBloc.add(const GlobalEvent.checkUpdate());
+    }
     globalBloc.add(GlobalEvent.switchNavigationDestination(
         destinationIndex: configCubit.state.helloPageIndex));
     return;

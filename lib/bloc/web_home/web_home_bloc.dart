@@ -2,6 +2,7 @@ import 'package:auto_novel_reader_flutter/bloc/global/global_bloc.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
+import 'package:auto_novel_reader_flutter/network/interceptor/response_interceptor.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/web_home_util.dart';
 import 'package:bloc/bloc.dart';
@@ -16,9 +17,13 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   WebHomeBloc() : super(const _Initial()) {
     on<WebHomeEvent>((event, emit) async {
       await event.map(
-        init: (event) async => await _onInit(event, emit),
-        refreshFavoredWeb: (event) async =>
-            await _onRefreshFavoredWeb(event, emit),
+        setWebNovelOutlines: (event) async =>
+            await _onSetWebNovelOutlines(event, emit),
+        setWebMostVisited: (event) async =>
+            await _onSetWebMostVisited(event, emit),
+        setLoadingStatus: (event) async =>
+            await _onSetLoadingStatus(event, emit),
+        setWebFavored: (event) async => await _onSetWebFavored(event, emit),
         toNovelDetail: (event) async => await _onToNovelDetail(event, emit),
         readChapter: (event) async => await _onReadChapter(event, emit),
         nextChapter: (event) async => await _onNextChapter(event, emit),
@@ -27,47 +32,24 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
         leaveDetail: (event) async => await _onLeaveDetail(event, emit),
         favorNovel: (event) async => await _onFavorNovel(event, emit),
         unFavorNovel: (event) async => await _onUnFavorNovel(event, emit),
+        setSearchData: (event) async => await _onSetSearchData(event, emit),
         searchWeb: (event) async => await _onSearchWeb(event, emit),
         loadNextPageWeb: (event) async => await _onLoadNextPageWeb(event, emit),
       );
     });
   }
 
-  _onInit(_Init event, Emitter<WebHomeState> emit) async {
-    if (state.inInit) return;
-    emit(state.copyWith(inInit: true));
+  _onSetWebMostVisited(
+      _SetWebMostVisited event, Emitter<WebHomeState> emit) async {
     Set<WebNovelOutline> newWebOutlines = {};
-    await Future.wait([
-      loadFavoredWebOutline().then((webNovelOutlines) {
-        var favoredWebMapSnapshot = <String, WebNovelOutline>{};
-        for (var webNovelOutline in webNovelOutlines) {
-          favoredWebMapSnapshot[
-                  '${webNovelOutline.providerId}${webNovelOutline.novelId}'] =
-              webNovelOutline;
-        }
-        emit(state.copyWith(favoredWebMap: favoredWebMapSnapshot));
-        newWebOutlines.addAll(webNovelOutlines);
-      }),
-      loadPagedWebOutline(
-        provider: 'kakuyomu,syosetu,novelup,hameln,pixiv,alphapolis',
-      ).then((webNovelOutlinesResult) {
-        emit(state.copyWith(webMostVisited: webNovelOutlinesResult.$1));
-        newWebOutlines.addAll(webNovelOutlinesResult.$1);
-      }),
-    ]);
-    var webNovelOutlineMapSnapshot = {...state.webNovelOutlineMap};
-    for (var webNovelOutline in newWebOutlines) {
-      final novelKey =
-          '${webNovelOutline.providerId}-${webNovelOutline.novelId}';
-      webNovelOutlineMapSnapshot[novelKey] = webNovelOutline;
-    }
-    emit(state.copyWith(
-        inInit: false, webNovelOutlineMap: webNovelOutlineMapSnapshot));
+    emit(state.copyWith(webMostVisited: event.webMostVisited));
+    newWebOutlines.addAll(event.webMostVisited);
+    _updateWebOutlinesCache(event.webMostVisited, emit);
   }
 
-  _onRefreshFavoredWeb(
-      _RefreshFavoredWeb event, Emitter<WebHomeState> emit) async {
-    final webNovelOutlines = await loadFavoredWebOutline();
+  _onSetWebFavored(_SetWebFavored event, Emitter<WebHomeState> emit) async {
+    final webNovelOutlines = event.webFavored;
+    // TODO 迁移到 FavoredCubit
     var favoredWebMapSnapshot = <String, WebNovelOutline>{};
     for (var webNovelOutline in webNovelOutlines) {
       favoredWebMapSnapshot[
@@ -78,46 +60,62 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   }
 
   _onToNovelDetail(_ToNovelDetail event, Emitter<WebHomeState> emit) async {
-    emit(state.copyWith(loadingNovelDetail: true));
-    final dto = await loadWebNovelDto(
-      event.providerId,
-      event.novelId,
-      onRequest: () => {},
-      onRequestFinished: () => {},
-    );
-    if (dto == null) return;
+    add(const WebHomeEvent.setLoadingStatus({
+      RequestLabel.loadNovelDetail: LoadingStatus.loading,
+    }));
+    late final WebNovelDto dto;
+    try {
+      dto = await loadWebNovelDto(
+        event.providerId,
+        event.novelId,
+        onRequest: () => {},
+        onRequestFinished: () => {},
+      ) as WebNovelDto;
+    } catch (e) {
+      add(WebHomeEvent.setLoadingStatus({
+        RequestLabel.loadNovelDetail: (e is ServerException)
+            ? LoadingStatus.serverError
+            : LoadingStatus.failed,
+      }));
+      return;
+    }
     emit(state.copyWith(
       currentWebNovelDto: dto,
       webNovelDtoMap: {
         ...state.webNovelDtoMap,
         dto.novelKey: dto,
       },
-      loadingNovelDetail: false,
+      chapterDtoMap: {},
     ));
-    _updateLastReadChapterId(
-      dto.providerId,
-      dto.novelId,
-      dto.lastReadChapterId,
-    );
+    if (webCacheCubit.state.lastReadChapterMap[dto.novelKey] == null) {
+      _updateLastReadChapterId(
+        dto.novelKey,
+        dto.lastReadChapterId,
+      );
+    }
+    add(const WebHomeEvent.setLoadingStatus({
+      RequestLabel.loadNovelDetail: null,
+    }));
   }
 
   _onReadChapter(_ReadChapter event, Emitter<WebHomeState> emit) async {
     if (loadingChapter) return;
-
     var targetChapterId = event.chapterId;
     targetChapterId ??= findChapterId(state.currentWebNovelDto!);
     final dto = state.currentWebNovelDto!;
-    _updateLastReadChapterId(dto.providerId, dto.novelId, targetChapterId);
+    _updateLastReadChapterId(dto.novelKey, targetChapterId);
     globalBloc.add(const GlobalEvent.setReadType(ReadType.web));
     emit(state.copyWith(loadingNovelChapter: true));
-    final chapterKey = currentNovelKey! + targetChapterId;
+    final chapterKey = '${currentNovelKey!}-$targetChapterId';
 
     final targetDto = await loadNovelChapter(
       currentNovelProviderId,
       currentNovelId,
       targetChapterId,
       onRequest: () => emit(state.copyWith(loadingNovelChapter: true)),
-      onRequestFinished: () => emit(state.copyWith(loadingNovelChapter: false)),
+      onRequestFinished: () => emit(state.copyWith(
+        loadingNovelChapter: false,
+      )),
     );
 
     if (targetDto == null) throw Exception('targetDto is null');
@@ -129,19 +127,20 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     _requestUpdateReadHistory(
         currentNovelProviderId, currentNovelId, targetChapterId);
 
-    // 预加载下一章节
-    final nextChapterKey = currentNovelKey! + (targetDto.nextId ?? '');
-    final nextDto = await loadNovelChapter(
-      currentNovelProviderId,
-      currentNovelId,
-      targetDto.nextId,
-    );
     var dtoMapSnapshot = <String, ChapterDto?>{
       ...state.chapterDtoMap,
       chapterKey: targetDto,
-      nextChapterKey: nextDto,
     };
-
+    // 预加载下一章节
+    if (targetDto.nextId != null) {
+      final nextChapterKey = '${currentNovelKey!}-${targetDto.nextId ?? ''}';
+      final nextDto = await loadNovelChapter(
+        currentNovelProviderId,
+        currentNovelId,
+        targetDto.nextId,
+      );
+      dtoMapSnapshot[nextChapterKey] = nextDto;
+    }
     emit(state.copyWith(
       chapterDtoMap: dtoMapSnapshot,
     ));
@@ -183,18 +182,23 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     }
   }
 
+  _onSetSearchData(_SetSearchData event, Emitter<WebHomeState> emit) {
+    emit(state.copyWith(webSearchData: event.data));
+  }
+
   _onSearchWeb(_SearchWeb event, Emitter<WebHomeState> emit) async {
     if (state.searchingWeb) return;
+    final data = state.webSearchData;
     emit(state.copyWith(
       searchingWeb: true,
       webNovelSearchResult: [],
       currentWebSearchPage: 0,
-      webProvider: event.provider,
-      webType: event.type,
-      webLevel: event.level,
-      webTranslate: event.translate,
-      webSort: event.sort,
-      webQuery: event.query,
+      webProvider: data.provider.map((e) => e.name).toList(),
+      webType: NovelStatus.indexByZhName(data.type.zhName),
+      webLevel: WebNovelLevel.indexByZhName(data.level.zhName),
+      webTranslate: WebTranslationSource.indexByZhName(data.translate.zhName),
+      webSort: WebNovelOrder.indexByZhName(data.sort.zhName),
+      webQuery: data.query,
     ));
     await _loadPagedWebNovel(emit);
   }
@@ -211,6 +215,17 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
       searchingWeb: true,
     ));
     await _loadPagedWebNovel(emit);
+  }
+
+  void _updateWebOutlinesCache(
+      List<WebNovelOutline> outlines, Emitter<WebHomeState> emit) async {
+    var webNovelOutlineMapSnapshot = {...state.webNovelOutlineMap};
+    for (var webNovelOutline in outlines) {
+      webNovelOutlineMapSnapshot[webNovelOutline.novelId] = webNovelOutline;
+    }
+    emit(state.copyWith(
+      webNovelOutlineMap: webNovelOutlineMapSnapshot,
+    ));
   }
 
   Future<void> _loadPagedWebNovel(Emitter<WebHomeState> emit) async {
@@ -234,9 +249,8 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     ));
   }
 
-  void _updateLastReadChapterId(
-          String providerId, String novelId, String? chapterId) =>
-      webCacheCubit.updateLastReadChapter(providerId, novelId, chapterId);
+  void _updateLastReadChapterId(String novelKey, String? chapterId) =>
+      webCacheCubit.updateLastReadChapter(novelKey, chapterId);
 
   Future<WebHomeState> _favorWeb(String favoredId) async {
     final response = await apiClient.userFavoredWebService.putNovelId(
@@ -282,8 +296,24 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
         .putNovelId(providerId, novelId, chapterId);
   }
 
+  _onSetLoadingStatus(_SetLoadingStatus event, Emitter<WebHomeState> emit) {
+    emit(state.copyWith(loadingStatusMap: {
+      ...state.loadingStatusMap,
+      ...event.loadingStatusMap,
+    }));
+  }
+
+  _onSetWebNovelOutlines(
+      _SetWebNovelOutlines event, Emitter<WebHomeState> emit) {
+    emit(state.copyWith(
+      webNovelSearchResult: event.webOutlines,
+    ));
+  }
+
   bool get loadingChapter => state.loadingNovelChapter;
   String get currentNovelId => state.currentWebNovelDto!.novelId;
   String get currentNovelProviderId => state.currentWebNovelDto!.providerId;
   String? get currentNovelKey => state.currentWebNovelDto?.novelKey;
+
+  WebSearchData get searchData => state.webSearchData;
 }

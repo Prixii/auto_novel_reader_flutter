@@ -95,7 +95,9 @@ class _RegisterFormState extends State<RegisterForm> {
             return null;
           }),
           space,
-          buildRoundButton(() => _doSignUp()),
+          requesting
+              ? buildLoadingButton()
+              : buildRoundButton(() => _doSignUp()),
           const SizedBox(
             height: 328,
           )
@@ -178,13 +180,17 @@ class _RegisterFormState extends State<RegisterForm> {
     if (!_isPasswordMatch) {
       showWarnToast('两次密码不一致');
     } else {
-      requesting = true;
+      setState(() {
+        requesting = true;
+      });
       final result = await readUserCubit(context).signUp(
           email: _emailController.text,
           username: _usernameController.text,
           password: _passwordController.text,
           emailCode: _emailCodeController.text);
-      requesting = false;
+      setState(() {
+        requesting = false;
+      });
       if (result) {
         showSucceedToast('注册成功');
         if (mounted) Navigator.pop(context);

@@ -8,6 +8,7 @@ import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:auto_novel_reader_flutter/ui/components/favored/favored_list.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/line_button.dart';
+import 'package:auto_novel_reader_flutter/ui/components/universal/timeout_info_container.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/comment/comment_box.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/comment/comment_list.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_detail/flow_tag.dart';
@@ -25,9 +26,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:unicons/unicons.dart';
 
 class WenkuNovelDetailContainer extends StatelessWidget {
-  const WenkuNovelDetailContainer({super.key, this.openFromWeb = false});
+  const WenkuNovelDetailContainer(
+    this.novelId, {
+    super.key,
+    this.openFromWeb = false,
+  });
 
   final bool openFromWeb;
+  final String novelId;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +41,7 @@ class WenkuNovelDetailContainer extends StatelessWidget {
       create: (context) => CommentCubit(),
       child: BlocSelector<WenkuHomeBloc, WenkuHomeState, WenkuNovelDto?>(
         selector: (state) {
-          return state.loadingDetail ? null : state.currentWenkuNovelDto;
+          return state.currentWenkuNovelDto;
         },
         builder: (context, novelDto) {
           return Scaffold(
@@ -46,23 +52,42 @@ class WenkuNovelDetailContainer extends StatelessWidget {
                 title: const Text('小说详情'),
                 actions: _buildActions(context),
               ),
-              body: (novelDto == null)
-                  ? const Center(child: CircularProgressIndicator())
-                  : WenkuNovelDetail(
-                      novelDto: novelDto,
-                      novelId: readWenkuHomeBloc(context).currentNovelId,
-                      openFromWeb: openFromWeb,
-                    ));
+              body: _buildNovelDetailBody(novelDto));
         },
       ),
     );
   }
 
+  Widget _buildNovelDetailBody(WenkuNovelDto? novelDto) {
+    return BlocSelector<WenkuHomeBloc, WenkuHomeState, LoadingStatus?>(
+      selector: (state) {
+        return state.loadingStatusMap[RequestLabel.loadNovelDetail];
+      },
+      builder: (context, state) {
+        return TimeoutInfoContainer(
+          status: state,
+          child: (novelDto == null)
+              ? Container()
+              : WenkuNovelDetail(
+                  novelDto: novelDto,
+                  novelId: readWenkuHomeBloc(context).currentNovelId,
+                  openFromWeb: openFromWeb,
+                ),
+          onRetry: () {
+            readWenkuHomeBloc(context).add(WenkuHomeEvent.toWenkuDetail(
+              novelId,
+            ));
+          },
+        );
+      },
+    );
+  }
+
   List<Widget> _buildActions(BuildContext context) {
     return [
+      //     TODO 编辑
       // IconButton(
       //   onPressed: () {
-      //     // TODO 编辑
       //     Fluttertoast.showToast(msg: '这个功能还没有做呢');
       //   },
       //   icon: const Icon(UniconsLine.edit),
@@ -166,11 +191,11 @@ class _WenkuNovelDetailState extends State<WenkuNovelDetail> {
 
   List<String> _getCoverUrls(WenkuNovelDto novelDto) {
     var urls = <String>[];
-    if (novelDto.cover != null) {
+    if (novelDto.cover != null && novelDto.cover!.isNotEmpty) {
       urls.add(novelDto.cover!);
     }
     for (var volume in novelDto.volumes) {
-      if (volume.cover != null) {
+      if (volume.cover != null && volume.cover!.isNotEmpty) {
         urls.add(volume.cover!);
       }
     }
@@ -314,7 +339,11 @@ class _WenkuNovelDetailState extends State<WenkuNovelDetail> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (_) => const WebNovelDetailContainer(openFromWeb: true)));
+            builder: (_) => WebNovelDetailContainer(
+                  providerId,
+                  novelId,
+                  openFromWeb: true,
+                )));
   }
 
   LineButton _buildReadButton(BuildContext context) {

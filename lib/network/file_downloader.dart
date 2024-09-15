@@ -53,7 +53,11 @@ Future<File?> _downloadWenkuEpub(String url, String filename, File file) async {
 
 Future<File?> _downloadZhEpub(String url, String filename, File file) async {
   try {
-    var response = await Dio().get(
+    var response = await Dio(BaseOptions(
+      connectTimeout: const Duration(seconds: 8),
+      receiveTimeout: const Duration(seconds: 8),
+      sendTimeout: const Duration(seconds: 8),
+    )).get(
       url,
       onReceiveProgress: (num received, num total) {
         double process = double.parse((received / total).toStringAsFixed(4));

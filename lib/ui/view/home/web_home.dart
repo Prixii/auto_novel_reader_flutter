@@ -2,7 +2,7 @@ import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/bloc/wenku_home/wenku_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
-import 'package:auto_novel_reader_flutter/ui/components/web_home/home/home.dart';
+import 'package:auto_novel_reader_flutter/ui/components/web_home/home/explore.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/novel_rank/novel_rank.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/web_novel/web_novel_search_page.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/wenku_novel/wenku_novel_search_page.dart';
@@ -37,7 +37,7 @@ class WebHomeView extends StatelessWidget {
         ),
         body: const TabBarView(
           children: [
-            Home(),
+            Explore(),
             WebNovelSearchPage(),
             WenkuNovelSearchPage(),
             NovelRank(),
@@ -53,7 +53,7 @@ class WebHomeView extends StatelessWidget {
       tabAlignment: TabAlignment.start,
       isScrollable: true,
       tabs: [
-        Tab(text: '首页'),
+        Tab(text: '发现'),
         Tab(text: '网络'),
         Tab(text: '文库'),
         Tab(text: '排行'),
@@ -98,16 +98,19 @@ class WebHomeView extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (_) => const WebNovelDetailContainer()));
+                            builder: (_) => WebNovelDetailContainer(
+                                result.$2[0]!, result.$2[1]!)));
                   }
                   if (result.$1 == NovelType.wenku) {
+                    final wenkuId = result.$2[0]!;
                     readWenkuHomeBloc(context)
-                        .add(WenkuHomeEvent.toWenkuDetail(result.$2[0]!));
+                        .add(WenkuHomeEvent.toWenkuDetail(wenkuId));
                     Navigator.of(context).pop(); // 关闭对话框
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (_) => const WenkuNovelDetailContainer()));
+                            builder: (_) =>
+                                WenkuNovelDetailContainer(wenkuId)));
                   }
                 }
               },

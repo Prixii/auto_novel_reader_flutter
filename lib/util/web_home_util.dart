@@ -1,15 +1,17 @@
+import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/error_logger.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-Future<List<WebNovelOutline>> loadFavoredWebOutline({
+Future<(List<WebNovelOutline>, int)> loadFavoredWebOutline({
   String favoredId = 'default',
   int page = 0,
   int pageSize = 8,
   String sort = 'update',
 }) async {
+  if (!userCubit.isSignIn) throw Exception('未登录');
   return apiClient.userFavoredWebService
       .getIdList(
     favoredId: favoredId,
@@ -18,18 +20,41 @@ Future<List<WebNovelOutline>> loadFavoredWebOutline({
     sort: sort,
   )
       .then((response) {
-    if (response?.statusCode == 502) {
-      Fluttertoast.showToast(msg: '服务器维护中');
-      return [];
-    }
     final body = response?.body;
     final webNovelOutlines = parseToWebNovelOutline(body);
     favoredCubit.setNovelToFavoredIdMap(webOutlines: webNovelOutlines.toList());
 
-    return webNovelOutlines;
+    return (webNovelOutlines, body['pageNumber'] as int);
   });
 }
 
+Future<List<WebNovelOutline>> loadPagedWebOutlines(WebSearchData data) async {
+  try {
+    return apiClient.webNovelService
+        .getList(
+      data.page,
+      data.pageSize,
+      provider: data.provider.map((e) => e.name).join(','),
+      type: NovelStatus.indexByZhName(data.type.zhName),
+      level: WebNovelLevel.indexByZhName(data.level.zhName),
+      translate: WebTranslationSource.indexByZhName(data.translate.zhName),
+      sort: WebNovelOrder.indexByZhName(data.sort.zhName),
+      query: data.query,
+    )
+        .then((response) {
+      final body = response.body;
+      final webNovelOutlines = parseToWebNovelOutline(body);
+      favoredCubit.setNovelToFavoredIdMap(webOutlines: webNovelOutlines);
+
+      return webNovelOutlines;
+    });
+  } catch (e, stackTrace) {
+    errorLogger.logError(e, stackTrace);
+    rethrow;
+  }
+}
+
+@Deprecated('use loadPagedWebOutlines instead')
 Future<(List<WebNovelOutline>, int)> loadPagedWebOutline({
   int page = 0,
   int pageSize = 8,
@@ -60,26 +85,73 @@ Future<(List<WebNovelOutline>, int)> loadPagedWebOutline({
   });
 }
 
+Future<List<WenkuNovelOutline>> loadPagedWenkuOutlines(
+    WenkuSearchData data) async {
+  try {
+    final response = await apiClient.wenkuNovelService.getList(
+      data.page,
+      data.pageSize,
+      level: WenkuNovelLevel.indexByZhName(data.level.zhName),
+      query: data.query,
+    );
+    final body = response.body;
+    final wenkuNovelOutlines = parseToWenkuNovelOutline(body);
+    favoredCubit.setNovelToFavoredIdMap(wenkuOutlines: wenkuNovelOutlines);
+
+    return wenkuNovelOutlines;
+  } catch (e, stackTrace) {
+    errorLogger.logError(e, stackTrace);
+    rethrow;
+  }
+}
+
+@Deprecated('use loadPagedWenkuOutlines instead')
 Future<(List<WenkuNovelOutline>, int)> loadPagedWenkuOutline({
   int page = 0,
   int pageSize = 12,
   int level = 0,
   String? query,
 }) async {
-  return apiClient.wenkuNovelService
-      .getList(
-    page,
-    pageSize,
-    level: level,
-    query: query,
-  )
-      .then((response) {
+  try {
+    final response = await apiClient.wenkuNovelService.getList(
+      page,
+      pageSize,
+      level: level,
+      query: query,
+    );
     final body = response.body;
     final wenkuNovelOutlines = parseToWenkuNovelOutline(body);
     favoredCubit.setNovelToFavoredIdMap(wenkuOutlines: wenkuNovelOutlines);
 
     return (wenkuNovelOutlines, body['pageNumber'] as int);
-  });
+  } catch (e, stackTrace) {
+    errorLogger.logError(e, stackTrace);
+    rethrow;
+  }
+}
+
+Future<(List<WenkuNovelOutline>, int)> requestWenkuLatestUpdate({
+  int page = 0,
+  int pageSize = 12,
+  int level = 0,
+  String? query,
+}) async {
+  try {
+    final response = await apiClient.wenkuNovelService.getList(
+      page,
+      pageSize,
+      level: level,
+      query: query,
+    );
+    final body = response.body;
+    final wenkuNovelOutlines = parseToWenkuNovelOutline(body);
+    favoredCubit.setNovelToFavoredIdMap(wenkuOutlines: wenkuNovelOutlines);
+
+    return (wenkuNovelOutlines, body['pageNumber'] as int);
+  } catch (e, stackTrace) {
+    errorLogger.logError(e, stackTrace);
+    rethrow;
+  }
 }
 
 String findChapterId(WebNovelDto webNovelDto) {
@@ -125,21 +197,17 @@ Future<WebNovelDto?> loadWebNovelDto(
   Function? onRequestFinished,
 }) async {
   // 检查是否有缓存
-  final existDto = webHomeBloc.state.webNovelDtoMap['$providerId$novelId'];
+  final existDto = webHomeBloc.state.webNovelDtoMap['$providerId-$novelId'];
   if (existDto != null) {
     return existDto;
   }
-  // 没有缓存，则请求
-  onRequest?.call();
-  final response =
-      await apiClient.webNovelService.getNovelId(providerId, novelId);
-  if (response.statusCode == 502) {
-    Fluttertoast.showToast(msg: '服务器维护中');
-    onRequestFinished?.call();
-    return null;
-  }
-  final body = response.body;
+
   try {
+    // 没有缓存，则请求
+    onRequest?.call();
+    final response =
+        await apiClient.webNovelService.getNovelId(providerId, novelId);
+    final body = response.body;
     final webNovelDto = WebNovelDto(
       providerId,
       novelId,
@@ -173,7 +241,7 @@ Future<WebNovelDto?> loadWebNovelDto(
   } catch (e, stackTrace) {
     errorLogger.logError(e, stackTrace);
     onRequestFinished?.call();
-    return null;
+    rethrow;
   }
 }
 
@@ -185,7 +253,7 @@ Future<ChapterDto?> loadNovelChapter(
   Function? onRequestFinished,
 }) async {
   if (chapterId == null) return null;
-  final chapterKey = providerId + novelId + chapterId;
+  final chapterKey = '$providerId-$novelId-$chapterId';
 
   // 检查是否有缓存
   final existDto = webHomeBloc.state.chapterDtoMap[chapterKey];
@@ -207,14 +275,10 @@ Future<ChapterDto?> _requestNovelChapter(
   String novelId,
   String chapterId,
 ) async {
-  final response = await apiClient.webNovelService
-      .getChapter(providerId, novelId, chapterId);
-  if (response.statusCode == 502) {
-    Fluttertoast.showToast(msg: '服务器维护中');
-    return null;
-  }
-  final body = response.body;
   try {
+    final response = await apiClient.webNovelService
+        .getChapter(providerId, novelId, chapterId);
+    final body = response.body;
     final chapterDto = ChapterDto(
       baiduParagraphs: body['youdaoParagraphs']?.cast<String>(),
       originalParagraphs: body['paragraphs']?.cast<String>(),
@@ -229,7 +293,7 @@ Future<ChapterDto?> _requestNovelChapter(
     return chapterDto;
   } catch (e, stackTrace) {
     errorLogger.logError(e, stackTrace);
-    return null;
+    rethrow;
   }
 }
 
@@ -240,10 +304,15 @@ Future<WenkuNovelDto?> loadWenkuNovelDto(
 }) async {
   final existDto = wenkuHomeBloc.state.wenkuNovelDtoMap[novelId];
   if (existDto != null) return existDto;
-  onRequest?.call();
-  final wenkuDto = await _requestWenkuNovelDto(novelId);
-  onRequestFinished?.call();
-  return wenkuDto;
+  try {
+    onRequest?.call();
+    final wenkuDto = await _requestWenkuNovelDto(novelId);
+    onRequestFinished?.call();
+    return wenkuDto;
+  } catch (e, stackTrace) {
+    errorLogger.logError(e, stackTrace);
+    rethrow;
+  }
 }
 
 Future<WenkuNovelDto?> _requestWenkuNovelDto(String novelId) async {
@@ -348,4 +417,19 @@ List<Comment> parseCommentList(body) {
     errorLogger.logError(e, stackTrace);
   }
   return list;
+}
+
+Future<List<WebNovelOutline>> requestHistory(HistorySearchData data) async {
+  try {
+    final response = await apiClient.userReadHistoryWebService.getList(
+      page: data.page,
+      pageSize: data.pageSize,
+    );
+    final body = response!.body;
+    final newDtoList = parseToWebNovelOutline(body);
+    return newDtoList;
+  } catch (e, stackTrace) {
+    errorLogger.logError(e, stackTrace);
+    rethrow;
+  }
 }

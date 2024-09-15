@@ -132,8 +132,15 @@ class WebNovelTile extends StatelessWidget {
       webOutline.providerId,
       webOutline.novelId,
     ));
-    Navigator.push(context,
-        MaterialPageRoute(builder: (_) => const WebNovelDetailContainer()));
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => WebNovelDetailContainer(
+          webOutline.providerId,
+          webOutline.novelId,
+        ),
+      ),
+    );
   }
 
   Widget _buildFooter(WebNovelOutline webOutline, BuildContext context) {

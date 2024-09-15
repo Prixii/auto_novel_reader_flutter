@@ -18,10 +18,12 @@ class FavoredView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // readFavoredCubit(context).setFavored(
-    //   type: NovelType.web,
-    //   favored: Favored.createDefault(),
-    // );
+    readFavoredCubit(context).setFavored(
+      type: NovelType.web,
+      favored: Favored.createDefault(),
+      sortType: SearchSortType.update,
+    );
+
     return BlocSelector<UserCubit, UserState, bool>(
       selector: (state) {
         return state.token != null;
@@ -186,7 +188,6 @@ class _FavoredBodyState extends State<FavoredBody>
           if (metrics.pixels > metrics.maxScrollExtent - 60) {
             if (shouldLoadMore && scrollDirection == ScrollDirection.forward) {
               shouldLoadMore = false;
-              talker.debug('load next page!');
               readFavoredCubit(context).loadNextPage();
             }
           } else {

@@ -10,5 +10,8 @@ class GlobalState with _$GlobalState {
     @Default(false) bool isLoading,
     int? progressTypeValue,
     @Default(ReadType.none) ReadType readType,
+    // 版本
+    @Default(false) bool shouldShowNewReleaseDialog,
+    ReleaseData? latestReleaseData,
   }) = _Initial;
 }

@@ -10,21 +10,31 @@ class ResponseInterceptor implements Interceptor {
   @override
   FutureOr<Response<BodyType>> intercept<BodyType>(
       Chain<BodyType> chain) async {
-    final response = await chain.proceed(chain.request);
+    late final Response<BodyType> response;
+    try {
+      response = await chain.proceed(chain.request);
+    } catch (e, stackTrace) {
+      errorLogger.logError(e, stackTrace);
+      rethrow;
+    }
     if (kDebugMode) {
       talker.info('${response.body}\n ${response.error}');
     }
     if (response.isSuccessful) return response;
-    if (response.statusCode == 502) {
+    if (response.statusCode ~/ 100 == 5) {
       errorLogger.logError(e, StackTrace.current,
           extra: '${response.statusCode}:${response.error}');
-      return response;
+      throw ServerException('${response.error}');
     } else {
       errorLogger.logError(e, StackTrace.current,
           extra: '${response.statusCode}:${response.error}');
       showErrorToast('${response.statusCode}, ${response.error}');
       return response;
-      // throw Exception([response.statusCode, response.error]);
     }
   }
+}
+
+class ServerException implements Exception {
+  ServerException(this.message);
+  final String message;
 }
