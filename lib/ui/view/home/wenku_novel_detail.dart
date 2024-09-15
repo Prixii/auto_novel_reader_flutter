@@ -191,11 +191,11 @@ class _WenkuNovelDetailState extends State<WenkuNovelDetail> {
 
   List<String> _getCoverUrls(WenkuNovelDto novelDto) {
     var urls = <String>[];
-    if (novelDto.cover != null) {
+    if (novelDto.cover != null && novelDto.cover!.isNotEmpty) {
       urls.add(novelDto.cover!);
     }
     for (var volume in novelDto.volumes) {
-      if (volume.cover != null) {
+      if (volume.cover != null && volume.cover!.isNotEmpty) {
         urls.add(volume.cover!);
       }
     }

@@ -1,3 +1,4 @@
+import 'package:auto_novel_reader_flutter/ui/components/reader/plain_text_book_cover.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/info_badge.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +30,8 @@ class _PagedCoverState extends State<PagedCover> {
                   itemBuilder: (context, index) => CachedNetworkImage(
                     imageUrl: widget.urls[index],
                     fit: BoxFit.fitHeight,
+                    errorWidget: (_, __, ___) =>
+                        const PlainTextBookCover(title: ' 暂无封面'),
                   ),
                   itemCount: widget.urls.length,
                   onPageChanged: (value) {
