@@ -31,6 +31,7 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
   late Animation<double> _fadeAnimation;
   late CurvedAnimation _curvedScaleAnimation;
   late CurvedAnimation _curvedFadeAnimation;
+  late ScrollController _filterScrollController;
 
   late bool isOldAss;
 
@@ -43,6 +44,7 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
     super.initState();
     isOldAss = readUserCubit(context).isOldAss;
     _initAnimation();
+    _filterScrollController = ScrollController();
   }
 
   void _initAnimation() {
@@ -69,6 +71,7 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
   @override
   void dispose() {
     _animationController.dispose();
+    _filterScrollController.dispose();
     super.dispose();
   }
 
@@ -143,7 +146,7 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
           clipBehavior: Clip.hardEdge,
           width: double.infinity,
           padding: const EdgeInsets.all(12.0),
-          constraints: BoxConstraints(maxHeight: 260),
+          constraints: const BoxConstraints(maxHeight: 260),
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16.0),
               boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15))],
@@ -173,9 +176,9 @@ class _WebSearchWidgetState extends State<WebSearchWidget>
           thickness: 4,
           radius: const Radius.circular(10),
           thumbVisibility: true,
-          controller: ScrollController(),
-          // trackVisibility: true,
+          controller: _filterScrollController,
           child: SingleChildScrollView(
+            controller: _filterScrollController,
             child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
