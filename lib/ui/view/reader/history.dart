@@ -101,7 +101,7 @@ class _HistoryBodyState extends State<HistoryBody> {
         return false;
       },
       child: RefreshIndicator(
-        onRefresh: () async => await pageLoader.refresh(),
+        onRefresh: () async => await doRefresh(),
         child: SingleChildScrollView(
             padding: const EdgeInsets.all(8),
             child: Column(
@@ -143,7 +143,6 @@ class _HistoryBodyState extends State<HistoryBody> {
   Future<List<WebNovelOutline>> _search() {
     final cubit = readHistoryCubit(context);
     cubit.setLoadingStatus({RequestLabel.loadHistory: LoadingStatus.loading});
-    cubit.setHistoryOutlines([]);
     try {
       return requestHistory(searchData);
     } catch (e, stackTrace) {
