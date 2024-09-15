@@ -19,28 +19,30 @@ class _PagedCoverState extends State<PagedCover> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 328,
-      child: Stack(
-        children: [
-          PageView.builder(
-            itemBuilder: (context, index) => CachedNetworkImage(
-              imageUrl: widget.urls[index],
-              fit: BoxFit.fitHeight,
+    return widget.urls.isEmpty
+        ? const SizedBox.shrink()
+        : SizedBox(
+            height: 328,
+            child: Stack(
+              children: [
+                PageView.builder(
+                  itemBuilder: (context, index) => CachedNetworkImage(
+                    imageUrl: widget.urls[index],
+                    fit: BoxFit.fitHeight,
+                  ),
+                  itemCount: widget.urls.length,
+                  onPageChanged: (value) {
+                    setState(() {
+                      currentPage = value;
+                    });
+                  },
+                ),
+                InfoBadge(
+                  '${currentPage + 1}/${widget.urls.length}',
+                  copyOnLongPress: false,
+                ),
+              ],
             ),
-            itemCount: widget.urls.length,
-            onPageChanged: (value) {
-              setState(() {
-                currentPage = value;
-              });
-            },
-          ),
-          InfoBadge(
-            '${currentPage + 1}/${widget.urls.length}',
-            copyOnLongPress: false,
-          ),
-        ],
-      ),
-    );
+          );
   }
 }

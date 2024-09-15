@@ -76,14 +76,16 @@ class WenkuNovelTile extends StatelessWidget {
         radius: 8,
         child: Stack(
           children: [
-            CachedNetworkImage(
-                imageUrl: novel.cover,
-                fit: BoxFit.cover,
-                errorWidget: (_, url, error) {
-                  errorLogger.logError(error, StackTrace.current,
-                      extra: 'url: $url');
-                  return PlainTextBookCover(title: novel.title);
-                }),
+            novel.cover == null
+                ? PlainTextBookCover(title: novel.title)
+                : CachedNetworkImage(
+                    imageUrl: novel.cover!,
+                    fit: BoxFit.cover,
+                    errorWidget: (_, url, error) {
+                      errorLogger.logError(error, StackTrace.current,
+                          extra: 'url: $url');
+                      return PlainTextBookCover(title: novel.title);
+                    }),
             Align(
               alignment: Alignment.bottomCenter,
               child: _buildMicaTitle(novel, context),
