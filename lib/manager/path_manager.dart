@@ -59,4 +59,5 @@ class _PathManager {
   String get loggerPath => externalStorageDirectory + _loggerPath;
 
   String getPathByUid(String uid) => '$parseDirPath/$uid';
+  String getThumbnailPath(String path) => '$path.thumbnail';
 }

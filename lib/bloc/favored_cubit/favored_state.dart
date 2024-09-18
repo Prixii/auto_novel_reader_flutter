@@ -12,9 +12,9 @@ class FavoredState with _$FavoredState {
       NovelType.local: [],
     })
     Map<NovelType, List<Favored>> favoredMap,
+    @Default(null) Favored? currentFavored,
     @Default(NovelType.web) NovelType currentType,
     @Default(SearchSortType.update) searchSortType,
-    @Default(null) Favored? currentFavored,
     // web
     @Default({}) Map<String, int> favoredWebPageMap,
     @Default({}) Map<String, int> favoredWebMaxPageMap,

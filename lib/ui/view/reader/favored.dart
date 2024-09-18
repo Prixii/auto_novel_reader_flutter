@@ -18,11 +18,11 @@ class FavoredView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    readFavoredCubit(context).setFavored(
-      type: NovelType.web,
-      favored: Favored.createDefault(),
-      sortType: SearchSortType.update,
-    );
+    // readFavoredCubit(context).setFavored(
+    //   type: NovelType.web,
+    //   favored: Favored.createDefault(),
+    //   sortType: SearchSortType.update,
+    // );
 
     return BlocSelector<UserCubit, UserState, bool>(
       selector: (state) {
@@ -62,10 +62,18 @@ class FavoredView extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: Selector(
-              onTap: (_, index) => readFavoredCubit(context)
-                  .setFavored(type: NovelType.values[index]),
-              tabs: [NovelType.web.zhName, NovelType.wenku.zhName]),
+          child: BlocSelector<FavoredCubit, FavoredState, NovelType>(
+            selector: (state) {
+              return state.currentType;
+            },
+            builder: (context, type) {
+              return Selector(
+                  value: type.zhName,
+                  onTap: (index) => readFavoredCubit(context)
+                      .setFavored(type: NovelType.values[index]),
+                  tabs: [NovelType.web.zhName, NovelType.wenku.zhName]);
+            },
+          ),
         ),
         Expanded(
           child: BlocSelector<FavoredCubit, FavoredState, NovelType>(
@@ -88,10 +96,22 @@ class FavoredView extends StatelessWidget {
                         return favoredListWeb;
                       },
                       builder: (context, favoredListWeb) {
-                        return Selector(
-                            onTap: (_, index) => readFavoredCubit(context)
-                                .setFavored(favored: favoredListWeb[index]),
-                            tabs: favoredListWeb.map((e) => e.title).toList());
+                        return BlocSelector<FavoredCubit, FavoredState,
+                            Favored>(
+                          selector: (state) {
+                            return state.currentFavored ??
+                                Favored.createDefault();
+                          },
+                          builder: (context, currentFavored) {
+                            return Selector(
+                                value: currentFavored.title,
+                                onTap: (index) => readFavoredCubit(context)
+                                    .setFavored(favored: favoredListWeb[index]),
+                                tabs: favoredListWeb
+                                    .map((e) => e.title)
+                                    .toList());
+                          },
+                        );
                       },
                     ),
                   ),
@@ -108,11 +128,23 @@ class FavoredView extends StatelessWidget {
                         return favoredListWenku;
                       },
                       builder: (context, favoredListWenku) {
-                        return Selector(
-                            onTap: (_, index) => readFavoredCubit(context)
-                                .setFavored(favored: favoredListWenku[index]),
-                            tabs:
-                                favoredListWenku.map((e) => e.title).toList());
+                        return BlocSelector<FavoredCubit, FavoredState,
+                            Favored>(
+                          selector: (state) {
+                            return state.currentFavored ??
+                                Favored.createDefault();
+                          },
+                          builder: (context, currentFavored) {
+                            return Selector(
+                                value: currentFavored.title,
+                                onTap: (index) => readFavoredCubit(context)
+                                    .setFavored(
+                                        favored: favoredListWenku[index]),
+                                tabs: favoredListWenku
+                                    .map((e) => e.title)
+                                    .toList());
+                          },
+                        );
                       },
                     ),
                   )
@@ -122,10 +154,18 @@ class FavoredView extends StatelessWidget {
           ),
         ),
         Expanded(
-          child: Selector(
-              onTap: (_, index) => readFavoredCubit(context)
-                  .setFavored(sortType: SearchSortType.values[index]),
-              tabs: SearchSortType.values.map((e) => e.zhName).toList()),
+          child: BlocSelector<FavoredCubit, FavoredState, SearchSortType>(
+            selector: (state) {
+              return state.searchSortType;
+            },
+            builder: (context, sort) {
+              return Selector(
+                  value: sort.zhName,
+                  onTap: (index) => readFavoredCubit(context)
+                      .setFavored(sortType: SearchSortType.values[index]),
+                  tabs: SearchSortType.values.map((e) => e.zhName).toList());
+            },
+          ),
         ),
       ],
     );

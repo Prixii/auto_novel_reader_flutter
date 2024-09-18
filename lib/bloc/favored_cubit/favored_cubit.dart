@@ -30,18 +30,18 @@ class FavoredCubit extends Cubit<FavoredState> {
     }, currentFavored: Favored.createDefault(), currentType: NovelType.web));
     // 向服务器获取
     final response = await apiClient.userService.getFavored();
-    if (response?.statusCode == 502) {
-      showErrorToast('服务器维护中');
-      return;
-    }
     final body = response?.body;
+    final webFavoredList = parseToFavored(body['favoredWeb']);
+    final wenkuFavoredList = parseToFavored(body['favoredWenku']);
     emit(state.copyWith(
       favoredMap: {
         NovelType.local: localFavored,
-        NovelType.web: parseToFavored(body['favoredWeb']),
-        NovelType.wenku: parseToFavored(body['favoredWenku'])
+        NovelType.web: webFavoredList,
+        NovelType.wenku: wenkuFavoredList,
       },
-      currentFavored: Favored.createDefault(),
+      currentFavored: webFavoredList.isEmpty
+          ? Favored.createDefault()
+          : webFavoredList.first,
       currentType: NovelType.web,
     ));
     requestFavoredNovels();
@@ -55,18 +55,6 @@ class FavoredCubit extends Cubit<FavoredState> {
     if (favoreds.isEmpty) favoreds.add(Favored.createDefault());
     return favoreds;
   }
-
-  List<Favored> get localFavored => (state.favoredMap[NovelType.local]!.isEmpty)
-      ? [Favored.createDefault()]
-      : state.favoredMap[NovelType.local]!;
-
-  List<Favored> get webFavored => (state.favoredMap[NovelType.web]!.isEmpty)
-      ? [Favored.createDefault()]
-      : state.favoredMap[NovelType.web]!;
-
-  List<Favored> get wenkuFavored => (state.favoredMap[NovelType.wenku]!.isEmpty)
-      ? [Favored.createDefault()]
-      : state.favoredMap[NovelType.wenku]!;
 
   Future<void> loadNextPage() async {
     if (state.currentType == NovelType.web) {
@@ -102,6 +90,7 @@ class FavoredCubit extends Cubit<FavoredState> {
     Favored? favored,
     SearchSortType? sortType,
   }) async {
+    if (!userCubit.isSignIn) return;
     final novelType = type ?? state.currentType;
     if (type != null) {
       emit(state.copyWith(
@@ -219,14 +208,8 @@ class FavoredCubit extends Cubit<FavoredState> {
         pageSize: 20,
         sort: sortType.name,
       );
-      if (response == null) throw Exception('response is null');
-      if (response.statusCode == 502) {
-        showErrorToast('服务器维护中');
-        throw Exception('服务器维护中');
-      }
-
       // 处理响应
-      final body = response.body;
+      final body = response!.body;
       final maxPage = body['pageNumber'];
       final newWebNovelList = parseToWebNovelOutline(body);
       emit(state.copyWith(
@@ -266,15 +249,14 @@ class FavoredCubit extends Cubit<FavoredState> {
       ...state.isWenkuRequestingMap,
       favoredId: true,
     }));
-    // 发送请求
-    await apiClient.userFavoredWenkuService
-        .getIdList(
-      favoredId: favoredId,
-      page: state.favoredWenkuPageMap[favoredId] ?? 0,
-      pageSize: 20,
-      sort: sortType.name,
-    )
-        .then((response) {
+    try {
+      // 发送请求
+      final response = await apiClient.userFavoredWenkuService.getIdList(
+        favoredId: favoredId,
+        page: state.favoredWenkuPageMap[favoredId] ?? 0,
+        pageSize: 20,
+        sort: sortType.name,
+      );
       if (response == null) {
         throw Exception('response is null');
       }
@@ -304,14 +286,14 @@ class FavoredCubit extends Cubit<FavoredState> {
         },
       ));
       setNovelToFavoredIdMap(wenkuOutlines: newWenkuNovelList);
-    }).catchError((e, stackTrace) {
+    } catch (e, stackTrace) {
       errorLogger.logError(e, stackTrace);
 
       emit(state.copyWith(isWenkuRequestingMap: {
-        ...state.isWenkuRequestingMap,
+        ...state.isWebRequestingMap,
         favoredId: false,
       }));
-    });
+    }
   }
 
   void updateFavorState(
@@ -368,6 +350,7 @@ class FavoredCubit extends Cubit<FavoredState> {
     }
   }
 
+  // 用来设置小说是否收藏
   void setNovelToFavoredIdMap({
     List<WebNovelOutline>? webOutlines,
     List<WenkuNovelOutline>? wenkuOutlines,
@@ -468,14 +451,20 @@ class FavoredCubit extends Cubit<FavoredState> {
     }
 
     if (response != null && response.isSuccessful) {
-      emit(state.copyWith(favoredMap: {
-        ...state.favoredMap,
-        type: [
-          ...state.favoredMap[type]!
-              .where((element) => element.id != favoredId),
-          Favored(id: favoredId, title: favoredName),
-        ]
-      }));
+      final newFavored = Favored(id: favoredId, title: favoredName);
+      emit(
+        state.copyWith(
+          favoredMap: {
+            ...state.favoredMap,
+            type: [
+              ...state.favoredMap[type]!
+                  .where((element) => element.id != favoredId),
+              newFavored,
+            ]
+          },
+          currentFavored: isCurrentFavored(favoredId) ? newFavored : null,
+        ),
+      );
       showSucceedToast('重命名收藏夹成功');
       return true;
     } else {
@@ -500,12 +489,30 @@ class FavoredCubit extends Cubit<FavoredState> {
     }
 
     if (response != null && response.isSuccessful) {
-      emit(state.copyWith(favoredMap: {
-        ...state.favoredMap,
-        type: state.favoredMap[type]!
-            .where((element) => element.id != favoredId)
-            .toList(),
-      }));
+      Favored? newCurrent;
+      if (isCurrentFavored(favoredId)) {
+        switch (state.currentType) {
+          case NovelType.web:
+            newCurrent = state.favoredMap[NovelType.web]!.first;
+            break;
+          case NovelType.wenku:
+            newCurrent = state.favoredMap[NovelType.wenku]!.first;
+            break;
+          case NovelType.local:
+            throw Exception('不支持的类型');
+        }
+      }
+      emit(
+        state.copyWith(
+          favoredMap: {
+            ...state.favoredMap,
+            type: state.favoredMap[type]!
+                .where((element) => element.id != favoredId)
+                .toList(),
+          },
+          currentFavored: newCurrent,
+        ),
+      );
       showSucceedToast('删除收藏夹成功');
       return true;
     } else {
@@ -521,4 +528,19 @@ class FavoredCubit extends Cubit<FavoredState> {
       ...newStatusMap,
     }));
   }
+
+  List<Favored> get localFavored => (state.favoredMap[NovelType.local]!.isEmpty)
+      ? [Favored.createDefault()]
+      : state.favoredMap[NovelType.local]!;
+
+  List<Favored> get webFavored => (state.favoredMap[NovelType.web]!.isEmpty)
+      ? [Favored.createDefault()]
+      : state.favoredMap[NovelType.web]!;
+
+  List<Favored> get wenkuFavored => (state.favoredMap[NovelType.wenku]!.isEmpty)
+      ? [Favored.createDefault()]
+      : state.favoredMap[NovelType.wenku]!;
+
+  bool isCurrentFavored(String favoredId) =>
+      (state.currentFavored?.id == favoredId);
 }

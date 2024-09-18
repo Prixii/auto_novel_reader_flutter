@@ -1,72 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:unicons/unicons.dart';
 
-class Selector extends StatefulWidget {
+class Selector extends StatelessWidget {
   const Selector(
       {super.key,
       required this.onTap,
       required this.tabs,
-      this.tabController,
+      required this.value,
       this.padding = const EdgeInsets.fromLTRB(8, 8, 8, 8)});
+
   final EdgeInsetsGeometry padding;
-  final Function(String, int) onTap;
+  final Function(int) onTap;
   final List<String> tabs;
-  final TabController? tabController;
-
-  @override
-  State<Selector> createState() => _SelectorState();
-}
-
-class _SelectorState extends State<Selector> with TickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = widget.tabController ??
-        TabController(
-          length: widget.tabs.length,
-          vsync: this,
-          initialIndex: 0,
-        );
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
+  final String value;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: widget.padding,
-      child: _buildDropDownMenuButton(theme),
+      padding: padding,
+      child: _buildDropDownMenuButton(theme, context),
     );
   }
 
-  InkWell _buildDropDownMenuButton(ThemeData theme) {
+  InkWell _buildDropDownMenuButton(ThemeData theme, BuildContext context) {
     return InkWell(
       onTap: () {
         final renderBox = context.findRenderObject() as RenderBox;
         var local = renderBox.localToGlobal(Offset.zero);
         var size = MediaQuery.of(context).size;
         showMenu(
-            items: widget.tabs
+            items: tabs
                 .map((tab) => PopupMenuItem(
                       value: tab,
                       child: Text(tab),
                       onTap: () {
-                        setState(() {
-                          if (_tabController.length != widget.tabs.length) {
-                            _updateTabController(tab);
-                          }
-                          final index = widget.tabs.indexOf(tab);
-                          _tabController.index =
-                              (index >= widget.tabs.length) ? 0 : index;
-                          widget.onTap(tab, index);
-                        });
+                        final index = tabs.indexOf(tab);
+                        onTap(index);
                       },
                     ))
                 .toList(),
@@ -89,7 +59,7 @@ class _SelectorState extends State<Selector> with TickerProviderStateMixin {
           children: [
             Expanded(
               child: Text(
-                widget.tabs[_tabController.index],
+                value,
                 style: theme.textTheme.bodyMedium,
                 maxLines: 1,
                 textAlign: TextAlign.center,
@@ -101,16 +71,5 @@ class _SelectorState extends State<Selector> with TickerProviderStateMixin {
         ),
       ),
     );
-  }
-
-  void _updateTabController(String tab) {
-    final newTabController = TabController(
-      length: widget.tabs.length,
-      vsync: this,
-      initialIndex: widget.tabs.indexOf(tab),
-    );
-    final oldTabController = _tabController;
-    _tabController = newTabController;
-    oldTabController.dispose();
   }
 }
