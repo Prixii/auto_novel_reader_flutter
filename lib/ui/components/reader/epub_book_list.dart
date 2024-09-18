@@ -154,12 +154,13 @@ class _BookListTileState extends State<BookListTile> {
         PopupMenuButton(
           icon: const Icon(UniconsLine.ellipsis_v),
           itemBuilder: (context) => [
-            PopupMenuItem(
-              child: const Text('编辑信息'),
-              onTap: () async {
-                _showInfoEditor(context);
-              },
-            ),
+            // TODO
+            // PopupMenuItem(
+            //   child: const Text('编辑信息'),
+            //   onTap: () async {
+            //     _showInfoEditor(context);
+            //   },
+            // ),
             PopupMenuItem(
               child: Text(
                 '删除',
