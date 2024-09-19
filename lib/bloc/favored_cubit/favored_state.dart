@@ -3,7 +3,7 @@ part of 'favored_cubit.dart';
 @freezed
 class FavoredState with _$FavoredState {
   const factory FavoredState.initial({
-    @Default({}) Map<RequestLabel, LoadingStatus?> loadingStatusMap,
+    @Default({}) Map<String, LoadingStatus?> loadingStatusMap,
 
     // 收藏页面
     @Default({

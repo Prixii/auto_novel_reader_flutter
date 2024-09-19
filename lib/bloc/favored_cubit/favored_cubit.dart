@@ -2,7 +2,6 @@ import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
-import 'package:auto_novel_reader_flutter/util/error_logger.dart';
 import 'package:bloc/bloc.dart';
 import 'package:chopper/chopper.dart';
 import 'package:flutter/foundation.dart';
@@ -44,7 +43,6 @@ class FavoredCubit extends Cubit<FavoredState> {
           : webFavoredList.first,
       currentType: NovelType.web,
     ));
-    requestFavoredNovels();
   }
 
   List<Favored> parseToFavored(dynamic body) {
@@ -54,35 +52,6 @@ class FavoredCubit extends Cubit<FavoredState> {
     }
     if (favoreds.isEmpty) favoreds.add(Favored.createDefault());
     return favoreds;
-  }
-
-  Future<void> loadNextPage() async {
-    if (state.currentType == NovelType.web) {
-      if (state.isWebRequestingMap[state.currentFavored?.id] == true) {
-        return;
-      }
-      final oldValue = state.favoredWebPageMap[state.currentFavored?.id] ?? 0;
-      if (oldValue + 1 >=
-          state.favoredWebMaxPageMap[state.currentFavored?.id]!) {
-        return;
-      }
-      emit(state.copyWith(favoredWebPageMap: {
-        ...state.favoredWebPageMap,
-        state.currentFavored!.id: oldValue + 1
-      }));
-    } else if (state.currentType == NovelType.wenku) {
-      if (state.isWenkuRequestingMap[state.currentFavored?.id] == true) {
-        return;
-      }
-      final oldValue = state.favoredWenkuPageMap[state.currentFavored?.id] ?? 0;
-      if (oldValue + 1 >=
-          state.favoredWenkuMaxPageMap[state.currentFavored?.id]!) return;
-      emit(state.copyWith(favoredWenkuPageMap: {
-        ...state.favoredWenkuPageMap,
-        state.currentFavored!.id: oldValue + 1
-      }));
-    }
-    requestFavoredNovels(refresh: false);
   }
 
   Future<void> setFavored({
@@ -95,7 +64,8 @@ class FavoredCubit extends Cubit<FavoredState> {
     if (type != null) {
       emit(state.copyWith(
         currentType: type,
-        currentFavored: Favored.createDefault(),
+        currentFavored:
+            state.favoredMap[novelType]?.first ?? Favored.createDefault(),
         searchSortType: sortType ?? state.searchSortType,
       ));
     }
@@ -107,192 +77,6 @@ class FavoredCubit extends Cubit<FavoredState> {
     }
     if (sortType != null) {
       emit(state.copyWith(searchSortType: sortType));
-    }
-    late List? targetNovels;
-    if (sortType != null) {
-      requestFavoredNovels();
-      return;
-    }
-    if (novelType == NovelType.web) {
-      targetNovels = state.favoredWebNovelsMap[state.currentFavored?.id];
-    } else if (novelType == NovelType.wenku) {
-      targetNovels = state.favoredWenkuNovelsMap[state.currentFavored?.id];
-    } else {
-      throw Exception('invalid novel type');
-    }
-    if (targetNovels == null || targetNovels.isEmpty) {
-      requestFavoredNovels();
-    }
-  }
-
-  Future<void> requestFavoredNovels({
-    bool refresh = true,
-  }) async {
-    final sortType = state.searchSortType;
-    switch (state.currentType) {
-      case NovelType.web:
-        refresh
-            ? await _requestWebFavored(state.currentFavored!.id, sortType)
-            : await _loadWebFavored(state.currentFavored!.id, sortType);
-        break;
-      case NovelType.wenku:
-        refresh
-            ? await _requestWenkuFavored(state.currentFavored!.id, sortType)
-            : await _loadWenkuFavored(state.currentFavored!.id, sortType);
-        break;
-      case NovelType.local:
-        showWarnToast('暂不支持');
-        break;
-    }
-  }
-
-  Future<void> _requestWebFavored(
-    String favoredId,
-    SearchSortType sortType,
-  ) async {
-    if (state.isWebRequestingMap[favoredId] == true) return;
-    emit(state.copyWith(
-      favoredWebPageMap: {
-        ...state.favoredWebPageMap,
-        favoredId: 0,
-      },
-      favoredWebMaxPageMap: {
-        ...state.favoredWebMaxPageMap,
-        favoredId: 0,
-      },
-      favoredWebNovelsMap: {
-        ...state.favoredWebNovelsMap,
-        favoredId: [],
-      },
-    ));
-    _loadWebFavored(favoredId, sortType, refresh: true);
-  }
-
-  Future<void> _requestWenkuFavored(
-    String favoredId,
-    SearchSortType sortType,
-  ) async {
-    if (state.isWenkuRequestingMap[favoredId] == true) return;
-    emit(state.copyWith(
-      favoredWenkuPageMap: {
-        ...state.favoredWenkuPageMap,
-        favoredId: 0,
-      },
-      favoredWenkuMaxPageMap: {
-        ...state.favoredWenkuMaxPageMap,
-        favoredId: 0,
-      },
-      favoredWenkuNovelsMap: {
-        ...state.favoredWenkuNovelsMap,
-        favoredId: [],
-      },
-    ));
-    _loadWenkuFavored(favoredId, sortType, refresh: true);
-  }
-
-  Future<void> _loadWebFavored(
-    String favoredId,
-    SearchSortType sortType, {
-    bool refresh = false,
-  }) async {
-    // 设置请求标志
-    emit(state.copyWith(isWebRequestingMap: {
-      ...state.isWebRequestingMap,
-      favoredId: true,
-    }));
-    try {
-      // 发送请求
-      final response = await apiClient.userFavoredWebService.getIdList(
-        favoredId: favoredId,
-        page: state.favoredWebPageMap[favoredId] ?? 0,
-        pageSize: 20,
-        sort: sortType.name,
-      );
-      // 处理响应
-      final body = response!.body;
-      final maxPage = body['pageNumber'];
-      final newWebNovelList = parseToWebNovelOutline(body);
-      emit(state.copyWith(
-        favoredWebMaxPageMap: {
-          ...state.favoredWebMaxPageMap,
-          favoredId: maxPage,
-        },
-        favoredWebNovelsMap: {
-          ...state.favoredWebNovelsMap,
-          favoredId: [
-            ...(refresh ? [] : (state.favoredWebNovelsMap[favoredId] ?? [])),
-            ...newWebNovelList
-          ],
-        },
-        isWebRequestingMap: {
-          ...state.isWebRequestingMap,
-          favoredId: false,
-        },
-      ));
-      setNovelToFavoredIdMap(webOutlines: newWebNovelList);
-    } catch (e, stackTrace) {
-      errorLogger.logError(e, stackTrace);
-
-      emit(state.copyWith(isWebRequestingMap: {
-        ...state.isWebRequestingMap,
-        favoredId: false,
-      }));
-    }
-  }
-
-  Future<void> _loadWenkuFavored(
-    String favoredId,
-    SearchSortType sortType, {
-    bool refresh = false,
-  }) async {
-    emit(state.copyWith(isWenkuRequestingMap: {
-      ...state.isWenkuRequestingMap,
-      favoredId: true,
-    }));
-    try {
-      // 发送请求
-      final response = await apiClient.userFavoredWenkuService.getIdList(
-        favoredId: favoredId,
-        page: state.favoredWenkuPageMap[favoredId] ?? 0,
-        pageSize: 20,
-        sort: sortType.name,
-      );
-      if (response == null) {
-        throw Exception('response is null');
-      }
-      if (response.statusCode == 502) {
-        showErrorToast('服务器维护中');
-        throw Exception('服务器维护中');
-      }
-      // 处理响应
-      final body = response.body;
-      final maxPage = body['pageNumber'];
-      final newWenkuNovelList = parseToWenkuNovelOutline(body);
-      emit(state.copyWith(
-        favoredWenkuMaxPageMap: {
-          ...state.favoredWenkuMaxPageMap,
-          favoredId: maxPage,
-        },
-        favoredWenkuNovelsMap: {
-          ...state.favoredWenkuNovelsMap,
-          favoredId: [
-            ...(refresh ? [] : (state.favoredWenkuNovelsMap[favoredId] ?? [])),
-            ...newWenkuNovelList
-          ],
-        },
-        isWenkuRequestingMap: {
-          ...state.isWenkuRequestingMap,
-          favoredId: false,
-        },
-      ));
-      setNovelToFavoredIdMap(wenkuOutlines: newWenkuNovelList);
-    } catch (e, stackTrace) {
-      errorLogger.logError(e, stackTrace);
-
-      emit(state.copyWith(isWenkuRequestingMap: {
-        ...state.isWebRequestingMap,
-        favoredId: false,
-      }));
     }
   }
 
@@ -522,7 +306,33 @@ class FavoredCubit extends Cubit<FavoredState> {
     }
   }
 
-  onSetLoadingStatus(Map<RequestLabel, LoadingStatus?> newStatusMap) {
+  setFavoredNovelList(
+    NovelType type,
+    String favoredId, {
+    List<WebNovelOutline>? webNovels,
+    List<WenkuNovelOutline>? wenkuNovels,
+  }) {
+    assert(type == NovelType.web || type == NovelType.wenku);
+    assert(type != NovelType.web || webNovels != null);
+    assert(type != NovelType.wenku || wenkuNovels != null);
+    switch (type) {
+      case NovelType.web:
+        emit(state.copyWith(favoredWebNovelsMap: {
+          ...state.favoredWebNovelsMap,
+          favoredId: webNovels!,
+        }));
+        break;
+      case NovelType.wenku:
+        emit(state.copyWith(favoredWenkuNovelsMap: {
+          ...state.favoredWenkuNovelsMap,
+          favoredId: wenkuNovels!,
+        }));
+        break;
+      default:
+    }
+  }
+
+  setLoadingStatus(Map<String, LoadingStatus?> newStatusMap) {
     emit(state.copyWith(loadingStatusMap: {
       ...state.loadingStatusMap,
       ...newStatusMap,

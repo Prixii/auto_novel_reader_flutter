@@ -433,3 +433,49 @@ Future<List<WebNovelOutline>> requestHistory(HistorySearchData data) async {
     rethrow;
   }
 }
+
+Future<List<WebNovelOutline>> loadWebFavored(
+  LoadFavoredData data,
+) async {
+  try {
+    // 发送请求
+    final response = await apiClient.userFavoredWebService.getIdList(
+      favoredId: data.favoredId,
+      page: data.page,
+      pageSize: 20,
+      sort: data.sort.name,
+    );
+
+    // 处理响应
+    final body = response!.body;
+    final newWebNovelList = parseToWebNovelOutline(body);
+
+    return newWebNovelList;
+  } catch (e, stackTrace) {
+    errorLogger.logError(e, stackTrace);
+    rethrow;
+  }
+}
+
+Future<List<WenkuNovelOutline>> loadWenkuFavored(
+  LoadFavoredData data,
+) async {
+  try {
+    // 发送请求
+    final response = await apiClient.userFavoredWenkuService.getIdList(
+      favoredId: data.favoredId,
+      page: data.page,
+      pageSize: 20,
+      sort: data.sort.name,
+    );
+
+    // 处理响应
+    final body = response!.body;
+    final newWenkuNovelList = parseToWenkuNovelOutline(body);
+
+    return newWenkuNovelList;
+  } catch (e, stackTrace) {
+    errorLogger.logError(e, stackTrace);
+    rethrow;
+  }
+}

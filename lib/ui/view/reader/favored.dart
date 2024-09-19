@@ -3,27 +3,191 @@ import 'package:auto_novel_reader_flutter/bloc/user/user_cubit.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
+import 'package:auto_novel_reader_flutter/network/interceptor/response_interceptor.dart';
 import 'package:auto_novel_reader_flutter/ui/components/favored/favored_manager.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/selector.dart';
+import 'package:auto_novel_reader_flutter/ui/components/universal/timeout_info_container.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/web_novel_tile.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/wenku_novel_tile.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
+import 'package:auto_novel_reader_flutter/util/error_logger.dart';
+import 'package:auto_novel_reader_flutter/util/page_loader.dart';
+import 'package:auto_novel_reader_flutter/util/web_home_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:unicons/unicons.dart';
 
-class FavoredView extends StatelessWidget {
+class FavoredView extends StatefulWidget {
   const FavoredView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // readFavoredCubit(context).setFavored(
-    //   type: NovelType.web,
-    //   favored: Favored.createDefault(),
-    //   sortType: SearchSortType.update,
-    // );
+  State<FavoredView> createState() => _FavoredViewState();
+}
 
+class _FavoredViewState extends State<FavoredView> {
+  late PageLoader<WebNovelOutline, List<WebNovelOutline>> webPageLoader;
+  late PageLoader<WenkuNovelOutline, List<WenkuNovelOutline>> wenkuPageLoader;
+
+  late LoadFavoredData webFavoredData, wenkuFavoredData;
+
+  @override
+  void initState() {
+    super.initState();
+    webFavoredData = const LoadFavoredData();
+    wenkuFavoredData = const LoadFavoredData();
+
+    webPageLoader = PageLoader(
+        size: webFavoredData.pageSize,
+        initPage: 0,
+        pageSetter: (newPage) => webFavoredData = webFavoredData.copyWith(
+              page: newPage,
+            ),
+        loader: () async => _searchWeb(),
+        dataGetter: (result) => result,
+        onLoadSucceed: (outlines) {
+          final cubit = readFavoredCubit(context);
+          cubit.setFavoredNovelList(
+            NovelType.web,
+            webFavoredData.favoredId,
+            webNovels: outlines,
+          );
+          cubit.setLoadingStatus({webFavoredKey: null});
+        },
+        onLoadFailed: (e, stackTrace) {
+          errorLogger.logError(e, stackTrace);
+          readFavoredCubit(context).setLoadingStatus(
+            {
+              webFavoredKey: e is ServerException
+                  ? LoadingStatus.serverError
+                  : LoadingStatus.failed
+            },
+          );
+        });
+    wenkuPageLoader = PageLoader(
+        size: wenkuFavoredData.pageSize,
+        initPage: 0,
+        pageSetter: (newPage) => wenkuFavoredData = wenkuFavoredData.copyWith(
+              page: newPage,
+            ),
+        loader: () async => _searchWenku(),
+        dataGetter: (result) => result,
+        onLoadSucceed: (outlines) {
+          final cubit = readFavoredCubit(context);
+          cubit.setFavoredNovelList(
+            NovelType.wenku,
+            wenkuFavoredData.favoredId,
+            wenkuNovels: outlines,
+          );
+          cubit.setLoadingStatus({wenkuFavoredKey: null});
+        },
+        onLoadFailed: (e, stackTrace) {
+          errorLogger.logError(e, stackTrace);
+          readFavoredCubit(context).setLoadingStatus(
+            {
+              wenkuFavoredKey: e is ServerException
+                  ? LoadingStatus.serverError
+                  : LoadingStatus.failed
+            },
+          );
+        });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      webPageLoader.refresh();
+    });
+  }
+
+  Future<List<WebNovelOutline>> _searchWeb() async {
+    final cubit = readFavoredCubit(context);
+    cubit.setLoadingStatus({webFavoredKey: LoadingStatus.loading});
+    try {
+      final widgetContext = context;
+      final newWebNovelList = await loadWebFavored(webFavoredData);
+      if (widgetContext.mounted) {
+        readFavoredCubit(widgetContext)
+            .setNovelToFavoredIdMap(webOutlines: newWebNovelList);
+      }
+      return newWebNovelList;
+    } catch (e, stackTrace) {
+      errorLogger.logError(e, stackTrace);
+      cubit.setLoadingStatus(
+        {
+          webFavoredKey: e is ServerException
+              ? LoadingStatus.serverError
+              : LoadingStatus.failed
+        },
+      );
+      return Future.value([]);
+    }
+  }
+
+  Future<void> doRefreshWeb() async {
+    final cubit = readFavoredCubit(context);
+    try {
+      cubit.setFavoredNovelList(
+        NovelType.wenku,
+        webFavoredData.favoredId,
+        webNovels: [],
+      );
+      cubit.setLoadingStatus({webFavoredKey: LoadingStatus.loading});
+      await webPageLoader.refresh();
+    } catch (e, stackTrace) {
+      errorLogger.logError(e, stackTrace);
+      cubit.setLoadingStatus(
+        {
+          webFavoredKey: e is ServerException
+              ? LoadingStatus.serverError
+              : LoadingStatus.failed
+        },
+      );
+    }
+  }
+
+  Future<List<WenkuNovelOutline>> _searchWenku() async {
+    final cubit = readFavoredCubit(context);
+    cubit.setLoadingStatus({wenkuFavoredKey: LoadingStatus.loading});
+    try {
+      final widgetContext = context;
+      final newWenkuNovelList = await loadWenkuFavored(wenkuFavoredData);
+      if (widgetContext.mounted) {
+        readFavoredCubit(widgetContext)
+            .setNovelToFavoredIdMap(wenkuOutlines: newWenkuNovelList);
+      }
+      return newWenkuNovelList;
+    } catch (e, stackTrace) {
+      errorLogger.logError(e, stackTrace);
+      cubit.setLoadingStatus(
+        {
+          wenkuFavoredKey: e is ServerException
+              ? LoadingStatus.serverError
+              : LoadingStatus.failed
+        },
+      );
+      return Future.value([]);
+    }
+  }
+
+  Future<void> doRefreshWenku() async {
+    final cubit = readFavoredCubit(context);
+    try {
+      cubit.setFavoredNovelList(NovelType.wenku, wenkuFavoredData.favoredId,
+          wenkuNovels: []);
+      cubit.setLoadingStatus({wenkuFavoredKey: LoadingStatus.loading});
+      await wenkuPageLoader.refresh();
+    } catch (e, stackTrace) {
+      errorLogger.logError(e, stackTrace);
+      cubit.setLoadingStatus(
+        {
+          wenkuFavoredKey: e is ServerException
+              ? LoadingStatus.serverError
+              : LoadingStatus.failed
+        },
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return BlocSelector<UserCubit, UserState, bool>(
       selector: (state) {
         return state.token != null;
@@ -33,7 +197,10 @@ class FavoredView extends StatelessWidget {
             ? const Center(child: Text('未登录'))
             : Stack(
                 children: [
-                  const FavoredBody(),
+                  FavoredBody(
+                    refreshWeb: () => webPageLoader.refresh(),
+                    refreshWenku: () => wenkuPageLoader.refresh(),
+                  ),
                   _buildFavoredSelector(context),
                   _buildAddFavoredButton(context),
                 ],
@@ -69,8 +236,7 @@ class FavoredView extends StatelessWidget {
             builder: (context, type) {
               return Selector(
                   value: type.zhName,
-                  onTap: (index) => readFavoredCubit(context)
-                      .setFavored(type: NovelType.values[index]),
+                  onTap: (index) => setFavored(type: NovelType.values[index]),
                   tabs: [NovelType.web.zhName, NovelType.wenku.zhName]);
             },
           ),
@@ -105,8 +271,8 @@ class FavoredView extends StatelessWidget {
                           builder: (context, currentFavored) {
                             return Selector(
                                 value: currentFavored.title,
-                                onTap: (index) => readFavoredCubit(context)
-                                    .setFavored(favored: favoredListWeb[index]),
+                                onTap: (index) =>
+                                    setFavored(favored: favoredListWeb[index]),
                                 tabs: favoredListWeb
                                     .map((e) => e.title)
                                     .toList());
@@ -137,9 +303,8 @@ class FavoredView extends StatelessWidget {
                           builder: (context, currentFavored) {
                             return Selector(
                                 value: currentFavored.title,
-                                onTap: (index) => readFavoredCubit(context)
-                                    .setFavored(
-                                        favored: favoredListWenku[index]),
+                                onTap: (index) => setFavored(
+                                    favored: favoredListWenku[index]),
                                 tabs: favoredListWenku
                                     .map((e) => e.title)
                                     .toList());
@@ -161,8 +326,8 @@ class FavoredView extends StatelessWidget {
             builder: (context, sort) {
               return Selector(
                   value: sort.zhName,
-                  onTap: (index) => readFavoredCubit(context)
-                      .setFavored(sortType: SearchSortType.values[index]),
+                  onTap: (index) =>
+                      setFavored(sortType: SearchSortType.values[index]),
                   tabs: SearchSortType.values.map((e) => e.zhName).toList());
             },
           ),
@@ -197,13 +362,48 @@ class FavoredView extends StatelessWidget {
       },
     );
   }
+
+  void setFavored({
+    NovelType? type,
+    Favored? favored,
+    SearchSortType? sortType,
+  }) {
+    if (type == null && favored == null && sortType == null) return;
+    final cubit = readFavoredCubit(context);
+    type = type ?? cubit.state.currentType;
+
+    cubit.setFavored(sortType: sortType, type: type, favored: favored);
+    if (type == NovelType.web) {
+      if (favored?.id == webFavoredData.favoredId &&
+          sortType == webFavoredData.sort) return;
+      webFavoredData = webFavoredData.copyWith(
+        favoredId: favored?.id ?? webFavoredData.favoredId,
+        sort: sortType ?? webFavoredData.sort,
+      );
+      webPageLoader.refresh();
+    } else if (type == NovelType.wenku) {
+      if (favored?.id == wenkuFavoredData.favoredId &&
+          sortType == wenkuFavoredData.sort) return;
+      wenkuFavoredData = wenkuFavoredData.copyWith(
+        favoredId: favored?.id ?? wenkuFavoredData.favoredId,
+        sort: sortType ?? wenkuFavoredData.sort,
+      );
+      wenkuPageLoader.refresh();
+    }
+  }
+
+  String get wenkuFavoredKey => 'wenku-${wenkuFavoredData.favoredId}';
+  String get webFavoredKey => 'web-${webFavoredData.favoredId}';
 }
 
 class FavoredBody extends StatefulWidget {
   const FavoredBody({
     super.key,
+    required this.refreshWenku,
+    required this.refreshWeb,
   });
 
+  final Function refreshWenku, refreshWeb;
   @override
   State<FavoredBody> createState() => _FavoredBodyState();
 }
@@ -213,7 +413,6 @@ class _FavoredBodyState extends State<FavoredBody>
   var scrollDirection = ScrollDirection.forward;
   var shouldLoadMore = false;
 
-  // FIXME Selector 同步
   @override
   void initState() {
     super.initState();
@@ -228,7 +427,7 @@ class _FavoredBodyState extends State<FavoredBody>
           if (metrics.pixels > metrics.maxScrollExtent - 60) {
             if (shouldLoadMore && scrollDirection == ScrollDirection.forward) {
               shouldLoadMore = false;
-              readFavoredCubit(context).loadNextPage();
+              // readFavoredCubit(context).loadNextPage();
             }
           } else {
             shouldLoadMore = true;
@@ -245,91 +444,46 @@ class _FavoredBodyState extends State<FavoredBody>
         return false;
       },
       child: BlocSelector<FavoredCubit, FavoredState, (List, NovelType)>(
-        selector: (state) {
-          final type = state.currentType;
-          final favored = state.currentFavored ?? Favored.createDefault();
-          if (type == NovelType.web) {
-            final list =
-                state.favoredWebNovelsMap[favored.id] ?? <WebNovelOutline>[];
-            return (list, type);
-          }
-          if (type == NovelType.wenku) {
-            final list = state.favoredWenkuNovelsMap[favored.id] ??
-                <WenkuNovelOutline>[];
-            return (list, type);
-          }
-          throw Exception('invalid novel type');
-        },
-        builder: (context, listData) {
-          switch (listData.$2) {
-            case NovelType.web:
-              return SingleChildScrollView(
+          selector: (typeNovelData) {
+        final type = typeNovelData.currentType;
+        final favored = typeNovelData.currentFavored ?? Favored.createDefault();
+        if (type == NovelType.web) {
+          final list = typeNovelData.favoredWebNovelsMap[favored.id] ??
+              <WebNovelOutline>[];
+          return (list, type);
+        }
+        if (type == NovelType.wenku) {
+          final list = typeNovelData.favoredWenkuNovelsMap[favored.id] ??
+              <WenkuNovelOutline>[];
+          return (list, type);
+        }
+        throw Exception('invalid novel type');
+      }, builder: (context, listData) {
+        final novelType = listData.$2;
+
+        return BlocSelector<FavoredCubit, FavoredState, LoadingStatus?>(
+          selector: (state) {
+            final favoredKey = '${novelType.name}-${state.currentFavored?.id}';
+            return state.loadingStatusMap[favoredKey];
+          },
+          builder: (context, state) {
+            return TimeoutInfoContainer(
+              status: state,
+              child: SingleChildScrollView(
                 padding:
                     const EdgeInsets.symmetric(vertical: 48.0, horizontal: 8),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    WebNovelList(
-                        webNovels: listData.$1 as List<WebNovelOutline>),
-                    _buildWebProgressIndicator(),
-                  ],
-                ),
-              );
-            case NovelType.wenku:
-              return SingleChildScrollView(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 48.0, horizontal: 8),
-                child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  WenkuNovelList(
-                      wenkuNovels: listData.$1 as List<WenkuNovelOutline>),
-                  _buildWenkuProgressIndicator(),
-                ]),
-              );
-            default:
-              throw Exception('invalid novel type');
-          }
-        },
-      ),
-    );
-  }
-
-  Widget _buildWebProgressIndicator() {
-    return BlocSelector<FavoredCubit, FavoredState, bool>(
-      selector: (state) {
-        final favored = state.currentFavored ?? Favored.createDefault();
-        return state.isWebRequestingMap[favored.id] ?? false;
-      },
-      builder: (context, isRequesting) {
-        return Visibility(
-          visible: isRequesting,
-          child: const SizedBox(
-            height: 64,
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
-          ),
+                child: novelType == NovelType.web
+                    ? WebNovelList(
+                        webNovels: listData.$1 as List<WebNovelOutline>)
+                    : (novelType == NovelType.wenku
+                        ? WenkuNovelList(
+                            wenkuNovels: listData.$1 as List<WenkuNovelOutline>)
+                        : throw Exception('invalid novel type')),
+              ),
+            );
+          },
         );
-      },
-    );
-  }
-
-  Widget _buildWenkuProgressIndicator() {
-    return BlocSelector<FavoredCubit, FavoredState, bool>(
-      selector: (state) {
-        final favored = state.currentFavored ?? Favored.createDefault();
-        return state.isWenkuRequestingMap[favored.id] ?? false;
-      },
-      builder: (context, isRequesting) {
-        return Visibility(
-          visible: isRequesting,
-          child: const SizedBox(
-            height: 64,
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
-          ),
-        );
-      },
+      }),
     );
   }
 }

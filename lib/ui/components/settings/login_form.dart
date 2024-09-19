@@ -37,34 +37,44 @@ class _LoginFormState extends State<LoginForm> {
     return Form(
       autovalidateMode: AutovalidateMode.onUserInteraction,
       key: _formKey,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          buildTextField(
-            '用户名/邮箱',
-            _emailOrUsernameController,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return '请输入用户名/邮箱';
-              }
-              return null;
-            },
-          ),
-          space,
-          buildTextField('密码', _passwordController, obscureText: true,
+      child: AutofillGroup(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            buildTextField(
+              '用户名/邮箱',
+              _emailOrUsernameController,
               validator: (value) {
-            if (value == null || value.length < 8) {
-              return '密码至少为 8 个字符';
-            }
-            return null;
-          }, inputFormatters: [
-            FilteringTextInputFormatter.deny(RegExp(r"\s")),
-          ]),
-          space,
-          requesting
-              ? buildLoadingButton()
-              : buildRoundButton(() => _doSignIn(context)),
-        ],
+                if (value == null || value.isEmpty) {
+                  return '请输入用户名/邮箱';
+                }
+                return null;
+              },
+              autofillHints: const [AutofillHints.username],
+            ),
+            space,
+            buildTextField(
+              '密码',
+              _passwordController,
+              obscureText: true,
+              validator: (value) {
+                if (value == null || value.length < 8) {
+                  return '密码至少为 8 个字符';
+                }
+                return null;
+              },
+              inputFormatters: [
+                FilteringTextInputFormatter.deny(RegExp(r"\s")),
+              ],
+              autofillHints: const [AutofillHints.password],
+              onEditingComplete: () => TextInput.finishAutofillContext(),
+            ),
+            space,
+            requesting
+                ? buildLoadingButton()
+                : buildRoundButton(() => _doSignIn(context)),
+          ],
+        ),
       ),
     );
   }

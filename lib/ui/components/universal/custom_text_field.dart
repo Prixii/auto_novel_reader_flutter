@@ -10,6 +10,8 @@ TextFormField buildTextField(
   String? errorText,
   TextInputType? keyboardType,
   FormFieldValidator<String?>? validator,
+  Iterable<String>? autofillHints,
+  void Function()? onEditingComplete,
 }) {
   return TextFormField(
     keyboardType: keyboardType,
@@ -29,5 +31,7 @@ TextFormField buildTextField(
     inputFormatters: inputFormatters,
     maxLines: maxLines,
     validator: validator,
+    autofillHints: autofillHints,
+    onEditingComplete: onEditingComplete,
   );
 }

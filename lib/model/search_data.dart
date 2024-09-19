@@ -39,3 +39,13 @@ class HistorySearchData with _$HistorySearchData {
     @Default(16) int pageSize,
   }) = _HistorySearchData;
 }
+
+@freezed
+class LoadFavoredData with _$LoadFavoredData {
+  const factory LoadFavoredData({
+    @Default('default') String favoredId,
+    @Default(0) int page,
+    @Default(20) int pageSize,
+    @Default(SearchSortType.update) SearchSortType sort,
+  }) = _LoadFavoredData;
+}
