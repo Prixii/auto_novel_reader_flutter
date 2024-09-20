@@ -17,37 +17,35 @@ class RankNovelList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: () async => readNovelRankBloc(context)
-          .add(NovelRankEvent.searchRankNovel(rankCategory)),
-      child: SingleChildScrollView(
-          padding: const EdgeInsets.only(top: 48, left: 8, right: 8),
-          child: BlocSelector<NovelRankBloc, NovelRankState,
-              List<WebNovelOutline>>(
-            selector: (state) {
-              return state.novels[rankCategory] ?? [];
-            },
-            builder: (context, webNovels) {
-              return BlocSelector<NovelRankBloc, NovelRankState,
-                  LoadingStatus?>(
-                selector: (state) {
-                  return state.loadingStatus[rankCategory];
-                },
-                builder: (context, state) {
-                  return TimeoutInfoContainer(
-                    status: state,
-                    onRetry: () => readNovelRankBloc(context)
-                        .add(NovelRankEvent.searchRankNovel(rankCategory)),
+    return BlocSelector<NovelRankBloc, NovelRankState, List<WebNovelOutline>>(
+      selector: (state) {
+        return state.novels[rankCategory] ?? [];
+      },
+      builder: (context, webNovels) {
+        return BlocSelector<NovelRankBloc, NovelRankState, LoadingStatus?>(
+          selector: (state) {
+            return state.loadingStatus[rankCategory];
+          },
+          builder: (context, state) {
+            return TimeoutInfoContainer(
+              status: state,
+              onRetry: () => readNovelRankBloc(context)
+                  .add(NovelRankEvent.searchRankNovel(rankCategory)),
+              child: RefreshIndicator(
+                  onRefresh: () async => readNovelRankBloc(context)
+                      .add(NovelRankEvent.searchRankNovel(rankCategory)),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(top: 48, left: 8, right: 8),
                     child: WebNovelList(
                       webNovels: webNovels,
                       rankMode: true,
                       listMode: true,
                     ),
-                  );
-                },
-              );
-            },
-          )),
+                  )),
+            );
+          },
+        );
+      },
     );
   }
 }

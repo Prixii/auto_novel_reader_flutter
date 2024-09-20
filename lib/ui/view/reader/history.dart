@@ -100,43 +100,40 @@ class _HistoryBodyState extends State<HistoryBody> {
         }
         return false;
       },
-      child: RefreshIndicator(
-        onRefresh: () async => await doRefresh(),
-        child: SingleChildScrollView(
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                BlocSelector<HistoryCubit, HistoryState, List<WebNovelOutline>>(
-                  selector: (state) {
-                    return state.histories;
-                  },
-                  builder: (context, state) {
-                    return WebNovelList(
-                      webNovels: state,
-                      listMode: true,
-                    );
-                  },
-                ),
-                _buildIndicator(),
-              ],
-            )),
-      ),
+      child: _buildHistoryList(),
     );
   }
 
-  Widget _buildIndicator() {
-    return BlocSelector<HistoryCubit, HistoryState, LoadingStatus?>(
-      selector: (state) {
-        return state.loadingStatusMap[RequestLabel.loadHistory];
-      },
-      builder: (context, state) {
-        return TimeoutInfoContainer(
-          status: state,
-          onRetry: () => doRefresh(),
-          child: Container(),
-        );
-      },
+  RefreshIndicator _buildHistoryList() {
+    return RefreshIndicator(
+      onRefresh: () async => await doRefresh(),
+      child: BlocSelector<HistoryCubit, HistoryState, LoadingStatus?>(
+        selector: (state) {
+          return state.loadingStatusMap[RequestLabel.loadHistory];
+        },
+        builder: (context, state) {
+          return TimeoutInfoContainer(
+            status: state,
+            onRetry: () => doRefresh(),
+            child:
+                BlocSelector<HistoryCubit, HistoryState, List<WebNovelOutline>>(
+              selector: (state) {
+                return state.histories;
+              },
+              builder: (context, state) {
+                return SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(8),
+                  child: WebNovelList(
+                    webNovels: state,
+                    listMode: true,
+                  ),
+                );
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 

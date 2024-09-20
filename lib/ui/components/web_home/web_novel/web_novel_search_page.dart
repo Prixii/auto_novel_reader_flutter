@@ -161,63 +161,57 @@ class _WebNovelDtoListState extends State<WebNovelDtoList> {
   @override
   Widget build(BuildContext context) {
     return NotificationListener(
-        onNotification: (notification) {
-          if (notification is ScrollNotification) {
-            final metrics = notification.metrics;
-            if (metrics.pixels > metrics.maxScrollExtent - 60) {
-              if (shouldLoadMore &&
-                  scrollDirection == ScrollDirection.forward) {
-                shouldLoadMore = false;
-                widget.onLoadMore.call();
-              }
-            } else {
-              shouldLoadMore = true;
+      onNotification: (notification) {
+        if (notification is ScrollNotification) {
+          final metrics = notification.metrics;
+          if (metrics.pixels > metrics.maxScrollExtent - 60) {
+            if (shouldLoadMore && scrollDirection == ScrollDirection.forward) {
+              shouldLoadMore = false;
+              widget.onLoadMore.call();
             }
+          } else {
+            shouldLoadMore = true;
           }
-          if (notification is ScrollUpdateNotification) {
-            final delta = notification.dragDetails;
-            if (delta != null) {
-              scrollDirection = delta.delta.dy > 0
-                  ? ScrollDirection.reverse
-                  : ScrollDirection.forward;
-            }
+        }
+        if (notification is ScrollUpdateNotification) {
+          final delta = notification.dragDetails;
+          if (delta != null) {
+            scrollDirection = delta.delta.dy > 0
+                ? ScrollDirection.reverse
+                : ScrollDirection.forward;
           }
-          return false;
-        },
-        child: RefreshIndicator(
-          onRefresh: () async => await widget.onRefresh(),
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 68),
-            child:
-                BlocSelector<WebHomeBloc, WebHomeState, List<WebNovelOutline>>(
-              selector: (state) {
-                return state.webNovelSearchResult;
-              },
-              builder: (context, webNovels) {
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    WebNovelList(webNovels: webNovels),
-                    _buildIndicator()
-                  ],
-                );
-              },
-            ),
-          ),
-        ));
+        }
+        return false;
+      },
+      child: _buildNovelList(),
+    );
   }
 
-  Widget _buildIndicator() {
-    return BlocSelector<WebHomeBloc, WebHomeState, LoadingStatus?>(
+  Widget _buildNovelList() {
+    return BlocSelector<WebHomeBloc, WebHomeState, List<WebNovelOutline>>(
       selector: (state) {
-        return state.loadingStatusMap[RequestLabel.searchWeb];
+        return state.webNovelSearchResult;
       },
-      builder: (context, state) {
-        return TimeoutInfoContainer(
-          status: state,
-          onRetry: () => widget.onRefresh(),
-          child: Container(),
+      builder: (context, webNovels) {
+        return BlocSelector<WebHomeBloc, WebHomeState, LoadingStatus?>(
+          selector: (state) {
+            return state.loadingStatusMap[RequestLabel.searchWeb];
+          },
+          builder: (context, state) {
+            return TimeoutInfoContainer(
+              status: state,
+              onRetry: () => widget.onRefresh(),
+              child: RefreshIndicator(
+                onRefresh: () async => await widget.onRefresh(),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 68),
+                  child: WebNovelList(webNovels: webNovels),
+                ),
+              ),
+            );
+          },
         );
       },
     );

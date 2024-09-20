@@ -151,41 +151,35 @@ class _WenkuNovelDtoListState extends State<WenkuNovelDtoList> {
         }
         return false;
       },
-      child: RefreshIndicator(
-        onRefresh: () async => await widget.onRefresh(),
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 68),
-          child: BlocSelector<WenkuHomeBloc, WenkuHomeState,
-              List<WenkuNovelOutline>>(
-            selector: (state) {
-              return state.wenkuNovelSearchResult;
-            },
-            builder: (context, wenkuNovels) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  WenkuNovelList(wenkuNovels: wenkuNovels),
-                  _buildIndicator()
-                ],
-              );
-            },
-          ),
-        ),
-      ),
+      child: _buildWenkuList(),
     );
   }
 
-  Widget _buildIndicator() {
-    return BlocSelector<WenkuHomeBloc, WenkuHomeState, LoadingStatus?>(
+  Widget _buildWenkuList() {
+    return BlocSelector<WenkuHomeBloc, WenkuHomeState, List<WenkuNovelOutline>>(
       selector: (state) {
-        return state.loadingStatusMap[RequestLabel.searchWenku];
+        return state.wenkuNovelSearchResult;
       },
-      builder: (context, state) {
-        return TimeoutInfoContainer(
-          status: state,
-          onRetry: () => widget.onRefresh(),
-          child: Container(),
+      builder: (context, wenkuNovels) {
+        return BlocSelector<WenkuHomeBloc, WenkuHomeState, LoadingStatus?>(
+          selector: (state) {
+            return state.loadingStatusMap[RequestLabel.searchWenku];
+          },
+          builder: (context, state) {
+            return TimeoutInfoContainer(
+              status: state,
+              onRetry: () => widget.onRefresh(),
+              child: RefreshIndicator(
+                onRefresh: () async => await widget.onRefresh(),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 68),
+                  child: WenkuNovelList(wenkuNovels: wenkuNovels),
+                ),
+              ),
+            );
+          },
         );
       },
     );

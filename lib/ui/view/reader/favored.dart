@@ -466,7 +466,7 @@ class _FavoredBodyState extends State<FavoredBody>
     );
   }
 
-  RefreshIndicator _buildFavoredNovelList(
+  Widget _buildFavoredNovelList(
     NovelType novelType,
     (List<dynamic>, NovelType) listData,
   ) {
@@ -481,12 +481,12 @@ class _FavoredBodyState extends State<FavoredBody>
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(vertical: 48.0, horizontal: 8),
-        child: _getNovelList(novelType, listData),
+        child: _selectNovelList(novelType, listData),
       ),
     );
   }
 
-  StatelessWidget _getNovelList(
+  StatelessWidget _selectNovelList(
       NovelType novelType, (List<dynamic>, NovelType) listData) {
     return novelType == NovelType.web
         ? WebNovelList(webNovels: listData.$1 as List<WebNovelOutline>)
