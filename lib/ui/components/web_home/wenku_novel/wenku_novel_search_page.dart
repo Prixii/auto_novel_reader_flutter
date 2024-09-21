@@ -115,8 +115,8 @@ class WenkuNovelDtoList extends StatefulWidget {
     required this.onRefresh,
   });
 
-  final Function onLoadMore;
-  final Function onRefresh;
+  final Future<void> Function() onLoadMore;
+  final Future<void> Function() onRefresh;
 
   @override
   State<WenkuNovelDtoList> createState() => _WenkuNovelDtoListState();
@@ -166,19 +166,14 @@ class _WenkuNovelDtoListState extends State<WenkuNovelDtoList> {
             return state.loadingStatusMap[RequestLabel.searchWenku];
           },
           builder: (context, state) {
-            return TimeoutInfoContainer(
-              status: state,
-              onRetry: () => widget.onRefresh(),
-              child: RefreshIndicator(
-                onRefresh: () async => await widget.onRefresh(),
-                child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 68),
-                  child: WenkuNovelList(wenkuNovels: wenkuNovels),
+            return RefreshList(
+                loadingStatus: state,
+                onRetry: widget.onRefresh,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 68,
                 ),
-              ),
-            );
+                child: WenkuNovelList(wenkuNovels: wenkuNovels));
           },
         );
       },

@@ -138,8 +138,8 @@ class WebNovelDtoList extends StatefulWidget {
     required this.onRefresh,
   });
 
-  final Function onLoadMore;
-  final Function onRefresh;
+  final Future<void> Function() onLoadMore;
+  final Future<void> Function() onRefresh;
 
   @override
   State<WebNovelDtoList> createState() => _WebNovelDtoListState();
@@ -198,18 +198,14 @@ class _WebNovelDtoListState extends State<WebNovelDtoList> {
             return state.loadingStatusMap[RequestLabel.searchWeb];
           },
           builder: (context, state) {
-            return TimeoutInfoContainer(
-              status: state,
-              onRetry: () => widget.onRefresh(),
-              child: RefreshIndicator(
-                onRefresh: () async => await widget.onRefresh(),
-                child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 68),
-                  child: WebNovelList(webNovels: webNovels),
-                ),
+            return RefreshList(
+              loadingStatus: state,
+              onRetry: widget.onRefresh,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8,
+                vertical: 68,
               ),
+              child: WebNovelList(webNovels: webNovels),
             );
           },
         );

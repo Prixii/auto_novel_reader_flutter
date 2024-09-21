@@ -232,11 +232,20 @@ class _WebNovelDetailState extends State<WebNovelDetail> {
 
   Widget _buildAuthorInfo(WebNovelDto novelDto) {
     return Row(children: [
-      Text('作者: ', style: styleManager.tipText(context)),
-      Text(_getAuthors(novelDto),
+      Text(
+        '作者: ',
+        style: styleManager.tipText(context),
+        overflow: TextOverflow.ellipsis,
+      ),
+      Expanded(
+        child: Text(
+          _getAuthors(novelDto),
           style: styleManager.tipText(context)?.copyWith(
                 color: styleManager.colorScheme(context).primary,
-              )),
+              ),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
     ]);
   }
 

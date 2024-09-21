@@ -26,23 +26,18 @@ class RankNovelList extends StatelessWidget {
           selector: (state) {
             return state.loadingStatus[rankCategory];
           },
-          builder: (context, state) {
-            return TimeoutInfoContainer(
-              status: state,
-              onRetry: () => readNovelRankBloc(context)
-                  .add(NovelRankEvent.searchRankNovel(rankCategory)),
-              child: RefreshIndicator(
-                  onRefresh: () async => readNovelRankBloc(context)
-                      .add(NovelRankEvent.searchRankNovel(rankCategory)),
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.only(top: 48, left: 8, right: 8),
-                    child: WebNovelList(
-                      webNovels: webNovels,
-                      rankMode: true,
-                      listMode: true,
-                    ),
-                  )),
-            );
+          builder: (context, loadingStatus) {
+            return RefreshList(
+                loadingStatus: loadingStatus,
+                onRetry: () async {
+                  readNovelRankBloc(context)
+                      .add(NovelRankEvent.searchRankNovel(rankCategory));
+                },
+                child: WebNovelList(
+                  webNovels: webNovels,
+                  rankMode: true,
+                  listMode: true,
+                ));
           },
         );
       },

@@ -42,3 +42,40 @@ class TimeoutInfoContainer extends StatelessWidget {
     }
   }
 }
+
+class RefreshList extends StatelessWidget {
+  const RefreshList({
+    super.key,
+    required this.loadingStatus,
+    required this.onRetry,
+    required this.child,
+    this.padding = const EdgeInsets.only(top: 48, left: 8, right: 8),
+  });
+
+  final LoadingStatus? loadingStatus;
+  final Future<void> Function() onRetry;
+  final Widget child;
+  final EdgeInsets padding;
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator(
+      onRefresh: onRetry,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: padding,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            child,
+            TimeoutInfoContainer(
+              status: loadingStatus,
+              onRetry: onRetry,
+              child: Container(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
