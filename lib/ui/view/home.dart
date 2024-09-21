@@ -8,9 +8,13 @@ import 'package:auto_novel_reader_flutter/ui/view/reader/reader.dart';
 import 'package:auto_novel_reader_flutter/ui/view/settings.dart';
 import 'package:auto_novel_reader_flutter/ui/view/home/web_home.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:unicons/unicons.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+const lanzouvUrl = 'https://wwrn.lanzouv.com/b00uyftbja';
+const lanzouvPassword = 'hpst';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
@@ -112,13 +116,17 @@ class ReleaseAlertDialog extends StatelessWidget {
       content: Text(data.body),
       actions: [
         TextButton(
-          child: const Text('算了吧'),
-          onPressed: () {
+          child: const Text('蓝奏云下载'),
+          onPressed: () async {
             Navigator.of(context).pop();
+            await Clipboard.setData(const ClipboardData(text: lanzouvPassword));
+            showSucceedToast('密码已复制到剪切板');
+            await Future.delayed(const Duration(milliseconds: 600), () {});
+            launchUrl(Uri.parse(lanzouvUrl));
           },
         ),
         TextButton(
-          child: const Text('下载新版本'),
+          child: const Text('GitHub 下载'),
           onPressed: () {
             Navigator.of(context).pop();
             readGlobalBloc(context).add(const GlobalEvent.closeReleaseDialog());
