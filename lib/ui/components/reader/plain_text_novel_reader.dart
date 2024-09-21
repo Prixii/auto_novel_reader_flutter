@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:unicons/unicons.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 const standardSwitchPageVelocity = 100.0;
 
@@ -137,6 +138,9 @@ class _PlainTextNovelReaderState extends State<PlainTextNovelReader>
     return PopScope(
       onPopInvoked: (value) {
         if (Scaffold.of(context).isDrawerOpen) return;
+        if (readConfigCubit(context).state.keepAwakeWhenReading) {
+          WakelockPlus.disable();
+        }
         readWebHomeBloc(context).add(const WebHomeEvent.closeNovel());
       },
       child: Stack(

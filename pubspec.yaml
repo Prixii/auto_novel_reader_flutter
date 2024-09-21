@@ -53,6 +53,7 @@ dependencies:
   # url_launcher
   url_launcher: ^6.3.0
   package_info_plus: ^8.0.2
+  wakelock_plus: ^1.2.8
   
 dev_dependencies:
   flutter_test:

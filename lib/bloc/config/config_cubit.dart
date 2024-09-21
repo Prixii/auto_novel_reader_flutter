@@ -22,6 +22,9 @@ class ConfigCubit extends HydratedCubit<ConfigState> {
     emit(state.copyWith(themeMode: value));
   }
 
+  setKeepAwakeWhenReading(bool value) =>
+      emit(state.copyWith(keepAwakeWhenReading: value));
+
   setWebNovelConfig(WebNovelConfig value) =>
       emit(state.copyWith(webNovelConfig: value));
 

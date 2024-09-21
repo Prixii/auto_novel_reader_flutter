@@ -26,6 +26,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:unicons/unicons.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 class WebNovelDetailContainer extends StatelessWidget {
   const WebNovelDetailContainer(
@@ -398,6 +399,9 @@ class _WebNovelDetailState extends State<WebNovelDetail> {
 
   void _readNovel(BuildContext context, String? lastReadChapterId) {
     readWebHomeBloc(context).add(WebHomeEvent.readChapter(lastReadChapterId));
+    if (readConfigCubit(context).state.keepAwakeWhenReading) {
+      WakelockPlus.enable();
+    }
     Navigator.push(
       context,
       MaterialPageRoute(

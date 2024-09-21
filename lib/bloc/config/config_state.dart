@@ -14,6 +14,7 @@ class ConfigState with _$ConfigState {
     @Default(NovelAppearanceConfig())
     NovelAppearanceConfig novelAppearanceConfig,
     @Default(true) bool autoCheckUpdate, // 自动检查更新
+    @Default(true) bool keepAwakeWhenReading, // 阅读时保持屏幕常亮
   }) = _Initial;
 
   factory ConfigState.fromJson(Map<String, dynamic> json) =>

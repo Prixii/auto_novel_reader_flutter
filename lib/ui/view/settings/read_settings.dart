@@ -25,6 +25,13 @@ class ReadSettings extends StatelessWidget {
             _buildSlideShiftOption(context),
             _buildShowErrorInfoOption(context),
             _buildVolumeKeyShiftOption(context),
+            SwitchOption(
+                icon: UniconsLine.lightbulb_alt,
+                label: '阅读时屏幕常亮',
+                value: readConfigCubit(context).state.keepAwakeWhenReading,
+                onChanged: (value) => {
+                      readConfigCubit(context).setKeepAwakeWhenReading(value),
+                    }),
             Divider(
               indent: 16,
               endIndent: 16,

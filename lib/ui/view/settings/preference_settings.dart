@@ -26,14 +26,17 @@ class PreferenceSettings extends StatelessWidget {
             _buildHelloPageSetter(context),
             _buildUrlSetter(context),
             _buildThemeSetter(context),
+            Divider(
+                indent: 16,
+                endIndent: 16,
+                color: Theme.of(context).dividerColor),
             SwitchOption(
-              icon: UniconsLine.refresh,
-              label: '自动检查更新',
-              value: readConfigCubit(context).state.autoCheckUpdate,
-              onChanged: (value) => {
-                readConfigCubit(context).setAutoCheckUpdate(value),
-              },
-            ),
+                icon: UniconsLine.refresh,
+                label: '自动检查更新',
+                value: readConfigCubit(context).state.autoCheckUpdate,
+                onChanged: (value) => {
+                      readConfigCubit(context).setAutoCheckUpdate(value),
+                    }),
           ],
         ),
       ),
