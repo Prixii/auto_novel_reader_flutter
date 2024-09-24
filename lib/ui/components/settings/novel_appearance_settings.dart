@@ -1,7 +1,9 @@
 import 'package:auto_novel_reader_flutter/bloc/config/config_cubit.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
+import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/ui/components/universal/switch_option.dart';
+import 'package:auto_novel_reader_flutter/ui/components/universal/tab_option.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -23,28 +25,10 @@ class NovelAppearanceSettings extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildTitle(context),
-              Row(
-                children: [
-                  const SizedBox(width: 20),
-                  Text(
-                    '字体大小',
-                    style: styleManager.textTheme(context).bodyLarge,
-                  ),
-                  Expanded(
-                    child: Slider(
-                      value: config.fontSize.toDouble(),
-                      min: 8.0,
-                      max: 30.0,
-                      divisions: 22,
-                      label: config.fontSize.toDouble().toStringAsFixed(0),
-                      onChanged: (double value) => readConfigCubit(context)
-                          .setNovelAppearanceConfig(
-                              config.copyWith(fontSize: value.toInt())),
-                    ),
-                  ),
-                ],
-              ),
+              _buildRenderModeSelector(config, context),
+              _buildFontSizeSetter(context, config),
               SwitchOption(
+                  icon: UniconsLine.bold,
                   label: '字体加粗',
                   value: config.boldFont,
                   onChanged: (value) => readConfigCubit(context)
@@ -67,6 +51,36 @@ class NovelAppearanceSettings extends StatelessWidget {
     });
   }
 
+  Widget _buildFontSizeSetter(
+      BuildContext context, NovelAppearanceConfig config) {
+    return Row(
+      children: [
+        const SizedBox(width: 20),
+        Icon(
+          UniconsLine.text_size,
+          color: styleManager.colorScheme(context).onSecondaryContainer,
+        ),
+        const SizedBox(width: 10),
+        Text(
+          '字体大小',
+          style: styleManager.textTheme(context).bodyLarge,
+        ),
+        Expanded(
+          child: Slider(
+            value: config.fontSize.toDouble(),
+            min: 8.0,
+            max: 30.0,
+            divisions: 22,
+            label: config.fontSize.toDouble().toStringAsFixed(0),
+            onChanged: (double value) => readConfigCubit(context)
+                .setNovelAppearanceConfig(
+                    config.copyWith(fontSize: value.toInt())),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildTitle(BuildContext context) {
     return Row(
       children: [
@@ -83,5 +97,20 @@ class NovelAppearanceSettings extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Widget _buildRenderModeSelector(
+      NovelAppearanceConfig config, BuildContext context) {
+    const renderType = NovelRenderType.values;
+    return TabOption(
+        icon: UniconsLine.file_download_alt,
+        label: '渲染模式',
+        initValue: renderType.indexOf(config.renderType),
+        onTap: (_, index) => {
+              readConfigCubit(context).setNovelAppearanceConfig(config.copyWith(
+                renderType: renderType[index],
+              ))
+            },
+        tabs: renderType.map((e) => e.zhName).toList());
   }
 }

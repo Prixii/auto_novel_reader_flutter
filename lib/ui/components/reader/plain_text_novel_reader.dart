@@ -5,16 +5,14 @@ import 'package:auto_novel_reader_flutter/bloc/web_home/web_home_bloc.dart';
 import 'package:auto_novel_reader_flutter/manager/style_manager.dart';
 import 'package:auto_novel_reader_flutter/model/enums.dart';
 import 'package:auto_novel_reader_flutter/model/model.dart';
+import 'package:auto_novel_reader_flutter/ui/components/reader/paged/paginated_novel_render.dart';
 import 'package:auto_novel_reader_flutter/ui/components/web_home/chapter_list.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
-import 'package:auto_novel_reader_flutter/util/reader_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:unicons/unicons.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
-
-const standardSwitchPageVelocity = 100.0;
 
 class PlainTextNovelReaderContainer extends StatelessWidget {
   const PlainTextNovelReaderContainer({super.key});
@@ -27,13 +25,13 @@ class PlainTextNovelReaderContainer extends StatelessWidget {
       },
       builder: (context, dto) {
         return Scaffold(
-          appBar: AppBar(
-            title: Text(dto?.titleJp ?? dto?.titleZh ?? ''),
-            shadowColor: styleManager.colorScheme(context).shadow,
-            backgroundColor:
-                styleManager.colorScheme(context).secondaryContainer,
-            actions: _buildActions(context),
-          ),
+          // appBar: AppBar(
+          //   title: Text(dto?.titleJp ?? dto?.titleZh ?? ''),
+          //   shadowColor: styleManager.colorScheme(context).shadow,
+          //   backgroundColor:
+          //       styleManager.colorScheme(context).secondaryContainer,
+          //   actions: _buildActions(context),
+          // ),
           drawer: Drawer(
             child: BlocSelector<WebHomeBloc, WebHomeState, WebNovelDto?>(
               selector: (state) {
@@ -102,39 +100,25 @@ class _PlainTextNovelReaderState extends State<PlainTextNovelReader>
     with TickerProviderStateMixin {
   late AnimationController _maskAnimationController;
   late Animation<double> _maskAnimation;
-  late ScrollController _scrollController;
-  TextStyle? style;
-  late Size size;
 
   List<String> result = [];
+  late NovelRenderType renderType;
+
   @override
   void initState() {
     super.initState();
-
+    renderType =
+        readConfigCubit(context).state.novelAppearanceConfig.renderType;
     _maskAnimationController = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
     _maskAnimation =
         Tween(begin: 0.0, end: 1.0).animate(_maskAnimationController);
-    _scrollController = ScrollController();
-
-    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-    //   final resultText = ReaderUtil.pagingText(
-    //     widget.dto.youdaoParagraphs?.join('\n') ?? '',
-    //     size,
-    //     style!,
-    //   );
-    //   setState(() {
-    //     result = resultText;
-    //   });
-    // });
   }
 
   @override
   Widget build(BuildContext context) {
-    // return _buildPagedContent(context);
-
     return PopScope(
       onPopInvoked: (value) {
         if (Scaffold.of(context).isDrawerOpen) return;
@@ -152,27 +136,6 @@ class _PlainTextNovelReaderState extends State<PlainTextNovelReader>
     );
   }
 
-  // TODO 分页阅览
-  SingleChildScrollView _buildPagedContent(BuildContext context) {
-    final config = readConfigCubit(context).state.novelAppearanceConfig;
-    style = TextStyle(
-      color: Colors.black,
-      fontSize: config.fontSize.toDouble(),
-      fontWeight: config.boldFont ? FontWeight.bold : FontWeight.normal,
-    );
-    size = Size(screenSize.width, screenSize.height - appBarHeight - 60);
-    return SingleChildScrollView(
-      child: ListView.separated(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemBuilder: (context, index) => ReaderUtil.buildPagedText(
-            size: size, text: result[index], style: style!),
-        separatorBuilder: (context, index) => const Divider(),
-        itemCount: result.length,
-      ),
-    );
-  }
-
   Widget _buildNovelRender() {
     return BlocSelector<WebHomeBloc, WebHomeState, bool>(
       selector: (state) {
@@ -181,39 +144,7 @@ class _PlainTextNovelReaderState extends State<PlainTextNovelReader>
       builder: (context, isLoading) {
         return AbsorbPointer(
           absorbing: isLoading,
-          child: GestureDetector(
-            onHorizontalDragEnd: (detail) {
-              if (detail.velocity.pixelsPerSecond.dx <
-                  -standardSwitchPageVelocity) {
-                if (readConfigCubit(context).state.slideShift) nextPage();
-              } else if (detail.velocity.pixelsPerSecond.dx >
-                  standardSwitchPageVelocity) {
-                if (readConfigCubit(context).state.slideShift) previousPage();
-              }
-            },
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-              child: Column(
-                children: [
-                  Text(
-                    widget.dto.titleJp ?? '',
-                    style: styleManager.primaryColorTitleLarge(context),
-                  ),
-                  Text(
-                    widget.dto.titleZh ?? '',
-                    style: styleManager.titleSmall(context),
-                  ),
-                  const Divider(),
-                  NovelRender(
-                    chapterDto: widget.dto,
-                  ),
-                  _buildBottomPageSwitcher(),
-                ],
-              ),
-            ),
-          ),
+          child: PaginatedNovelRender(dto: widget.dto),
         );
       },
     );
@@ -225,9 +156,6 @@ class _PlainTextNovelReaderState extends State<PlainTextNovelReader>
           if (state.loadingNovelChapter) {
             _maskAnimationController.forward();
           } else {
-            _scrollController.animateTo(0,
-                duration: const Duration(milliseconds: 100),
-                curve: Curves.easeInOut);
             _maskAnimationController.reverse();
           }
         },
@@ -244,24 +172,6 @@ class _PlainTextNovelReaderState extends State<PlainTextNovelReader>
             child: const Center(child: CircularProgressIndicator()),
           ),
         ));
-  }
-
-  Widget _buildBottomPageSwitcher() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        TextButton(onPressed: previousPage, child: const Text('上一章')),
-        TextButton(onPressed: nextPage, child: const Text('下一章'))
-      ],
-    );
-  }
-
-  void nextPage() {
-    readWebHomeBloc(context).add(const WebHomeEvent.nextChapter());
-  }
-
-  void previousPage() {
-    readWebHomeBloc(context).add(const WebHomeEvent.previousChapter());
   }
 }
 

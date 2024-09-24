@@ -474,6 +474,11 @@ enum NovelContentType {
 enum NovelRenderType {
   streaming,
   paged;
+
+  String get zhName => switch (this) {
+        NovelRenderType.streaming => '流式',
+        NovelRenderType.paged => '翻页',
+      };
 }
 
 enum LoadingStatus { loading, failed, serverError }
@@ -493,4 +498,10 @@ enum RequestLabel {
   searchRank,
   //
   loadHistory,
+}
+
+enum WebNovelContentType {
+  original,
+  translation,
+  image,
 }

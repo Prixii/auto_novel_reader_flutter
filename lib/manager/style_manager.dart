@@ -62,6 +62,12 @@ class _StyleManager {
   ColorScheme colorScheme(BuildContext context) =>
       Theme.of(context).colorScheme;
   TextTheme textTheme(BuildContext context) => Theme.of(context).textTheme;
+
+  TextTheme originalTextTheme(BuildContext context) =>
+      Theme.of(context).textTheme.apply(
+            bodyColor: Colors.grey,
+          );
+
   Color get warnContainer => const Color(0xfffdf6ec);
   Color get onWarnContainer => const Color(0xffe6a23c);
   Color get succeedContainer => const Color(0xfff0f9eb);
