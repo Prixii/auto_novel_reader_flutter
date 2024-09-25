@@ -20,6 +20,8 @@ class ReaderUtil {
     final translationEnabled = webConfig.translationSourcesEnabled;
     final enableTrim = webConfig.enableTrim;
 
+    var imageLoaded = <String>{};
+
     List<TranslationSource> translationSources = [];
 
     for (var source in order) {
@@ -91,6 +93,8 @@ class ReaderUtil {
         // 处理图片渲染
         final (isImage, url) = tryParseImg(textToAppend);
         if (isImage) {
+          if (imageLoaded.contains(url)) continue;
+          imageLoaded.add(url);
           final imageSize = await getImageRenderSize(
             url,
             maxHeight,
