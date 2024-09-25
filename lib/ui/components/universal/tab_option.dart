@@ -121,7 +121,7 @@ class _TabOptionState extends State<TabOption> with TickerProviderStateMixin {
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
         width: (width ?? 100),
         decoration: BoxDecoration(
-          color: theme.colorScheme.primaryContainer,
+          color: theme.colorScheme.secondaryContainer,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(

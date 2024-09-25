@@ -31,7 +31,7 @@ class WebNovelContentSettings extends StatelessWidget {
               _buildLanguageSelector(languages, config, context),
               _buildTranslationSourceSelector(config, context),
               _buildTrimSetter(config, context),
-              _buildShowTranslationSourceSetter(config, context),
+              // _buildShowTranslationSourceSetter(config, context),
               const SizedBox(height: 8),
               _buildTranslationOrderTitle(context),
               const SizedBox(height: 8),
@@ -44,6 +44,7 @@ class WebNovelContentSettings extends StatelessWidget {
     );
   }
 
+  // 暂时下线
   SwitchOption _buildShowTranslationSourceSetter(
       WebNovelConfig config, BuildContext context) {
     return SwitchOption(

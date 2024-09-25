@@ -18,6 +18,7 @@ class ReaderUtil {
     final translationMode = webConfig.translationMode;
     final order = webConfig.translationSourcesOrder;
     final translationEnabled = webConfig.translationSourcesEnabled;
+    final enableTrim = webConfig.enableTrim;
 
     List<TranslationSource> translationSources = [];
 
@@ -84,7 +85,9 @@ class ReaderUtil {
               break;
           }
         }
+        if (enableTrim) textToAppend = textToAppend.trim();
         // textToAppend += '\n';
+
         // 处理图片渲染
         final (isImage, url) = tryParseImg(textToAppend);
         if (isImage) {
