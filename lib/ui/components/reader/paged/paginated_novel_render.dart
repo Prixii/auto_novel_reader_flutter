@@ -22,16 +22,21 @@ class PaginatedNovelRender extends StatefulWidget {
 
 class _PaginatedNovelRenderState extends State<PaginatedNovelRender> {
   late ScrollController _scrollController;
+  late PageController _pageController;
+  int currentPage = 0;
+  var switchable = true;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
+    _pageController = PageController();
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -51,17 +56,72 @@ class _PaginatedNovelRenderState extends State<PaginatedNovelRender> {
       },
       builder: (context, pageData) {
         if (pageData == null) return const Text('damn');
-        return PageView.builder(
-            itemCount: pageData.length,
-            itemBuilder: (context, index) {
-              return Center(
-                child: buildSinglePage(
-                  pageData[index],
-                  size: pageSize,
-                  paged: true,
+        return Stack(children: [
+          NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification notification) {
+              if (notification is ScrollEndNotification &&
+                  switchable &&
+                  notification.metrics.extentAfter == 0) {
+                nextChapter();
+              } else if (notification is ScrollEndNotification &&
+                  switchable &&
+                  notification.metrics.extentBefore == 0) {
+                previousChapter();
+              }
+              return false;
+            },
+            child: PageView.builder(
+                itemCount: pageData.length,
+                controller: _pageController,
+                onPageChanged: (index) {
+                  setState(() => currentPage = index);
+                  Future.delayed(const Duration(milliseconds: 1000), () {
+                    switchable = index == 0 || index == pageData.length - 1;
+                  });
+                },
+                itemBuilder: (context, index) {
+                  return Center(
+                    child: buildSinglePage(
+                      pageData[index],
+                      size: pageSize,
+                      paged: true,
+                    ),
+                  );
+                }),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(
+                horizontal: margin.$1 / 2, vertical: margin.$2 / 2),
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Container(
+                clipBehavior: Clip.hardEdge,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.grey.withOpacity(0.5),
                 ),
-              );
-            });
+                padding: const EdgeInsets.all(4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        widget.dto.titleZh ?? widget.dto.titleJp ?? '',
+                        overflow: TextOverflow.ellipsis,
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                    ),
+                    Text(
+                      '${currentPage + 1}/${pageData.length}',
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ]);
       },
     );
   }
@@ -70,10 +130,10 @@ class _PaginatedNovelRenderState extends State<PaginatedNovelRender> {
     return GestureDetector(
       onHorizontalDragEnd: (detail) {
         if (detail.velocity.pixelsPerSecond.dx < -standardSwitchPageVelocity) {
-          if (readConfigCubit(context).state.slideShift) nextPage();
+          if (readConfigCubit(context).state.slideShift) nextChapter();
         } else if (detail.velocity.pixelsPerSecond.dx >
             standardSwitchPageVelocity) {
-          if (readConfigCubit(context).state.slideShift) previousPage();
+          if (readConfigCubit(context).state.slideShift) previousChapter();
         }
       },
       child: BlocSelector<WebHomeBloc, WebHomeState, List<PagedData>?>(
@@ -113,13 +173,14 @@ class _PaginatedNovelRenderState extends State<PaginatedNovelRender> {
           width: size.width,
           height: paged ? size.height : null,
           child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: pagedData.contents
-                  .map((content) => buildContent(
-                        content,
-                        size: pageSize,
-                      ))
-                  .toList()),
+            mainAxisSize: MainAxisSize.min,
+            children: pagedData.contents
+                .map((content) => buildContent(
+                      content,
+                      size: pageSize,
+                    ))
+                .toList(),
+          ),
         ),
       );
 
@@ -167,18 +228,28 @@ class _PaginatedNovelRenderState extends State<PaginatedNovelRender> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        TextButton(onPressed: previousPage, child: const Text('上一章')),
-        TextButton(onPressed: nextPage, child: const Text('下一章'))
+        TextButton(onPressed: previousChapter, child: const Text('上一章')),
+        TextButton(onPressed: nextChapter, child: const Text('下一章'))
       ],
     );
   }
 
-  void nextPage() {
+  void nextChapter() {
+    switchable = false;
     readWebHomeBloc(context).add(const WebHomeEvent.nextChapter());
+    setState(() {
+      currentPage = 0;
+      _pageController.jumpToPage(0);
+    });
   }
 
-  void previousPage() {
+  void previousChapter() {
+    switchable = false;
     readWebHomeBloc(context).add(const WebHomeEvent.previousChapter());
+    setState(() {
+      currentPage = 0;
+      _pageController.jumpToPage(0);
+    });
   }
 
   Size get pageSize {
