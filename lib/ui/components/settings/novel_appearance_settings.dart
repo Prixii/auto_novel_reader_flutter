@@ -51,6 +51,7 @@ class NovelAppearanceSettings extends StatelessWidget {
     });
   }
 
+  // TODO 脏位, 清除分页数据
   Widget _buildFontSizeSetter(
       BuildContext context, NovelAppearanceConfig config) {
     return Row(

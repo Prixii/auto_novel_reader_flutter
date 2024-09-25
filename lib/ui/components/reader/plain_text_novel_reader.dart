@@ -23,13 +23,6 @@ class PlainTextNovelReaderContainer extends StatelessWidget {
       },
       builder: (context, dto) {
         return Scaffold(
-          // appBar: AppBar(
-          //   title: Text(dto?.titleJp ?? dto?.titleZh ?? ''),
-          //   shadowColor: styleManager.colorScheme(context).shadow,
-          //   backgroundColor:
-          //       styleManager.colorScheme(context).secondaryContainer,
-          //   actions: _buildActions(context),
-          // ),
           drawer: Drawer(
             child: BlocSelector<WebHomeBloc, WebHomeState, WebNovelDto?>(
               selector: (state) {

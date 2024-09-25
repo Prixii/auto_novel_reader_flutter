@@ -69,6 +69,7 @@ class WebNovelContentSettings extends StatelessWidget {
     );
   }
 
+  // TODO 脏位, 清除分页数据
   Padding _buildTranslationOrderTitle(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 20.0),
@@ -123,6 +124,14 @@ class WebNovelContentSettings extends StatelessWidget {
           onDoubleTap: () {
             final newEnabledMap = {...config.translationSourcesEnabled};
             newEnabledMap[item] = !newEnabledMap[item]!;
+            var enabledCount = 0;
+            for (var enabled in newEnabledMap.values) {
+              enabledCount += enabled ? 1 : 0;
+            }
+            if (enabledCount == 0) {
+              showWarnToast('至少需要启用一个翻译来源');
+              return;
+            }
             readConfigCubit(context).setWebNovelConfig(config.copyWith(
               translationSourcesEnabled: newEnabledMap,
             ));
