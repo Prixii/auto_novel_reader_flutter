@@ -109,6 +109,8 @@ class NovelAppearanceSettings extends StatelessWidget {
         onTap: (_, index) => {
               readConfigCubit(context).setNovelAppearanceConfig(config.copyWith(
                 renderType: renderType[index],
+                horizontalMargin: 40,
+                verticalMargin: 80,
               ))
             },
         tabs: renderType.map((e) => e.zhName).toList());

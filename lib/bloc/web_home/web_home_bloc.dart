@@ -23,6 +23,8 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
             await _onSetWebMostVisited(event, emit),
         setLoadingStatus: (event) async =>
             await _onSetLoadingStatus(event, emit),
+        setChapterPagedData: (event) async =>
+            await _onSetChapterPagedData(event, emit),
         setWebFavored: (event) async => await _onSetWebFavored(event, emit),
         toNovelDetail: (event) async => await _onToNovelDetail(event, emit),
         readChapter: (event) async => await _onReadChapter(event, emit),
@@ -33,8 +35,6 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
         favorNovel: (event) async => await _onFavorNovel(event, emit),
         unFavorNovel: (event) async => await _onUnFavorNovel(event, emit),
         setSearchData: (event) async => await _onSetSearchData(event, emit),
-        searchWeb: (event) async => await _onSearchWeb(event, emit),
-        loadNextPageWeb: (event) async => await _onLoadNextPageWeb(event, emit),
       );
     });
   }
@@ -118,18 +118,38 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
       )),
     );
 
+    // TODO 移除
+    final chapterPagedData = await loadPagedNovelChapter(
+      currentNovelProviderId,
+      currentNovelId,
+      targetChapterId,
+      onRequest: () => emit(state.copyWith(loadingNovelChapter: true)),
+      onRequestFinished: () => emit(state.copyWith(
+        loadingNovelChapter: false,
+      )),
+    );
+
     if (targetDto == null) throw Exception('targetDto is null');
+    if (chapterPagedData == null) throw Exception('targetDto is null');
 
     emit(state.copyWith(
       loadingNovelChapter: false,
       currentChapterDto: targetDto,
+      currentPagedData: chapterPagedData,
     ));
     _requestUpdateReadHistory(
-        currentNovelProviderId, currentNovelId, targetChapterId);
+      currentNovelProviderId,
+      currentNovelId,
+      targetChapterId,
+    );
 
     var dtoMapSnapshot = <String, ChapterDto?>{
       ...state.chapterDtoMap,
       chapterKey: targetDto,
+    };
+    var pagedDataMapSnapshot = <String, List<PagedData>?>{
+      ...state.chapterPagedDataMap,
+      chapterKey: chapterPagedData,
     };
     // 预加载下一章节
     if (targetDto.nextId != null) {
@@ -139,10 +159,17 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
         currentNovelId,
         targetDto.nextId,
       );
+      final nextPagedData = await loadPagedNovelChapter(
+        currentNovelProviderId,
+        currentNovelId,
+        targetDto.nextId,
+      );
       dtoMapSnapshot[nextChapterKey] = nextDto;
+      pagedDataMapSnapshot[nextChapterKey] = nextPagedData;
     }
     emit(state.copyWith(
       chapterDtoMap: dtoMapSnapshot,
+      chapterPagedDataMap: pagedDataMapSnapshot,
     ));
   }
 
@@ -186,37 +213,6 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     emit(state.copyWith(webSearchData: event.data));
   }
 
-  _onSearchWeb(_SearchWeb event, Emitter<WebHomeState> emit) async {
-    if (state.searchingWeb) return;
-    final data = state.webSearchData;
-    emit(state.copyWith(
-      searchingWeb: true,
-      webNovelSearchResult: [],
-      currentWebSearchPage: 0,
-      webProvider: data.provider.map((e) => e.name).toList(),
-      webType: NovelStatus.indexByZhName(data.type.zhName),
-      webLevel: WebNovelLevel.indexByZhName(data.level.zhName),
-      webTranslate: WebTranslationSource.indexByZhName(data.translate.zhName),
-      webSort: WebNovelOrder.indexByZhName(data.sort.zhName),
-      webQuery: data.query,
-    ));
-    await _loadPagedWebNovel(emit);
-  }
-
-  _onLoadNextPageWeb(_LoadNextPageWeb event, Emitter<WebHomeState> emit) async {
-    if (state.searchingWeb) return;
-    if (state.currentWebSearchPage == state.maxPage) {
-      showWarnToast('一点都没有啦~');
-      return;
-    }
-    if (state.currentWebSearchPage >= state.maxPage) return;
-    emit(state.copyWith(
-      currentWebSearchPage: state.currentWebSearchPage + 1,
-      searchingWeb: true,
-    ));
-    await _loadPagedWebNovel(emit);
-  }
-
   void _updateWebOutlinesCache(
       List<WebNovelOutline> outlines, Emitter<WebHomeState> emit) async {
     var webNovelOutlineMapSnapshot = {...state.webNovelOutlineMap};
@@ -225,27 +221,6 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     }
     emit(state.copyWith(
       webNovelOutlineMap: webNovelOutlineMapSnapshot,
-    ));
-  }
-
-  Future<void> _loadPagedWebNovel(Emitter<WebHomeState> emit) async {
-    final (newNovelList, pageNumber) = await loadPagedWebOutline(
-      page: state.currentWebSearchPage,
-      pageSize: 20,
-      provider: state.webProvider.join(','),
-      type: state.webType,
-      level: state.webLevel,
-      translate: state.webTranslate,
-      sort: state.webSort,
-      query: state.webQuery,
-    );
-    emit(state.copyWith(
-      webNovelSearchResult: [
-        ...state.webNovelSearchResult,
-        ...newNovelList,
-      ],
-      searchingWeb: false,
-      maxPage: pageNumber,
     ));
   }
 
@@ -316,4 +291,14 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
   String? get currentNovelKey => state.currentWebNovelDto?.novelKey;
 
   WebSearchData get searchData => state.webSearchData;
+
+  _onSetChapterPagedData(
+      _SetChapterPagedData event, Emitter<WebHomeState> emit) {
+    emit(state.copyWith(
+      chapterPagedDataMap: {
+        ...state.chapterPagedDataMap,
+        event.chapterKey: event.dataList
+      },
+    ));
+  }
 }

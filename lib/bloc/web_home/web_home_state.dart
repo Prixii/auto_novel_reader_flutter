@@ -6,6 +6,7 @@ class WebHomeState with _$WebHomeState {
     @Default({}) Map<RequestLabel, LoadingStatus?> loadingStatusMap,
     List<WebNovelOutline>? webMostVisited,
     @Default({}) Map<String, WebNovelOutline> favoredWebMap,
+
     // 小说大纲缓存
     @Default({}) Map<String, WebNovelOutline> webNovelOutlineMap,
 
@@ -14,8 +15,10 @@ class WebHomeState with _$WebHomeState {
     @Default({}) Map<String, WebNovelDto?> webNovelDtoMap,
     // 小说正文
     @Default(false) bool loadingNovelChapter,
-    @Default({}) Map<String, ChapterDto?> chapterDtoMap,
+    @Default({}) Map<String, ChapterDto?> chapterDtoMap, // 原始章节数据
+    @Default({}) Map<String, List<PagedData>?> chapterPagedDataMap, // 分页数据
     ChapterDto? currentChapterDto,
+    List<PagedData>? currentPagedData,
     // 搜索 web
     @Default(WebSearchData()) WebSearchData webSearchData,
     @Default(false) bool searchingWeb,

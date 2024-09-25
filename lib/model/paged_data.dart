@@ -37,7 +37,7 @@ extension PagedDataExt on PagedData {
         )
       ]);
 
-  String get text => contents.map((e) => e.text).join('\n');
+  String get text => contents.map((e) => e.text).join('');
 }
 
 extension WebContentExt on WebContent {

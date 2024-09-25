@@ -3,6 +3,7 @@ import 'package:auto_novel_reader_flutter/model/model.dart';
 import 'package:auto_novel_reader_flutter/network/api_client.dart';
 import 'package:auto_novel_reader_flutter/util/client_util.dart';
 import 'package:auto_novel_reader_flutter/util/error_logger.dart';
+import 'package:auto_novel_reader_flutter/util/reader_util.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 Future<(List<WebNovelOutline>, int)> loadFavoredWebOutline({
@@ -243,6 +244,38 @@ Future<WebNovelDto?> loadWebNovelDto(
     onRequestFinished?.call();
     rethrow;
   }
+}
+
+Future<List<PagedData>?> loadPagedNovelChapter(
+  String providerId,
+  String novelId,
+  String? chapterId, {
+  Function? onRequest,
+  Function? onRequestFinished,
+}) async {
+  final chapterKey = '$providerId-$novelId-$chapterId';
+  final existPagedData = webHomeBloc.state.chapterPagedDataMap[chapterKey];
+  if (existPagedData != null) {
+    return existPagedData;
+  }
+  final chapter = await loadNovelChapter(
+    providerId,
+    novelId,
+    chapterId,
+    onRequest: onRequest,
+    onRequestFinished: onRequestFinished,
+  );
+  if (chapter == null) {
+    return null;
+  }
+  final pagedData = await _paginateChapter(chapter);
+  return pagedData;
+}
+
+Future<List<PagedData>> _paginateChapter(ChapterDto chapter) async {
+  final config = configCubit.state.novelAppearanceConfig;
+  return await ReaderUtil.pagingText(
+      chapter.youdaoParagraphs ?? [], config.pageSize, config.textStyle);
 }
 
 Future<ChapterDto?> loadNovelChapter(

@@ -16,6 +16,10 @@ class WebHomeEvent with _$WebHomeEvent {
   const factory WebHomeEvent.setWebNovelOutlines(
     List<WebNovelOutline> webOutlines,
   ) = _SetWebNovelOutlines;
+  const factory WebHomeEvent.setChapterPagedData(
+    String chapterKey,
+    List<PagedData> dataList,
+  ) = _SetChapterPagedData;
 
   // 阅读
   const factory WebHomeEvent.toNovelDetail(String providerId, String novelId) =
@@ -35,6 +39,4 @@ class WebHomeEvent with _$WebHomeEvent {
 
   // 搜索
   const factory WebHomeEvent.setSearchData(WebSearchData data) = _SetSearchData;
-  const factory WebHomeEvent.searchWeb() = _SearchWeb;
-  const factory WebHomeEvent.loadNextPageWeb() = _LoadNextPageWeb;
 }
