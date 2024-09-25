@@ -5,6 +5,8 @@ class NovelAppearanceConfig with _$NovelAppearanceConfig {
   const factory NovelAppearanceConfig({
     @Default(14) int fontSize,
     @Default(false) bool boldFont,
+    @Default(14) int subFontSize,
+    @Default(0xff999999) int subTextColorHex,
 
     // 分页阅览
     @Default(NovelRenderType.streaming) NovelRenderType renderType,
@@ -19,6 +21,11 @@ class NovelAppearanceConfig with _$NovelAppearanceConfig {
 extension NovelAppearanceConfigExt on NovelAppearanceConfig {
   TextStyle get textStyle => TextStyle(
         color: Colors.black,
+        fontSize: fontSize.toDouble(),
+        fontWeight: boldFont ? FontWeight.bold : FontWeight.normal,
+      );
+  TextStyle get subTextStyle => TextStyle(
+        color: Color(subTextColorHex),
         fontSize: fontSize.toDouble(),
         fontWeight: boldFont ? FontWeight.bold : FontWeight.normal,
       );

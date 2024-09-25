@@ -274,8 +274,7 @@ Future<List<PagedData>?> loadPagedNovelChapter(
 
 Future<List<PagedData>> _paginateChapter(ChapterDto chapter) async {
   final config = configCubit.state.novelAppearanceConfig;
-  return await ReaderUtil.pagingText(
-      chapter.youdaoParagraphs ?? [], config.pageSize, config.textStyle);
+  return await ReaderUtil.pagingText(chapter, config.pageSize);
 }
 
 Future<ChapterDto?> loadNovelChapter(

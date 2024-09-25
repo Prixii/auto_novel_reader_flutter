@@ -45,22 +45,19 @@ class _PaginatedNovelRenderState extends State<PaginatedNovelRender> {
   }
 
   Widget _buildPagedViewer(BuildContext context) {
-    final style =
-        readConfigCubit(context).state.novelAppearanceConfig.textStyle;
     return BlocSelector<WebHomeBloc, WebHomeState, List<PagedData>?>(
       selector: (state) {
         return state.currentPagedData;
       },
-      builder: (context, state) {
-        if (state == null) return const Text('damn');
+      builder: (context, pageData) {
+        if (pageData == null) return const Text('damn');
         return PageView.builder(
-            itemCount: state.length,
+            itemCount: pageData.length,
             itemBuilder: (context, index) {
               return Center(
                 child: buildSinglePage(
-                  state[index],
+                  pageData[index],
                   size: pageSize,
-                  style: style,
                   paged: true,
                 ),
               );
@@ -70,8 +67,6 @@ class _PaginatedNovelRenderState extends State<PaginatedNovelRender> {
   }
 
   Widget _buildStreamViewer(BuildContext context) {
-    final style =
-        readConfigCubit(context).state.novelAppearanceConfig.textStyle;
     return GestureDetector(
       onHorizontalDragEnd: (detail) {
         if (detail.velocity.pixelsPerSecond.dx < -standardSwitchPageVelocity) {
@@ -85,22 +80,21 @@ class _PaginatedNovelRenderState extends State<PaginatedNovelRender> {
         selector: (state) {
           return state.currentPagedData;
         },
-        builder: (context, result) {
-          if (result == null) return const Text('damn');
+        builder: (context, pageData) {
+          if (pageData == null) return const Text('damn');
           return ListView.builder(
             controller: _scrollController,
             itemBuilder: (context, index) {
-              if (index == result.length) {
+              if (index == pageData.length) {
                 return _buildBottomPageSwitcher();
               }
               return buildSinglePage(
-                result[index],
+                pageData[index],
                 size: pageSize,
-                style: style,
                 paged: false,
               );
             },
-            itemCount: result.length + 1,
+            itemCount: pageData.length + 1,
           );
         },
       ),
@@ -110,7 +104,6 @@ class _PaginatedNovelRenderState extends State<PaginatedNovelRender> {
   Widget buildSinglePage(
     PagedData pagedData, {
     required Size size,
-    required TextStyle style,
     bool paged = false,
   }) =>
       Padding(
@@ -122,8 +115,10 @@ class _PaginatedNovelRenderState extends State<PaginatedNovelRender> {
           child: Column(
               mainAxisSize: MainAxisSize.min,
               children: pagedData.contents
-                  .map((content) =>
-                      buildContent(content, size: pageSize, style: style))
+                  .map((content) => buildContent(
+                        content,
+                        size: pageSize,
+                      ))
                   .toList()),
         ),
       );
@@ -131,11 +126,15 @@ class _PaginatedNovelRenderState extends State<PaginatedNovelRender> {
   Widget buildContent(
     WebContent content, {
     required Size size,
-    required TextStyle style,
   }) {
     switch (content.type) {
       case WebNovelContentType.original:
+        final style =
+            readConfigCubit(context).state.novelAppearanceConfig.textStyle;
+        return buildPagedText(content, size: size, style: style);
       case WebNovelContentType.translation:
+        final style =
+            readConfigCubit(context).state.novelAppearanceConfig.subTextStyle;
         return buildPagedText(content, size: size, style: style);
       case WebNovelContentType.image:
         return buildImage(content);
