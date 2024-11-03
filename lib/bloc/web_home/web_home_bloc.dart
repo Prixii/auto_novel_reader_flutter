@@ -173,6 +173,7 @@ class WebHomeBloc extends Bloc<WebHomeEvent, WebHomeState> {
     ));
   }
 
+  // TODO 翻页、切换
   _onNextChapter(_NextChapter event, Emitter<WebHomeState> emit) async {
     final nextId = state.currentChapterDto?.nextId;
     if (nextId == null) return;

@@ -24,6 +24,7 @@ class _PaginatedNovelRenderState extends State<PaginatedNovelRender> {
   late ScrollController _scrollController;
   late PageController _pageController;
   int currentPage = 0;
+  int totalPage = 0;
   var switchable = true;
 
   @override
@@ -52,7 +53,9 @@ class _PaginatedNovelRenderState extends State<PaginatedNovelRender> {
   Widget _buildPagedViewer(BuildContext context) {
     return BlocSelector<WebHomeBloc, WebHomeState, List<PagedData>?>(
       selector: (state) {
-        return state.currentPagedData;
+        final page = state.currentPagedData;
+        totalPage = page?.length ?? 0;
+        return page;
       },
       builder: (context, pageData) {
         if (pageData == null) return const Text('damn');
@@ -113,7 +116,7 @@ class _PaginatedNovelRenderState extends State<PaginatedNovelRender> {
                       ),
                     ),
                     Text(
-                      '${currentPage + 1}/${pageData.length}',
+                      '${currentPage + 1}/$totalPage ',
                       style: const TextStyle(color: Colors.white, fontSize: 12),
                     ),
                   ],
@@ -250,6 +253,24 @@ class _PaginatedNovelRenderState extends State<PaginatedNovelRender> {
       currentPage = 0;
       _pageController.jumpToPage(0);
     });
+  }
+
+  void nextPage() {
+    if (currentPage == totalPage - 1) return;
+    _pageController.animateTo(
+      currentPage + 1,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutCirc,
+    );
+  }
+
+  void previousPage() {
+    if (currentPage == 0) return;
+    _pageController.animateTo(
+      currentPage - 1,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutCirc,
+    );
   }
 
   Size get pageSize {
