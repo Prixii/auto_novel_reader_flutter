@@ -14,11 +14,7 @@ part 'user_cubit.g.dart';
 class UserCubit extends HydratedCubit<UserState> {
   UserCubit() : super(const UserState.initial());
 
-  Future<bool> signIn(
-    String emailOrUsername,
-    String password, {
-    bool autoSignIn = true,
-  }) async {
+  Future<bool> signIn(String emailOrUsername, String password) async {
     try {
       final signInResponse = await apiClient.authService.postSignIn({
         'emailOrUsername': emailOrUsername,
@@ -104,49 +100,41 @@ class UserCubit extends HydratedCubit<UserState> {
 
   /// 在 apiClient 初始化完成后调用
   Future<void> activateAuth(BuildContext context) async {
-    if (!state.autoSignIn) {
-      emit(const UserState.initial());
-      return;
-    }
     if (state.token == null) return;
+
     final signInTime = state.signInTime;
-    if (signInTime == null) {
-      emit(state.copyWith(signInTime: DateTime.now()));
-      return;
-    }
-    if (signInTime.difference(DateTime.now()).inDays >= 30) {
+    final timeSpan = (signInTime?.difference(DateTime.now()).inDays.abs() ?? 0);
+    if (signInTime == null || timeSpan >= 29) {
       await _autoSignIn(context);
-    } else if (signInTime.difference(DateTime.now()).inDays >= 25) {
+    } else if (timeSpan >= 25) {
       await _renewToken();
     }
+    talker.debug('test finish');
   }
 
   Future<void> _autoSignIn(BuildContext context) async {
     final signInSucceed = await signIn(
       state.emailOrUsername,
       state.password,
-      autoSignIn: true,
     );
     if (signInSucceed) return;
-
     showErrorToast('自动登录失败, 请尝试手动登录');
     emit(const UserState.initial());
   }
 
   Future<void> _renewToken() async {
-    if (state.token == null) return;
-
-    final renewResponse = await apiClient.authService.getRenew();
-    if (renewResponse?.statusCode == 502) {
-      Fluttertoast.showToast(msg: '服务器维护中');
-      return;
+    try {
+      final renewResponse = await apiClient.authService.getRenew();
+      final token = renewResponse?.body;
+      if (token == null || token.isEmpty) return;
+      emit(state.copyWith(
+        token: token,
+        signInTime: DateTime.now(),
+      ));
+    } catch (e, stackTrace) {
+      showErrorToast('自动登录失败, 请尝试手动登录');
+      errorLogger.logError(e, stackTrace);
     }
-    final token = renewResponse?.body;
-    if (token == null || token.isEmpty) return;
-    emit(state.copyWith(
-      token: token,
-      signInTime: DateTime.now(),
-    ));
   }
 
   Future<void> signOut() async {

@@ -23,12 +23,12 @@ class _SplashViewState extends State<SplashView> {
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      await _initChopperClient();
       Future.wait([
         _justWait(),
         _startInit(),
         _precacheImages(),
-        _initChopperClient()
       ]).then((_) => _leaveSplash());
     });
   }
@@ -79,6 +79,7 @@ class _SplashViewState extends State<SplashView> {
 
   Future<void> _initChopperClient() async {
     apiClient.createChopper();
+
     await userCubit.activateAuth(context);
   }
 }

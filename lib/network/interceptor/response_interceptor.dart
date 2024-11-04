@@ -17,9 +17,10 @@ class ResponseInterceptor implements Interceptor {
       errorLogger.logError(e, stackTrace);
       rethrow;
     }
-    if (kDebugMode) {
-      talker.info('${response.body}\n ${response.error}');
-    }
+    kDebugMode
+        ? talker.info(
+            '${response.body}\n ${response.error}\nurl:${chain.request.url}')
+        : {};
     if (response.isSuccessful) return response;
     if (response.statusCode ~/ 100 == 5) {
       errorLogger.logError(e, StackTrace.current,
@@ -27,7 +28,8 @@ class ResponseInterceptor implements Interceptor {
       throw ServerException('${response.error}');
     } else {
       errorLogger.logError(e, StackTrace.current,
-          extra: '${response.statusCode}:${response.error}');
+          extra:
+              '${response.statusCode}:${response.error}\nurl:${chain.request.url}');
       showErrorToast('${response.statusCode}, ${response.error}');
       return response;
     }

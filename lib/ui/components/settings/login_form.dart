@@ -15,7 +15,6 @@ class LoginForm extends StatefulWidget {
 class _LoginFormState extends State<LoginForm> {
   late TextEditingController _emailOrUsernameController, _passwordController;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  bool isRememberMeChecked = true;
   var requesting = false;
 
   @override
@@ -88,7 +87,6 @@ class _LoginFormState extends State<LoginForm> {
       final isSignInSucceed = await readUserCubit(context).signIn(
         _emailOrUsernameController.text,
         _passwordController.text,
-        autoSignIn: isRememberMeChecked,
       );
       setState(() {
         requesting = false;

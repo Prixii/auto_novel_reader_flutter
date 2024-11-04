@@ -8,17 +8,25 @@ class RequestInterceptor implements Interceptor {
   @override
   FutureOr<Response<BodyType>> intercept<BodyType>(
       Chain<BodyType> chain) async {
-    if (kDebugMode) {
-      talker.info(
-          '${chain.request.method} ${chain.request.url}\n${chain.request.body}');
+    final token = userCubit.state.token;
+    if (token == null ||
+        token.isEmpty ||
+        tokenlessApi.contains(chain.request.url.toString())) {
+      return chain.proceed(chain.request);
     }
-    if (userCubit.state.token == null) return chain.proceed(chain.request);
 
     final request = applyHeader(
       chain.request,
       'Authorization',
-      'Bearer ${userCubit.state.token}',
+      'Bearer $token',
     );
+
+    kDebugMode
+        ? talker.info(
+            '${chain.request.method} ${chain.request.url}\nheader${chain.request.headers}\n${chain.request.body}')
+        : {};
     return chain.proceed(request);
   }
 }
+
+final tokenlessApi = ['https://books.fishhawk.top/api/auth/sign-in'];
